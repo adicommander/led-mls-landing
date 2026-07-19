@@ -867,6 +867,18 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
 }
 .hero h1{ font-size:clamp(2.6rem,5vw,4.4rem); }
 .hero p.lead{ font-size:1.25rem; }
+/* ===== mobile footer: compact centered menu, not a long list ===== */
+@media (max-width:800px){
+  .footer-grid{ display:block; text-align:center; margin-bottom:20px; }
+  .footer-grid > div{ margin-bottom:22px; }
+  .footer-brand{ justify-content:center; margin-bottom:10px; }
+  .footer-grid p{ margin:0 auto; font-size:0.85rem; }
+  footer h4{ margin-bottom:8px; font-size:0.8rem; color:var(--slate-mid); text-transform:none; }
+  footer ul{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 20px; }
+  footer li{ margin-bottom:0; font-size:0.92rem; }
+  footer li a{ color:var(--slate-ink); font-weight:500; }
+  .footer-bottom{ flex-direction:column; align-items:center; gap:6px; text-align:center; padding-top:18px; }
+}
 </style>
 </body>
 </html>
