@@ -3,494 +3,1114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LED-MLS ישראל — האתר בבנייה</title>
-<meta name="description" content="LED-MLS ישראל — הנציגות הרשמית של MLS, יצרנית מסכי ה-LED המובילה בעולם. האתר בעברית נמצא בבנייה ויעלה בקרוב.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0603'/><circle cx='50' cy='50' r='22' fill='%23ff6600'/><circle cx='50' cy='50' r='34' fill='none' stroke='%23ff6600' stroke-opacity='.35' stroke-width='6'/></svg>">
+<title>MLS ישראל | ייצור והתקנת מסכי LED מקצועיים</title>
+<meta name="description" content="MLS ישראל — מסכי LED מקצועיים. פתרונות למסחר, אירועים, חוץ ופנים.">
+<link rel="icon" type="image/png" href="assets/images/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MLS ישראל">
+<meta property="og:title" content="MLS ישראל | ייצור והתקנת מסכי LED מקצועיים">
+<meta property="og:description" content="MLS ישראל — מסכי LED מקצועיים. פתרונות למסחר, אירועים, חוץ ופנים.">
+<meta property="og:image" content="https://led-mls.co.il/assets/images/products-hero.jpg">
+<meta property="og:url" content="https://led-mls.co.il/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MLS ישראל | ייצור והתקנת מסכי LED מקצועיים">
+<meta name="twitter:description" content="MLS ישראל — מסכי LED מקצועיים. פתרונות למסחר, אירועים, חוץ ופנים.">
+<meta name="twitter:image" content="https://led-mls.co.il/assets/images/products-hero.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@300;400;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Assistant:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+/* ==========================================================================
+   MLS ISRAEL — Design tokens
+   Palette: Void Navy / Signal Blue / Pixel Cyan / Warm White / Slate Ink
+   Type: Rubik (display) + Assistant (body) + JetBrains Mono (specs/data)
+   ========================================================================== */
+
 :root{
-  --bg:#0a0603;
-  --panel:#140d06;
-  --led:#ff6600;
-  --led-bright:#ff9900;
-  --led-soft:rgba(255,102,0,.14);
-  --cyan:#ffcc99;
-  --text:#f2ece2;
-  --dim:#a3927c;
-  --line:rgba(255,170,80,.12);
+  --void-navy: #0A0A0A;
+  --navy-raised: #181818;
+  --signal-blue: #FF6A1A;
+  --signal-blue-dim: #D6560F;
+  --pixel-cyan: #FFA94D;
+  --warm-white: #0A0A0A;
+  --slate-ink: #F5F1EC;
+  --slate-mid: #A69C93;
+  --slate-line: #2A2A2A;
+  --amber: #FFB020;
+
+  --font-display: 'Rubik', 'Segoe UI', sans-serif;
+  --font-body: 'Assistant', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --container: 1240px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
 body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Rubik',sans-serif;
+  font-family:var(--font-body);
+  color:var(--slate-ink);
+  background:var(--warm-white);
+  line-height:1.6;
+  direction:rtl;
+  -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-  position:relative;
+  max-width:100vw;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+ul{ list-style:none; }
+h1,h2,h3,h4{ font-family:var(--font-display); line-height:1.15; letter-spacing:-0.01em; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 28px; }
+.mono{ font-family:var(--font-mono); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
 }
 
-/* ---- LED pixel-grid backdrop ---- */
-body::before{
-  content:"";
-  position:fixed;inset:0;
-  background:
-    radial-gradient(circle at center, rgba(255,210,160,.05) 1px, transparent 1.6px);
-  background-size:14px 14px;
+/* ---------- Pixel grid signature motif ---------- */
+.pixel-field{
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(14px,1fr));
+  grid-auto-rows:14px;
+  gap:3px;
+  opacity:0.5;
   pointer-events:none;
-  z-index:0;
-}
-/* soft ambient glow pools */
-body::after{
-  content:"";
-  position:fixed;inset:0;
-  background:
-    radial-gradient(52% 42% at 78% 18%, rgba(255,102,0,.13), transparent 62%),
-    radial-gradient(46% 38% at 16% 82%, rgba(255,153,0,.06), transparent 60%);
-  pointer-events:none;
-  z-index:0;
-}
-
-/* ---- LED ticker strip ---- */
-.ticker{
-  position:relative;
+  overflow:hidden;
   z-index:2;
-  border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg,#140b03,#0c0602);
-  overflow:hidden;
-  padding:.65rem 0;
 }
-.ticker__track{
-  display:flex;
-  width:max-content;
-  animation:slide 26s linear infinite;
+.pixel-field span{
+  background:rgba(255,106,26,0.14);
+  border-radius:1px;
 }
-.ticker span{
-  font-family:'Karantina',cursive;
-  font-weight:400;
-  font-size:1.35rem;
-  letter-spacing:.12em;
-  color:var(--led-bright);
-  text-shadow:0 0 8px rgba(255,153,0,.8), 0 0 26px rgba(255,102,0,.4);
-  white-space:nowrap;
-  padding-inline-start:3.2rem;
+.pixel-field span.lit{
+  background:var(--pixel-cyan);
+  animation:pulse 3.2s ease-in-out infinite;
 }
-.ticker span i{font-style:normal;color:var(--dim);text-shadow:none;padding-inline:1.1rem}
-/* RTL: track slides to the right */
-@keyframes slide{from{transform:translateX(0)}to{transform:translateX(50%)}}
-
-/* ---- main ---- */
-main{
-  position:relative;
-  z-index:1;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:4rem 1.5rem 3rem;
-}
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:.55rem;
-  border:1px solid rgba(255,153,0,.4);
-  background:var(--led-soft);
-  color:var(--led-bright);
-  border-radius:999px;
-  padding:.45rem 1.1rem;
-  font-size:.86rem;
-  font-weight:500;
-  letter-spacing:.04em;
-  animation:rise .8s ease both;
-}
-.badge .dot{
-  width:.55rem;height:.55rem;border-radius:50%;
-  background:var(--led-bright);
-  box-shadow:0 0 10px var(--led-bright);
-  animation:blink 1.6s ease-in-out infinite;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-
-h1{
-  font-family:'Karantina',cursive;
-  font-weight:700;
-  font-size:clamp(4.6rem, 15vw, 11.5rem);
-  line-height:.9;
-  margin-top:1.6rem;
-  letter-spacing:.02em;
-  color:#fff;
-  text-shadow:
-    0 0 12px rgba(255,255,255,.35),
-    0 0 42px rgba(255,102,0,.6),
-    0 0 120px rgba(255,102,0,.35);
-  animation:rise .8s .1s ease both, flicker 7s 1.2s infinite;
-}
-h1 em{
-  font-style:normal;
-  color:var(--led-bright);
-  text-shadow:
-    0 0 10px rgba(255,153,0,.95),
-    0 0 44px rgba(255,102,0,.6),
-    0 0 130px rgba(255,102,0,.4);
-}
-@keyframes flicker{
-  0%,7.5%,9%,100%{opacity:1}
-  8%{opacity:.55}
-  8.5%{opacity:.85}
-  62%{opacity:1}
-  62.4%{opacity:.7}
-  62.8%{opacity:1}
+@keyframes pulse{
+  0%,100%{ opacity:.25; }
+  50%{ opacity:.9; }
 }
 
-.rep{
-  margin-top:1.2rem;
-  font-size:clamp(1.05rem, 2.4vw, 1.35rem);
-  font-weight:500;
-  color:#fff;
-  animation:rise .8s .15s ease both;
+/* ---------- Header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:100;
+  background:rgba(10,10,10,0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--slate-line);
 }
-.rep a{color:var(--led-bright);text-decoration:none;border-bottom:1px solid rgba(255,153,0,.45)}
-.rep a:hover{color:var(--cyan)}
+.site-header .container{
+  display:flex; align-items:center; justify-content:space-between;
+  height:76px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+}
+.logo-img{ height:44px; width:auto; display:block; }
+.footer-brand .logo-img{ height:38px; }
 
-.sub{
-  margin-top:1rem;
-  font-size:clamp(1.1rem, 2.4vw, 1.4rem);
-  font-weight:300;
-  color:var(--text);
-  animation:rise .8s .2s ease both;
+.nav-desktop{ display:flex; align-items:center; gap:34px; }
+.nav-desktop a{
+  color:var(--slate-ink); font-weight:600; font-size:0.95rem;
+  transition:color .2s;
 }
-.sub strong{font-weight:500;color:#fff}
-.note{
-  margin-top:.7rem;
-  color:var(--dim);
-  font-size:1rem;
-  font-weight:300;
-  animation:rise .8s .3s ease both;
-}
+.nav-desktop a:hover{ color:var(--signal-blue); }
 
-/* ---- product chips ---- */
-.chips{
-  margin-top:2.2rem;
-  display:flex;
-  flex-wrap:wrap;
-  gap:.6rem;
-  justify-content:center;
-  max-width:640px;
-  animation:rise .8s .35s ease both;
-}
-.chips span{
-  border:1px solid var(--line);
-  background:rgba(255,190,120,.05);
-  color:var(--dim);
-  border-radius:999px;
-  padding:.42rem 1rem;
-  font-size:.88rem;
-  font-weight:300;
-}
-
-/* ---- LED progress segments ---- */
-.progress{
-  margin-top:2.4rem;
-  display:flex;
-  gap:.45rem;
-  direction:ltr;
-  animation:rise .8s .4s ease both;
-}
-.progress i{
-  width:1.35rem;height:.5rem;
-  border-radius:2px;
-  background:rgba(255,210,160,.09);
-  overflow:hidden;
-  position:relative;
-}
-.progress i::after{
-  content:"";
-  position:absolute;inset:0;
-  background:var(--led-bright);
-  box-shadow:0 0 12px rgba(255,153,0,.85);
-  opacity:0;
-  animation:fill 3.6s infinite;
-}
-.progress i:nth-child(1)::after{animation-delay:0s}
-.progress i:nth-child(2)::after{animation-delay:.3s}
-.progress i:nth-child(3)::after{animation-delay:.6s}
-.progress i:nth-child(4)::after{animation-delay:.9s}
-.progress i:nth-child(5)::after{animation-delay:1.2s}
-.progress i:nth-child(6)::after{animation-delay:1.5s}
-.progress i:nth-child(7)::after{animation-delay:1.8s}
-.progress i:nth-child(8)::after{animation-delay:2.1s}
-@keyframes fill{
-  0%{opacity:0}
-  12%{opacity:1}
-  60%{opacity:1}
-  75%{opacity:0}
-  100%{opacity:0}
-}
-
-/* ---- contact ---- */
-.contact{
-  margin-top:3rem;
-  display:flex;
-  flex-wrap:wrap;
-  gap:1rem;
-  justify-content:center;
-  animation:rise .8s .5s ease both;
-}
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:.6rem;
-  text-decoration:none;
-  font-weight:500;
-  font-size:1.02rem;
-  padding:.85rem 1.7rem;
-  border-radius:12px;
-  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; padding:12px 26px; border-radius:var(--radius-sm);
+  font-weight:700; font-size:0.95rem; cursor:pointer; border:none;
+  transition:transform .15s ease, box-shadow .15s ease, background .2s;
 }
-.btn--led{
-  color:#1a0d00;
-  background:linear-gradient(90deg,var(--led),var(--led-bright));
-  box-shadow:0 0 24px rgba(255,153,0,.4), 0 8px 24px rgba(0,0,0,.5);
+.btn-primary{
+  background:var(--signal-blue); color:#fff;
+  box-shadow:0 8px 20px -8px rgba(255,106,26,0.5);
 }
-.btn--led:hover{
-  transform:translateY(-2px);
-  box-shadow:0 0 44px rgba(255,153,0,.6), 0 12px 28px rgba(0,0,0,.5);
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 24px -8px rgba(255,106,26,0.6); }
+.btn-ghost{
+  background:transparent; color:var(--slate-ink); border:1px solid var(--slate-line);
 }
-.btn--ghost{
-  color:var(--text);
-  border:1px solid var(--line);
-  background:rgba(255,190,120,.04);
-}
-.btn--ghost:hover{background:rgba(255,190,120,.09);transform:translateY(-2px)}
-
-footer{
-  position:relative;
-  z-index:1;
-  border-top:1px solid var(--line);
-  padding:1.2rem 1.5rem;
-  display:flex;
-  flex-wrap:wrap;
-  gap:.6rem;
-  align-items:center;
-  justify-content:space-between;
-  color:var(--dim);
-  font-size:.85rem;
-  font-weight:300;
-}
-footer .sig{display:inline-flex;align-items:center;gap:.45rem}
-footer .sig b{color:var(--led-bright);font-weight:500}
-footer a{color:var(--dim);text-decoration:none}
-footer a:hover{color:var(--led-bright)}
-
-@keyframes rise{
-  from{opacity:0;transform:translateY(18px)}
-  to{opacity:1;transform:translateY(0)}
+.btn-ghost:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+.btn-dark{
+  background:var(--slate-ink); color:var(--signal-blue);
 }
 
-/* ==== floating LED screen models (background scene) ==== */
-.scene{
-  position:fixed;inset:0;
-  z-index:0;
-  perspective:1400px;
-  pointer-events:none;
-  overflow:hidden;
-}
-.scr{
-  position:absolute;
-  transform:translate3d(var(--px,0px),var(--py,0px),0);
-  transition:transform .6s cubic-bezier(.2,.8,.2,1);
-  will-change:transform;
-}
-.scr__inner{
-  position:relative;
-  transform-style:preserve-3d;
-  animation:float var(--dur,16s) ease-in-out infinite alternate;
-}
-@keyframes float{
-  from{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-10px)}
-  to{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(14px)}
-}
-.panel{
-  position:relative;
-  background:#000;
-  border:.45rem solid #171009;
-  border-radius:8px;
-  overflow:hidden;
-  box-shadow:
-    0 0 0 1px rgba(255,153,0,.14),
-    0 30px 70px rgba(0,0,0,.65),
-    0 0 80px rgba(255,102,0,var(--glow,.22));
-}
-/* the "content" playing on each screen */
-.panel::before{
-  content:"";
-  position:absolute;inset:0;
-  background:
-    radial-gradient(120% 90% at 20% 15%, rgba(255,204,153,.85), transparent 45%),
-    radial-gradient(100% 100% at 85% 80%, #ff9900 0%, transparent 55%),
-    linear-gradient(115deg, #2a1000 0%, #ff6600 35%, #7a2d00 62%, #ffb347 92%);
-  background-size:230% 230%;
-  animation:play var(--play,9s) ease-in-out infinite alternate;
-}
-/* LED pixel + scanline texture over the content */
-.panel::after{
-  content:"";
-  position:absolute;inset:0;
-  background:
-    radial-gradient(circle, rgba(0,0,0,.5) 1px, transparent 1.4px),
-    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
-  background-size:5px 5px, 100% 3px;
-}
-@keyframes play{
-  from{background-position:0% 0%}
-  to{background-position:100% 100%}
+.nav-toggle{ display:none; background:none; border:none; color:var(--slate-ink); font-size:1.6rem; cursor:pointer; }
+
+@media (max-width:960px){
+  .nav-desktop{ display:none; }
+  .nav-toggle{ display:block; }
 }
 
-/* — outdoor billboard, right side — */
-.scr--billboard{top:7%;inset-inline-end:-4%;width:min(34vw,520px);opacity:.85}
-.scr--billboard .panel{aspect-ratio:16/9;--glow:.3}
-.scr--billboard .legs{display:flex;justify-content:space-evenly;height:48px}
-.scr--billboard .legs i{width:9px;background:linear-gradient(180deg,#2a1a0c,#0d0704);border-radius:0 0 3px 3px}
-
-/* — modular rental panel hanging on truss, left top — */
-.scr--rental{top:5%;inset-inline-start:-2%;width:min(26vw,400px);opacity:.55;filter:blur(1.4px)}
-.scr--rental .panel{aspect-ratio:4/3;border-radius:4px}
-.scr--rental .panel::before{animation-duration:12s;filter:brightness(.9)}
-.scr--rental .modules{
-  position:absolute;inset:0;
-  background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.65) 0 1px, transparent 1px calc(100%/5)),
-    repeating-linear-gradient(0deg, rgba(0,0,0,.65) 0 1px, transparent 1px calc(100%/4));
+/* ---------- Header mascot (partially hidden behind button) ---------- */
+.hdr-mascot-wrap{ position:relative; }
+.hdr-mascot-clip{
+  position:absolute; top:100%; right:-10px; width:145px; height:131px;
+  overflow:hidden; pointer-events:none; z-index:5;
 }
-.scr--rental .cables{display:flex;justify-content:space-between;padding:0 16%;height:36px}
-.scr--rental .cables i{width:3px;background:linear-gradient(180deg,rgba(23,16,9,0),#171009)}
-
-/* — advertising poster totem, left bottom — */
-.scr--totem{bottom:9%;inset-inline-start:5%;width:min(13vw,190px);opacity:.8}
-.scr--totem .panel{aspect-ratio:9/19;border-radius:12px;--glow:.28}
-.scr--totem .panel::before{
-  background:
-    radial-gradient(140% 60% at 50% 0%, rgba(255,204,153,.8), transparent 55%),
-    linear-gradient(200deg, #ffb347 0%, #ff6600 42%, #301300 88%);
-  background-size:180% 260%;
-  animation-duration:7s;
-}
-.scr--totem .base{height:12px;margin:8px auto 0;width:74%;background:#171009;border-radius:3px;box-shadow:0 10px 22px rgba(0,0,0,.6)}
-
-/* — indoor wide screen, right bottom (far) — */
-.scr--indoor{bottom:12%;inset-inline-end:7%;width:min(22vw,340px);opacity:.5;filter:blur(2px)}
-.scr--indoor .panel{aspect-ratio:21/9;border-radius:6px}
-.scr--indoor .panel::before{animation-duration:10s;filter:brightness(1.05)}
-
-/* readability veil between the scene and the content */
-.veil{
-  position:fixed;inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:radial-gradient(62% 56% at 50% 46%, rgba(10,6,3,.8), rgba(10,6,3,.35) 62%, transparent 100%);
-}
-
-@media (max-width:760px){
-  .scr--rental,.scr--indoor{display:none}
-  .scr--billboard{inset-inline-end:-22%;width:62vw;opacity:.5;filter:blur(1px)}
-  .scr--totem{width:26vw;bottom:5%;opacity:.45;filter:blur(1px)}
+.hdr-mascot-img{ position:absolute; top:-95px; right:0; width:145px; display:block; will-change:transform; transform:translateY(-52px); animation:hdrPeek 15s ease-in-out infinite; transition:transform .45s cubic-bezier(.34,1.56,.64,1); }
+.hdr-mascot-wrap:hover .hdr-mascot-img{ animation:none; transform:translateY(6px) rotate(-2deg); }
+@keyframes hdrPeek{
+  0%, 86%   { transform:translateY(-52px) rotate(0deg); }
+  90%       { transform:translateY(6px) rotate(-3deg); }
+  93%       { transform:translateY(-2px) rotate(1deg); }
+  96%       { transform:translateY(3px) rotate(-1deg); }
+  100%      { transform:translateY(-52px) rotate(0deg); }
 }
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation:none !important;transition:none !important}
+  .hdr-mascot-img{ transform:translateY(4px); }
+}
+@media (max-width:640px){
+  .hdr-mascot-clip{ width:98px; height:89px; right:-6px; }
+  .hdr-mascot-img{ width:98px; top:-64px; }
+}
+
+/* ---------- Hero ---------- */
+.hero{
+  position:relative;
+  background:var(--void-navy);
+  color:var(--slate-ink);
+  overflow:hidden;
+  padding:96px 0 110px;
+  border-bottom:1px solid var(--slate-line);
+}
+.hero .container{ position:relative; z-index:2; }
+.hero-bg-slides{ position:absolute; inset:0; z-index:0; }
+.hero-bg-slide{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; transition:opacity 1.4s ease;
+}
+.hero-bg-slide.active{ opacity:1; }
+.hero-bg-scrim{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 30% -10%, rgba(255,106,26,0.18), transparent 60%),
+    linear-gradient(180deg, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.6) 45%, rgba(10,10,10,0.88) 100%);
+}
+.hero-bg-arrow{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:4;
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(10,10,10,0.5); border:1px solid rgba(255,255,255,0.25);
+  color:#fff; font-size:1.7rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s ease, border-color .2s ease, transform .2s ease;
+  backdrop-filter:blur(6px);
+}
+.hero-bg-arrow:hover{ background:rgba(255,106,26,0.55); border-color:var(--signal-blue); transform:translateY(-50%) scale(1.08); }
+.hero-bg-arrow-prev{ left:20px; }
+.hero-bg-arrow-next{ right:20px; }
+@media (max-width:760px){
+  .hero-bg-arrow{ width:36px; height:36px; font-size:1.35rem; }
+  .hero-bg-arrow-prev{ left:10px; }
+  .hero-bg-arrow-next{ right:10px; }
+}
+.eyebrow{
+  font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.16em;
+  color:var(--signal-blue-dim); text-transform:uppercase; margin-bottom:18px;
+  display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{ content:''; width:22px; height:2px; background:var(--signal-blue); }
+.hero h1{
+  font-size:clamp(2.2rem,4.6vw,3.6rem); font-weight:800; max-width:820px;
+  margin-bottom:22px;
+}
+.hero h1 span{ color:var(--signal-blue); }
+.hero p.lead{
+  font-size:1.15rem; color:var(--slate-mid); max-width:600px; margin-bottom:38px;
+}
+.hero-actions{ display:flex; gap:16px; flex-wrap:wrap; }
+
+.hero-stats{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--slate-line);
+  margin-top:70px; border-radius:var(--radius-md); overflow:hidden;
+  border:1px solid var(--slate-line);
+}
+.hero-stats div{ background:var(--navy-raised); padding:22px 20px; }
+.hero-stats b{ font-family:var(--font-mono); font-size:1.6rem; color:var(--signal-blue); display:block; }
+.hero-stats span{ font-size:0.85rem; color:var(--slate-mid); }
+
+@media (max-width:760px){
+  .hero-stats{ grid-template-columns:repeat(2,1fr); }
+}
+
+/* ---------- Sections ---------- */
+section{ padding:96px 0; }
+.section-head{ max-width:640px; margin-bottom:56px; }
+.section-head .eyebrow{ color:var(--signal-blue); }
+.section-head h2{ font-size:clamp(1.8rem,3vw,2.6rem); color:var(--slate-ink); margin-bottom:14px; }
+.section-head p{ color:var(--slate-mid); font-size:1.05rem; }
+
+/* ---------- Scroll-triggered heading underline marker ---------- */
+.section-head h2, .page-hero h1, .hero h1{
+  position:relative; display:inline-block; padding-bottom:16px;
+}
+.section-head h2::after, .page-hero h1::after, .hero h1::after{
+  content:''; position:absolute; bottom:0; right:0; height:3px; width:0;
+  background:linear-gradient(90deg, var(--signal-blue), var(--amber));
+  border-radius:2px;
+  transition:width 1s cubic-bezier(.16,1,.3,1);
+}
+.section-head h2.underline-in::after, .page-hero h1.underline-in::after, .hero h1.underline-in::after{
+  width:72px;
+}
+@media (prefers-reduced-motion: reduce){
+  .section-head h2::after, .page-hero h1::after, .hero h1::after{ transition:none; width:72px; }
+}
+.section-alt{ background:var(--navy-raised); }
+.section-dark{ background:var(--void-navy); color:var(--slate-ink); }
+.section-dark .section-head h2{ color:var(--slate-ink); }
+.section-dark .section-head p{ color:var(--slate-mid); }
+
+/* ---------- Card grids ---------- */
+.grid{ display:grid; gap:24px; }
+.grid-3{ grid-template-columns:repeat(3,1fr); }
+.grid-4{ grid-template-columns:repeat(4,1fr); }
+.grid-5{ grid-template-columns:repeat(5,1fr); }
+@media (max-width:960px){ .grid-3,.grid-4,.grid-5{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px){ .grid-3,.grid-4,.grid-5{ grid-template-columns:1fr; } }
+
+.card{
+  background:var(--navy-raised); border:1px solid var(--slate-line); border-radius:var(--radius-md);
+  padding:30px; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.card:hover{ transform:translateY(-6px); box-shadow:0 24px 44px -24px rgba(0,0,0,0.5); border-color:var(--signal-blue); }
+.card .num{ font-family:var(--font-mono); color:var(--signal-blue); font-size:0.8rem; margin-bottom:14px; display:block; transition:transform .3s ease; }
+.card:hover .num{ transform:scale(1.15) translateY(-2px); }
+.card h3{ font-size:1.2rem; margin-bottom:10px; }
+.card p{ color:var(--slate-mid); font-size:0.95rem; }
+.card a.more{ display:inline-block; margin-top:16px; font-weight:700; color:var(--signal-blue); font-size:0.9rem; transition:transform .25s ease; }
+.card:hover a.more{ transform:translateX(-6px); }
+
+.card-dark{
+  background:var(--navy-raised); border:1px solid var(--signal-blue); color:var(--slate-ink);
+  transition:box-shadow .25s ease;
+}
+.card-dark:hover{ box-shadow:0 0 0 3px rgba(255,106,26,0.14); }
+.card-dark h3{ color:var(--slate-ink); }
+.card-dark p{ color:var(--slate-mid); }
+
+/* ---------- Scroll reveal ---------- */
+[data-reveal]{
+  opacity:0; transform:translateY(26px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+[data-reveal].revealed{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){
+  [data-reveal]{ opacity:1; transform:none; transition:none; }
+}
+
+/* ---------- Spec table ---------- */
+.spec-table{ width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:0.88rem; }
+.spec-table th,.spec-table td{ padding:12px 14px; text-align:right; border-bottom:1px solid var(--slate-line); }
+.spec-table th{ color:var(--slate-mid); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+/* ---------- CTA band ---------- */
+.cta-band{
+  background:linear-gradient(120deg,var(--signal-blue),var(--signal-blue-dim));
+  color:#fff; border-radius:var(--radius-md); padding:56px; position:relative;
+  display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+}
+.cta-band h3{ font-size:1.7rem; margin-bottom:8px; }
+.cta-band p{ color:rgba(255,255,255,0.8); }
+
+/* ---------- Form ---------- */
+.form-wrap{ background:var(--navy-raised); border:1px solid var(--slate-line); border-radius:var(--radius-md); padding:40px; }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+@media (max-width:640px){ .form-row{ grid-template-columns:1fr; } }
+label{ display:block; font-size:0.85rem; font-weight:700; margin-bottom:6px; color:var(--slate-ink); }
+input,select,textarea{
+  width:100%; padding:12px 14px; border:1px solid var(--slate-line); border-radius:var(--radius-sm);
+  font-family:var(--font-body); font-size:0.95rem; background:var(--void-navy); color:var(--slate-ink);
+}
+input:focus,select:focus,textarea:focus{ outline:2px solid var(--signal-blue); outline-offset:1px; border-color:var(--signal-blue); }
+.chip-group{ display:flex; gap:10px; flex-wrap:wrap; }
+.chip{
+  padding:8px 16px; border:1px solid var(--slate-line); border-radius:99px; font-size:0.85rem; cursor:pointer;
+  transition:all .15s;
+}
+.chip:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+
+/* ---------- Footer ---------- */
+footer{ background:var(--navy-raised); color:var(--slate-mid); padding:70px 0 30px; border-top:1px solid var(--slate-line); }
+.footer-grid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:50px; }
+@media (max-width:800px){ .footer-grid{ grid-template-columns:1fr 1fr; } }
+footer h4{ color:var(--slate-ink); font-size:0.9rem; margin-bottom:16px; font-family:var(--font-display); }
+footer li{ margin-bottom:10px; font-size:0.9rem; }
+footer li a:hover{ color:var(--signal-blue); }
+.footer-bottom{
+  border-top:1px solid var(--slate-line); padding-top:24px;
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:0.82rem;
+}
+.footer-brand{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+
+/* ---------- Breadcrumb / page hero (inner pages) ---------- */
+.page-hero{
+  background:radial-gradient(ellipse 80% 60% at 30% -10%, rgba(255,106,26,0.14), transparent 60%), var(--void-navy); color:var(--slate-ink); padding:64px 0; position:relative; overflow:hidden;
+  border-bottom:1px solid var(--slate-line);
+}
+.page-hero h1{ font-size:clamp(1.9rem,3.6vw,2.8rem); }
+.page-hero .eyebrow{ color:var(--signal-blue-dim); }
+.page-hero p{ color:var(--slate-mid); max-width:560px; margin-top:14px; }
+
+/* ---------- Mobile nav drawer ---------- */
+.mobile-nav{
+  position:fixed; inset:0; background:var(--warm-white); z-index:200;
+  display:flex; flex-direction:column; padding:28px; transform:translateX(100%);
+  transition:transform .25s ease; overflow-y:auto; border-left:1px solid var(--slate-line);
+}
+.mobile-nav.open{ transform:translateX(0); }
+.mobile-nav a{ color:var(--slate-ink); font-size:1.2rem; padding:14px 0; border-bottom:1px solid var(--slate-line); font-weight:600; }
+.mobile-nav .close-btn{ align-self:flex-start; background:none; border:none; color:var(--slate-ink); font-size:1.8rem; margin-bottom:20px; cursor:pointer; }
+
+.badge{
+  display:inline-flex; align-items:center; gap:6px; background:rgba(255,169,77,0.14);
+  color:var(--pixel-cyan); font-size:0.78rem; font-weight:700; padding:6px 12px; border-radius:99px;
+  margin-bottom:16px; font-family:var(--font-mono);
+}
+
+.whatsapp-float{
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  width:58px; height:58px; border-radius:50%;
+  background:#25D366; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 20px rgba(0,0,0,0.28);
+  transition:transform .2s ease;
+}
+.whatsapp-float:hover{ transform:scale(1.08); }
+.whatsapp-float svg{ width:30px; height:30px; fill:#fff; }
+@media (max-width:640px){
+  .whatsapp-float{ width:52px; height:52px; bottom:18px; right:18px; }
+  .whatsapp-float svg{ width:26px; height:26px; }
+}
+
+/* ---------- Mobile polish (global) ---------- */
+@media (max-width:640px){
+  section{ padding:56px 0; }
+  .hero{ padding:52px 0 60px; }
+  .page-hero{ padding:40px 0; }
+  .cta-band{ padding:32px 22px; text-align:center; justify-content:center; }
+  .cta-band > a{ width:100%; }
+  .section-head{ margin-bottom:36px; }
+  .card{ padding:22px; }
+  .btn{ padding:12px 20px; font-size:0.9rem; }
+  .hero-actions{ flex-direction:column; align-items:stretch; }
+  .hero-actions .btn{ width:100%; }
+  table.spec-table{ font-size:0.78rem; }
+  .spec-table th, .spec-table td{ padding:9px 8px; white-space:nowrap; }
+}
+@media (max-width:400px){
+  .footer-grid{ grid-template-columns:1fr !important; }
 }
 </style>
 </head>
 <body>
+<div id="scrollProgress"></div>
+<div id="preloader"><img src="assets/images/logo.png" alt="MLS ישראל"><div class="pre-bar"><i></i></div></div>
+<style>
+/* ===== finish & mobile enhancements ===== */
+#preloader{ position:fixed; inset:0; z-index:2000; background:var(--void-navy); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; transition:opacity .5s ease, visibility .5s; }
+#preloader.hide{ opacity:0; visibility:hidden; }
+#preloader img{ height:52px; width:auto; animation:preFloat 1.4s ease-in-out infinite; }
+@keyframes preFloat{ 0%,100%{ transform:translateY(0); opacity:.85; } 50%{ transform:translateY(-8px); opacity:1; } }
+#preloader .pre-bar{ width:120px; height:3px; border-radius:2px; background:var(--slate-line); overflow:hidden; }
+#preloader .pre-bar i{ display:block; height:100%; width:40%; background:linear-gradient(90deg,var(--signal-blue),var(--amber)); animation:preSlide 1s ease-in-out infinite; }
+@keyframes preSlide{ 0%{ transform:translateX(120%);} 100%{ transform:translateX(-320%);} }
+#scrollProgress{ position:fixed; top:0; right:0; height:3px; width:0; z-index:200; background:linear-gradient(90deg,var(--signal-blue),var(--amber)); box-shadow:0 0 8px rgba(255,106,26,0.5); transition:width .1s linear; }
+#backToTop{ position:fixed; bottom:150px; right:24px; z-index:997; width:46px; height:46px; border-radius:50%; border:1px solid var(--slate-line); background:rgba(24,24,24,0.9); color:var(--slate-ink); font-size:1.2rem; cursor:pointer; opacity:0; transform:translateY(12px); pointer-events:none; transition:all .25s ease; backdrop-filter:blur(6px); }
+#backToTop.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+#backToTop:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .btn:focus-visible, .type-chip:focus-visible { outline:2px solid var(--signal-blue); outline-offset:2px; border-radius:4px; }
+.btn{ position:relative; overflow:hidden; }
+.btn .ripple{ position:absolute; border-radius:50%; transform:scale(0); background:rgba(255,255,255,0.35); animation:rip .6s ease-out; pointer-events:none; }
+@keyframes rip{ to{ transform:scale(2.4); opacity:0; } }
+body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); mix-blend-mode:overlay; }
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background:var(--void-navy); }
+::-webkit-scrollbar-thumb{ background:var(--slate-line); border-radius:6px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--signal-blue); }
+#mobileCta{ position:fixed; bottom:0; right:0; left:0; z-index:996; display:none; gap:10px; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(10,10,10,0.94); backdrop-filter:blur(10px); border-top:1px solid var(--slate-line); }
+#mobileCta a{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 12px; border-radius:var(--radius-sm); font-weight:700; font-size:0.95rem; }
+#mobileCta .mc-quote{ background:var(--signal-blue); color:#fff; }
+#mobileCta .mc-wa{ background:#25D366; color:#fff; }
+#mobileCta svg{ width:20px; height:20px; fill:#fff; }
+@media (max-width:768px){
+  #mobileCta{ display:flex; }
+  .whatsapp-float{ bottom:88px !important; }
+  .instagram-float{ bottom:150px !important; }
+  #backToTop{ bottom:212px; right:14px; }
+  body{ padding-bottom:66px; }
+}
+@keyframes ctaShake{ 0%,100%{ transform:rotate(0) scale(1); } 15%{ transform:rotate(-3deg) scale(1.04); } 35%{ transform:rotate(3deg) scale(1.04); } 55%{ transform:rotate(-2deg) scale(1.03); } 75%{ transform:rotate(1.5deg) scale(1.02); } }
+@keyframes ctaIdleDance{ 0%,78%,100%{ transform:rotate(0) scale(1); } 82%{ transform:rotate(-3deg) scale(1.04); } 86%{ transform:rotate(3deg) scale(1.04); } 90%{ transform:rotate(-2deg) scale(1.03); } 94%{ transform:rotate(1.5deg) scale(1.02); } 98%{ transform:rotate(0.5deg) scale(1.01); } }
+@media (hover:none){
+  .btn-primary, .whatsapp-float, #mobileCta .mc-quote{ animation:ctaIdleDance 4.5s ease-in-out infinite; }
+}
+@media (hover:hover){
+  .btn-primary:hover{ animation:ctaShake 0.6s ease-in-out; }
+  .whatsapp-float:hover{ animation:ctaShake 0.6s ease-in-out; }
+}
+@media (prefers-reduced-motion: reduce){
+  #preloader img, #preloader .pre-bar i, .btn .ripple, .btn-primary, .whatsapp-float, #mobileCta .mc-quote{ animation:none !important; }
+  body::after{ display:none; }
+}
+</style>
 
-<div class="scene" aria-hidden="true">
-  <div class="scr scr--rental" data-depth="26">
-    <div class="scr__inner" style="--ry:14deg;--rx:4deg;--dur:19s">
-      <div class="cables"><i></i><i></i></div>
-      <div class="panel" style="--play:12s"><div class="modules"></div></div>
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <img src="assets/images/logo.png" alt="MLS ישראל" class="logo-img">
+    </a>
+    <nav class="nav-desktop">
+      <a href="solutions.html">פתרונות</a>
+      <a href="products.html">מוצרים</a>
+      <a href="place.html">נסה למקם</a>
+      <a href="about.html">אודות</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="contact.html" class="btn btn-primary" style="display:none;" id="hdr-cta">קבלו הצעת מחיר</a>
+      <div class="hdr-mascot-wrap">
+        <a href="contact.html" class="btn btn-primary desktop-cta">קבלו הצעת מחיר</a>
+        <div class="hdr-mascot-clip">
+          <img src="assets/images/mascot-hang.png" alt="" class="hdr-mascot-img" aria-hidden="true">
+        </div>
+      </div>
+      <button class="nav-toggle" aria-label="פתח תפריט">☰</button>
     </div>
   </div>
-  <div class="scr scr--billboard" data-depth="14">
-    <div class="scr__inner" style="--ry:-16deg;--rx:2deg;--dur:15s">
-      <div class="panel" style="--play:8s"></div>
-      <div class="legs"><i></i><i></i></div>
-    </div>
-  </div>
-  <div class="scr scr--totem" data-depth="20">
-    <div class="scr__inner" style="--ry:18deg;--dur:13s">
-      <div class="panel" style="--play:7s"></div>
-      <div class="base"></div>
-    </div>
-  </div>
-  <div class="scr scr--indoor" data-depth="34">
-    <div class="scr__inner" style="--ry:-20deg;--rx:-3deg;--dur:17s">
-      <div class="panel" style="--play:10s"></div>
-    </div>
-  </div>
+</header>
+
+<div class="mobile-nav">
+  <button class="close-btn" aria-label="סגור תפריט">×</button>
+  <a href="solutions.html">פתרונות</a>
+  <a href="products.html">מוצרים</a>
+  <a href="place.html">נסה למקם</a>
+  <a href="about.html">אודות</a>
+  <a href="contact.html">צור קשר</a>
 </div>
-<div class="veil" aria-hidden="true"></div>
 
-<div class="ticker" aria-hidden="true">
-  <div class="ticker__track">
-    <span>האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i> האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i></span>
-    <span>האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i> האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i></span>
+<section class="hero">
+  <div class="hero-bg-slides" id="heroBgSlides">
+    <div class="hero-bg-slide active" style="background-image:url('assets/images/hero-bg/hero-bg-4-poolside.jpg')"></div>
+    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-1-abstract.jpg')"></div>
+    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-2-storefront.jpg')"></div>
+    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-3-billboard.jpg')"></div>
   </div>
-</div>
+  <div class="hero-bg-scrim"></div>
+  <button class="hero-bg-arrow hero-bg-arrow-prev" id="heroBgPrev" aria-label="תמונה קודמת">‹</button>
+  <button class="hero-bg-arrow hero-bg-arrow-next" id="heroBgNext" aria-label="תמונה הבאה">›</button>
+  <div class="pixel-field"></div>
+  <div class="container">
+    <div class="eyebrow">MLS ישראל</div>
+    <h1>מסכי LED שאנחנו <span>מייצרים ומתקינים.</span></h1>
+    <p class="lead">אנחנו מייצרים ומתקינים מסכי LED מהמתקדמים בעולם — עם ליווי מקצועי מתחילת הפרויקט ועד ההפעלה, מלאי זמין ומחירים הכי משתלמים בשוק.</p>
+    <div class="hero-actions">
+      <a href="contact.html" class="btn btn-primary">בקשו הצעת מחיר</a>
+      <a href="products.html" class="btn btn-ghost">לקטלוג המוצרים</a>
+    </div>
 
-<main>
-  <span class="badge"><span class="dot"></span> האתר בעברית — בבנייה ממש עכשיו</span>
-
-  <h1>LED<em>·</em>MLS</h1>
-
-  <p class="rep">הנציגות הרשמית בישראל של <a href="https://www.led-mls.com" target="_blank" rel="noopener">LED-MLS.COM</a> — יצרנית מסכי ה-LED המובילה בעולם</p>
-
-  <p class="sub">האתר החדש שלנו <strong>בבנייה</strong> — ובקרוב הוא יאיר כאן בעברית.</p>
-  <p class="note">בינתיים אפשר לדבר איתנו ישירות, או להתרשם מהמוצרים באתר הבינלאומי.</p>
-
-  <div class="chips">
-    <span>מסכי LED לחוץ</span>
-    <span>מסכי LED לפנים</span>
-    <span>מסכי השכרה לאירועים ובמות</span>
-    <span>מסכי פוסטר לקמעונאות</span>
-    <span>מסכי COB ברזולוציה גבוהה</span>
+    <div class="hero-stats">
+      <div data-reveal><b>28+</b><span>שנות ניסיון גלובלי ביצור LED</span></div>
+      <div data-reveal><b>150+</b><span>מדינות בהן פעיל המותג</span></div>
+      <div data-reveal><b>5</b><span>מפעלי ייצור ברחבי העולם</span></div>
+      <div data-reveal><b>#1</b><span>מותג LED מוביל עולמית</span></div>
+    </div>
   </div>
-
-  <div class="progress" aria-hidden="true">
-    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-  </div>
-
-  <div class="contact">
-    <a class="btn btn--led" href="mailto:sales@led-mls.co.il">שלחו לנו מייל</a>
-    <a class="btn btn--ghost" href="https://www.led-mls.com" target="_blank" rel="noopener">לאתר הבינלאומי ←</a>
-  </div>
-</main>
-
-<footer>
-  <span class="sig"><b>LED-MLS.co.il</b> © 2026 · כל הזכויות שמורות</span>
-  <span>הנציגות הרשמית של MLS בישראל · <a href="mailto:sales@led-mls.co.il">sales@led-mls.co.il</a></span>
-</footer>
+</section>
 
 <script>
 (function(){
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  var screens = document.querySelectorAll('.scr');
-  addEventListener('pointermove', function(e){
-    if (reduce.matches) return;
-    var x = e.clientX / innerWidth - .5;
-    var y = e.clientY / innerHeight - .5;
-    screens.forEach(function(el){
-      var d = parseFloat(el.dataset.depth || 10);
-      el.style.setProperty('--px', (-x * d) + 'px');
-      el.style.setProperty('--py', (-y * d) + 'px');
-    });
-  }, {passive: true});
+  var slides = document.querySelectorAll('#heroBgSlides .hero-bg-slide');
+  if (!slides.length) return;
+  var current = 0;
+  var intervalMs = 25000;
+  var timer;
+
+  function show(index){
+    slides[current].classList.remove('active');
+    current = (index + slides.length) % slides.length;
+    slides[current].classList.add('active');
+  }
+  function next(){ show(current + 1); }
+  function prev(){ show(current - 1); }
+  function resetTimer(){
+    clearInterval(timer);
+    timer = setInterval(next, intervalMs);
+  }
+
+  var nextBtn = document.getElementById('heroBgNext');
+  var prevBtn = document.getElementById('heroBgPrev');
+  if (nextBtn) nextBtn.addEventListener('click', function(){ next(); resetTimer(); });
+  if (prevBtn) prevBtn.addEventListener('click', function(){ prev(); resetTimer(); });
+
+  resetTimer();
 })();
 </script>
 
+<section id="tour-wrap">
+  <div id="tour-pin">
+
+    <video id="tourVideo" muted playsinline preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;"></video>
+    <script>
+    (function(){
+      var v=document.getElementById('tourVideo');
+      // Load a lighter 540p all-keyframe encode on small screens so scroll-scrubbing stays smooth
+      var isMobile = window.matchMedia('(max-width:760px)').matches;
+      v.src = isMobile ? 'assets/video/showcase-tour-mobile.mp4' : 'assets/video/showcase-tour.mp4';
+    })();
+    </script>
+
+    <div class="tour-scrim"></div>
+
+    <div class="tour-rail">
+      <div class="tour-dot" data-dot="0"><span>01</span></div>
+      <div class="tour-dot" data-dot="1"><span>02</span></div>
+      <div class="tour-dot" data-dot="2"><span>03</span></div>
+      <div class="tour-dot" data-dot="3"><span>04</span></div>
+    </div>
+
+    <div class="tour-kicker">MLS ישראל — סיור במוצרים</div>
+    <div class="tour-scrollhint"><span>גללו</span><i></i></div>
+
+    <div class="tour-caption" data-cap="0">
+      <div class="tour-eyebrow">01 · חלון הראווה</div>
+      <h2 class="tour-title">מסך <span>וילון</span></h2>
+      <p class="tour-sub">מסך שקוף שיושב ישירות על הזכוכית — במקום פוסטר מודבק</p>
+      <div class="tour-specs"><span>שקיפות גבוהה</span><span>התקנה על זכוכית</span></div>
+    </div>
+
+    <div class="tour-caption" data-cap="1">
+      <div class="tour-eyebrow">02 · ליד הבריכה</div>
+      <h2 class="tour-title">מסך <span>חוץ</span></h2>
+      <p class="tour-sub">עמיד במים ובשמש — בהיר גם באור יום מלא</p>
+      <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
+    </div>
+
+    <div class="tour-caption" data-cap="2">
+      <div class="tour-eyebrow">03 · על הבניין</div>
+      <h2 class="tour-title">שלטי <span>חוצות</span></h2>
+      <p class="tour-sub">שילוט פרסום ענק שנראה מרחק ניכר — לגגות, קירות חוץ וצמתים מרכזיים</p>
+      <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
+    </div>
+
+    <div class="tour-caption" data-cap="3">
+      <div class="tour-eyebrow">04 · בתוך הווילה</div>
+      <h2 class="tour-title">מסך <span>פנים</span></h2>
+      <p class="tour-sub">שטוח, דק וחד — לצפייה מקרוב</p>
+      <div class="tour-specs"><span>IP30</span><span>400–800 cd/m²</span><span>P1.25–P3.07</span></div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  #tour-wrap{ height:420vh; position:relative; background:#05070C; }
+  #tour-pin{
+    position:sticky; top:0; overflow:hidden;
+    height:100vh; height:100dvh;
+  }
+  .tour-scrim{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.15) 30%, rgba(5,7,12,0.05) 55%, rgba(5,7,12,0.3) 100%);
+  }
+  .tour-kicker{
+    position:absolute; top:28px; right:0; left:0; text-align:center;
+    font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase;
+    color:rgba(255,255,255,0.55); z-index:3;
+  }
+  .tour-scrollhint{
+    position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:8px; z-index:3;
+    font-family:var(--font-mono); font-size:0.68rem; letter-spacing:0.1em; color:rgba(255,255,255,0.5);
+  }
+  .tour-scrollhint i{
+    width:1px; height:26px; background:linear-gradient(rgba(255,255,255,0.6),transparent);
+    animation:tourScrollPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes tourScrollPulse{ 0%,100%{ opacity:0.3; } 50%{ opacity:1; } }
+  .tour-rail{
+    position:absolute; left:32px; top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:22px; z-index:3;
+  }
+  .tour-dot{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:0.72rem; color:rgba(255,255,255,0.35);
+  }
+  .tour-dot::before{
+    content:''; width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.25); transition:all .3s;
+  }
+  .tour-dot.active{ color:var(--pixel-cyan); }
+  .tour-dot.active::before{ background:var(--pixel-cyan); box-shadow:0 0 10px var(--pixel-cyan); transform:scale(1.3); }
+
+  .tour-caption{
+    position:absolute; bottom:64px; right:0; left:0; text-align:center; z-index:3;
+    opacity:0; transform:translateY(24px); pointer-events:none;
+    padding:0 20px;
+  }
+  .tour-eyebrow{
+    font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.2em; text-transform:uppercase;
+    color:var(--pixel-cyan); margin-bottom:14px;
+  }
+  .tour-title{
+    font-family:var(--font-display); font-weight:800; line-height:0.95;
+    font-size:clamp(2.1rem,9vw,6.5rem); color:#fff; margin-bottom:18px;
+    text-shadow:0 4px 30px rgba(0,0,0,0.5);
+  }
+  .tour-title span{ color:var(--signal-blue); -webkit-text-stroke:1px rgba(255,255,255,0.15); }
+  .tour-sub{
+    font-size:1.15rem; color:rgba(255,255,255,0.85); max-width:520px; margin:0 auto 22px; font-weight:500;
+  }
+  .tour-specs{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .tour-specs span{
+    font-family:var(--font-mono); font-size:0.8rem; font-weight:600; color:#fff;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25);
+    padding:7px 16px; border-radius:99px; backdrop-filter:blur(6px);
+  }
+  @media (max-width:760px){
+    #tour-wrap{ height:320vh; }
+    .tour-rail{ display:none; }
+    .tour-caption{ bottom:36px; }
+    .tour-kicker{ top:18px; font-size:0.62rem; }
+  }
+  @media (max-width:480px){
+    #tour-wrap{ height:260vh; }
+    .tour-title{ font-size:clamp(1.7rem,10vw,3rem); margin-bottom:10px; }
+    .tour-eyebrow{ font-size:0.68rem; margin-bottom:8px; }
+    .tour-sub{ font-size:0.92rem; margin-bottom:14px; }
+    .tour-specs span{ font-size:0.7rem; padding:5px 12px; }
+    .tour-scrollhint{ bottom:14px; }
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  if (!window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  const video = document.getElementById('tourVideo');
+  const dots = gsap.utils.toArray('.tour-dot');
+  const captions = gsap.utils.toArray('.tour-caption');
+  const hint = document.querySelector('.tour-scrollhint');
+
+  // Segment boundaries mapped from the source video's actual content (fractions of total duration, 10.04s):
+  //   0.00–0.85s  window / curtain screen (storefront)
+  //   1.15–4.30s  outdoor / pool screen
+  //   5.90–8.50s  outdoor / building screen
+  //   9.00–10.04s indoor screen
+  const stageAt = [0.04, 0.27, 0.72, 0.95]; // caption "peak" position per stage, as a fraction of duration
+  const stageActive = [
+    [0.0, 0.082],
+    [0.115, 0.428],
+    [0.588, 0.846],
+    [0.897, 1.0]
+  ];
+
+  function ready(fn){
+    if (video.readyState >= 1) fn();
+    else video.addEventListener('loadedmetadata', fn, { once:true });
+  }
+
+  ready(() => {
+    const dur = video.duration;
+    const isMobile = window.matchMedia('(max-width:760px)').matches;
+    const seekEps = isMobile ? 0.04 : 0.012;
+
+    ScrollTrigger.create({
+      trigger: '#tour-wrap',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: isMobile ? 0.8 : 0.4,
+      onUpdate: self => {
+        const p = self.progress;
+        const t = p * dur;
+        if (Math.abs(video.currentTime - t) > seekEps) {
+          if (typeof video.fastSeek === 'function') video.fastSeek(t);
+          else video.currentTime = t;
+        }
+
+        if (hint) hint.style.opacity = p < 0.03 ? 1 : 0;
+
+        stageActive.forEach((range, i) => {
+          const active = p >= range[0] && p <= range[1];
+          gsap.to(captions[i], {
+            opacity: active ? 1 : 0,
+            y: active ? 0 : 20,
+            duration: 0.2,
+            overwrite:true
+          });
+        });
+
+        let idx = 0;
+        for (let i = 0; i < stageAt.length; i++) { if (p >= stageActive[i][0]) idx = i; }
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    });
+  });
+})();
+</script>
+
+<section class="section-alt" data-reveal>
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">התהליך שלנו</div>
+      <h2>מרגע הפנייה ועד ההפעלה</h2>
+      <p>ליווי צמוד בכל שלב — מהייעוץ הראשוני ועד תמיכה שוטפת אחרי ההתקנה.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step1-consult.jpg" alt="פנייה וייעוץ" loading="lazy"><span class="timeline-num">01</span></div>
+        <h3>פנייה וייעוץ</h3>
+        <p>מבינים את הצרכים, השטח, מרחק הצפייה והתקציב שלכם.</p>
+      </div>
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step2-planning.jpg" alt="תכנון טכני" loading="lazy"><span class="timeline-num">02</span></div>
+        <h3>תכנון טכני</h3>
+        <p>קביעת פיץ', גודל וקונפיגורציה מדויקים לפרויקט הספציפי.</p>
+      </div>
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step3-production.jpg" alt="הפקת המסך" loading="lazy"><span class="timeline-num">03</span></div>
+        <h3>הפקת המסך</h3>
+        <p>אנחנו מייצרים את המסך בהתאם למפרט שסוכם יחד איתכם.</p>
+      </div>
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step4-install.jpg" alt="התקנה מקצועית" loading="lazy"><span class="timeline-num">04</span></div>
+        <h3>התקנה מקצועית</h3>
+        <p>צוות טכני שלנו מבצע את ההתקנה בשטח מקצה לקצה.</p>
+      </div>
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step5-testing.jpg" alt="הרצה ובדיקות" loading="lazy"><span class="timeline-num">05</span></div>
+        <h3>הרצה ובדיקות</h3>
+        <p>כיול צבע, בהירות ותצוגה — ווידוא שהכול עובד מושלם לפני מסירה.</p>
+      </div>
+      <div class="timeline-step" data-reveal>
+        <div class="timeline-img"><img src="assets/images/timeline/step6-support.jpg" alt="תמיכה ואחריות" loading="lazy"><span class="timeline-num">06</span></div>
+        <h3>תמיכה ואחריות</h3>
+        <p>זמינים עבורכם לאורך כל חיי המסך, גם אחרי ההתקנה.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .timeline{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:32px 28px;
+    margin-top:24px;
+  }
+  .timeline-img{
+    position:relative; border-radius:var(--radius-md); overflow:hidden;
+    margin-bottom:18px; aspect-ratio:4/3;
+  }
+  .timeline-img img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .45s ease; }
+  .timeline-step:hover .timeline-img img{ transform:scale(1.08); }
+  .timeline-num{
+    position:absolute; top:12px; right:12px; width:38px; height:38px; border-radius:50%;
+    background:var(--signal-blue); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:700; font-size:0.85rem;
+    box-shadow:0 4px 14px rgba(0,0,0,0.3);
+    transition:transform .3s ease;
+  }
+  .timeline-step:hover .timeline-num{ transform:rotate(-10deg) scale(1.1); }
+  .timeline-step h3{ font-size:1.05rem; margin-bottom:8px; }
+  .timeline-step p{ font-size:0.9rem; color:var(--slate-mid); line-height:1.55; }
+  @media (max-width:960px){
+    .timeline{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:640px){
+    .timeline{ grid-template-columns:1fr; }
+  }
+</style>
+
+<section class="section-alt" data-reveal>
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h3>מסך בעיצוב אישי לפי הנוחות והצורך שלכם</h3>
+        <p>שלחו לנו את הפרטים ונחזור עם הצעת מחיר מפורטת תוך זמן קצר.</p>
+      </div>
+      <div class="cta-mascot-wrap">
+        <img src="assets/images/mascot-lean.png" alt="" class="cta-mascot" aria-hidden="true">
+        <a href="contact.html" class="btn btn-dark">קבלו הצעת מחיר</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-mascot-wrap{ position:relative; display:inline-block; }
+  .cta-mascot{
+    position:absolute; bottom:-6px; right:calc(100% - 24px);
+    width:150px; pointer-events:none; z-index:2;
+    filter:drop-shadow(0 12px 18px rgba(0,0,0,0.35));
+  }
+  @media (max-width:760px){
+    .cta-mascot{ width:110px; right:calc(100% - 16px); }
+  }
+  @media (max-width:640px){
+    .cta-mascot{ display:none; }
+  }
+</style>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/images/logo.png" alt="MLS ישראל" class="logo-img">
+        </div>
+        <p style="max-width:320px; font-size:0.9rem;">מסכי LED מקצועיים מבית MLS ישראל — פתרונות תצוגה מתקדמים לשוק הישראלי.</p>
+      </div>
+      <div>
+        <h4>ניווט</h4>
+        <ul>
+          <li><a href="solutions.html">פתרונות</a></li>
+          <li><a href="products.html">מוצרים</a></li>
+          <li><a href="about.html">אודות</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>מוצרים</h4>
+        <ul>
+          <li><a href="products.html">מסכי פוסטר</a></li>
+          <li><a href="products.html">מסכי חוץ</a></li>
+          <li><a href="products.html">מסכי פנים</a></li>
+          <li><a href="products.html">מסך וילון</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>צור קשר</h4>
+        <ul>
+          <li><a href="contact.html">טופס יצירת קשר</a></li>
+          <li><a href="tel:+972585008500">058-500-8500</a></li>
+          <li><a href="mailto:info@led-mls.co.il">info@led-mls.co.il</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 MLS ישראל. כל הזכויות שמורות.</span>
+      <span>led-mls.co.il</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Pixel field generator — echoes the RGB pixel matrix of an actual LED wall
+document.querySelectorAll('.pixel-field').forEach(field=>{
+  const count = 260;
+  let html = '';
+  for(let i=0;i<count;i++){
+    const lit = Math.random() < 0.12;
+    html += `<span class="${lit ? 'lit':''}" style="animation-delay:${(Math.random()*3).toFixed(2)}s"></span>`;
+  }
+  field.innerHTML = html;
+});
+
+// Mobile nav
+const navToggle = document.querySelector('.nav-toggle');
+const mobileNav = document.querySelector('.mobile-nav');
+const closeBtn = document.querySelector('.close-btn');
+if(navToggle && mobileNav){
+  navToggle.addEventListener('click', ()=> mobileNav.classList.add('open'));
+  closeBtn.addEventListener('click', ()=> mobileNav.classList.remove('open'));
+  mobileNav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> mobileNav.classList.remove('open')));
+}
+
+// Chip multi-select (visual only)
+document.querySelectorAll('.chip-group').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      chip.classList.toggle('active');
+      chip.style.background = chip.classList.contains('active') ? '#2450FF' : '';
+      chip.style.color = chip.classList.contains('active') ? '#fff' : '';
+      chip.style.borderColor = chip.classList.contains('active') ? '#2450FF' : '';
+    });
+  });
+});
+
+// Contact / quote forms — demo submit handler
+document.querySelectorAll('form[data-demo-form]').forEach(form=>{
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const original = btn.textContent;
+    btn.textContent = 'הפנייה נשלחה ✓';
+    btn.disabled = true;
+    setTimeout(()=>{ btn.textContent = original; btn.disabled = false; form.reset(); }, 2500);
+  });
+});
+
+</script>
+<a href="https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED" class="whatsapp-float" target="_blank" rel="noopener" aria-label="שלחו לנו הודעה בוואטסאפ">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16.001 3C9.107 3 3.5 8.607 3.5 15.5c0 2.32.63 4.494 1.73 6.362L3 29l7.32-2.19a12.44 12.44 0 0 0 5.68 1.39h.001c6.894 0 12.5-5.607 12.5-12.5S22.895 3 16.001 3zm0 22.75h-.001a10.2 10.2 0 0 1-5.2-1.424l-.373-.222-3.86 1.155 1.176-3.76-.243-.386A10.19 10.19 0 0 1 5.75 15.5c0-5.652 4.599-10.25 10.251-10.25 5.652 0 10.25 4.598 10.25 10.25 0 5.653-4.598 10.25-10.25 10.25zm5.62-7.68c-.308-.154-1.82-.898-2.102-1.001-.282-.103-.487-.154-.692.154-.205.308-.795 1.001-.975 1.206-.18.205-.36.231-.667.077-.308-.154-1.3-.479-2.477-1.528-.916-.817-1.534-1.826-1.714-2.134-.18-.308-.019-.475.135-.628.139-.138.308-.36.462-.54.154-.18.205-.308.308-.513.103-.205.051-.385-.026-.539-.077-.154-.692-1.668-.949-2.284-.25-.6-.504-.519-.692-.529-.18-.008-.385-.01-.59-.01-.205 0-.539.077-.821.385-.282.308-1.077 1.052-1.077 2.566s1.103 2.977 1.257 3.182c.154.205 2.171 3.316 5.26 4.65.735.317 1.309.507 1.756.649.738.235 1.41.202 1.94.122.592-.088 1.82-.744 2.077-1.463.257-.719.257-1.335.18-1.463-.077-.129-.282-.205-.59-.36z"/></svg>
+</a>
+
+<a href="https://www.instagram.com/mls_israel" class="instagram-float" target="_blank" rel="noopener" aria-label="עקבו אחרינו באינסטגרם">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 1.62c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.19.4-.55.22-.94.47-1.35.88-.41.41-.66.8-.88 1.35-.16.42-.35 1.04-.4 2.19-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.19.22.55.47.94.88 1.35.41.41.8.66 1.35.88.42.16 1.04.35 2.19.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.19-.4.55-.22.94-.47 1.35-.88.41-.41.66-.8.88-1.35.16-.42.35-1.04.4-2.19.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.19a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.42-.16-1.04-.35-2.19-.4-1.24-.06-1.61-.07-4.75-.07Zm0 2.76a5.42 5.42 0 1 1 0 10.84 5.42 5.42 0 0 1 0-10.84Zm0 1.62a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm5.6-2.9a1.27 1.27 0 1 1 0 2.53 1.27 1.27 0 0 1 0-2.53Z"/></svg>
+</a>
+
+<style>
+  .instagram-float{
+    position:fixed; bottom:92px; right:24px; z-index:999;
+    width:58px; height:58px; border-radius:50%;
+    background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.28); transition:transform .2s ease;
+  }
+  .instagram-float:hover{ transform:scale(1.08); }
+  .instagram-float svg{ width:30px; height:30px; fill:#fff; }
+  @media (max-width:640px){
+    .whatsapp-float{ right:10px; bottom:12px; width:48px; height:48px; }
+    .whatsapp-float svg{ width:24px; height:24px; }
+    .instagram-float{ right:10px; bottom:68px; width:48px; height:48px; }
+    .instagram-float svg{ width:24px; height:24px; }
+  }
+</style>
+
+<div class="mascot-popup" id="mascotPopup" role="button" tabindex="0" aria-label="דברו איתנו בוואטסאפ">
+  <img src="assets/images/mascot.png" alt="מוזמנים לדבר איתנו גם בוואטסאפ">
+</div>
+
+<style>
+  .mascot-popup{
+    position:fixed; bottom:92px; right:14px; z-index:998;
+    width:200px; pointer-events:none;
+    opacity:0; transform:translateY(30px) scale(0.85);
+    transition:opacity .5s cubic-bezier(.34,1.56,.64,1), transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mascot-popup img{ width:100%; display:block; filter:drop-shadow(0 10px 22px rgba(0,0,0,0.4)); }
+  .mascot-popup.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; cursor:pointer; }
+  @media (max-width:640px){
+    .mascot-popup{ width:150px; bottom:80px; right:10px; }
+  }
+</style>
+
+<script>
+(function(){
+  var popup = document.getElementById('mascotPopup');
+  if (!popup) return;
+  var waLink = 'https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED';
+  function openWA(){ window.open(waLink, '_blank', 'noopener'); }
+  popup.addEventListener('click', openWA);
+  popup.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') openWA(); });
+
+  function cycle(){
+    popup.classList.add('show');
+    setTimeout(function(){ popup.classList.remove('show'); }, 5000);
+  }
+  setTimeout(function(){
+    cycle();
+    setInterval(cycle, 20000);
+  }, 4000);
+})();
+</script>
+
+
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  if (revealEls.length) {
+    var groups = new Map();
+    revealEls.forEach(function(el){
+      var parent = el.parentElement;
+      if (!groups.has(parent)) groups.set(parent, []);
+      groups.get(parent).push(el);
+    });
+    groups.forEach(function(list){
+      list.forEach(function(el, i){ el.style.transitionDelay = (i * 0.08) + 's'; });
+    });
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      revealEls.forEach(function(el){ io.observe(el); });
+    } else {
+      revealEls.forEach(function(el){ el.classList.add('revealed'); });
+    }
+  }
+
+  var statEls = document.querySelectorAll('.hero-stats b');
+  if (statEls.length && 'IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        io2.unobserve(entry.target);
+        var el = entry.target;
+        var raw = el.textContent.trim();
+        var match = raw.match(/^(\d+)(.*)$/);
+        if (match) {
+          var target = parseInt(match[1], 10);
+          var suffix = match[2];
+          var dur = 1200;
+          var start = performance.now();
+          function tick(now){
+            var p = Math.min(1, (now - start) / dur);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased) + suffix;
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        } else {
+          el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1), opacity .5s';
+          el.style.opacity = '0';
+          el.style.transform = 'scale(0.5)';
+          requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+              el.style.opacity = '1';
+              el.style.transform = 'scale(1)';
+            });
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    statEls.forEach(function(el){ io2.observe(el); });
+  }
+
+  var headings = document.querySelectorAll('.section-head h2, .page-hero h1, .hero h1');
+  if (headings.length && 'IntersectionObserver' in window) {
+    var io3 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('underline-in');
+          io3.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    headings.forEach(function(h){ io3.observe(h); });
+  } else {
+    headings.forEach(function(h){ h.classList.add('underline-in'); });
+  }
+})();
+</script>
+
+<button id="backToTop" aria-label="חזרה למעלה">↑</button>
+<div id="mobileCta">
+  <a href="contact.html" class="mc-quote">קבלו הצעת מחיר</a>
+  <a href="https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED" class="mc-wa" target="_blank" rel="noopener"><svg viewBox="0 0 32 32"><path d="M16 3C9.1 3 3.5 8.6 3.5 15.5c0 2.3.6 4.5 1.7 6.4L3 29l7.3-2.2c1.8 1 3.7 1.4 5.7 1.4 6.9 0 12.5-5.6 12.5-12.5S22.9 3 16 3zm5.6 15.1c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.2c-.2.2-.4.2-.7.1s-1.3-.5-2.5-1.5c-.9-.8-1.5-1.8-1.7-2.1s0-.5.1-.6c.1-.1.3-.4.5-.5.1-.2.2-.3.3-.5s0-.4 0-.5c-.1-.2-.7-1.7-.9-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1.1 1-1.1 2.6 1.1 3 1.3 3.2c.2.2 2.2 3.3 5.3 4.6.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>וואטסאפ</a>
+</div>
+<script>
+(function(){
+  var pre=document.getElementById('preloader');
+  function hidePre(){ if(pre) pre.classList.add('hide'); }
+  if(document.readyState==='complete') setTimeout(hidePre,300);
+  else window.addEventListener('load',function(){ setTimeout(hidePre,300); });
+  setTimeout(hidePre,3500);
+  var prog=document.getElementById('scrollProgress'), btt=document.getElementById('backToTop');
+  function onScroll(){ var st=window.pageYOffset||document.documentElement.scrollTop; var h=document.documentElement.scrollHeight-document.documentElement.clientHeight; var p=h>0?(st/h)*100:0; if(prog) prog.style.width=p+'%'; if(btt) btt.classList.toggle('show', st>600); }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  if(btt) btt.addEventListener('click',function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+  document.addEventListener('click',function(e){ var b=e.target.closest('.btn'); if(!b) return; var r=document.createElement('span'); r.className='ripple'; var rect=b.getBoundingClientRect(); var size=Math.max(rect.width,rect.height); r.style.width=r.style.height=size+'px'; r.style.left=(e.clientX-rect.left-size/2)+'px'; r.style.top=(e.clientY-rect.top-size/2)+'px'; b.appendChild(r); setTimeout(function(){ r.remove(); },600); });
+})();
+</script>
 </body>
 </html>

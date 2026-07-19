@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מוצרים | MLS ישראל</title>
+<meta name="description" content="קטלוג מסכי LED מלא: פוסטר, חוץ, פנים ומסך וילון. ייצור והתקנה בישראל.">
+<link rel="icon" type="image/png" href="assets/images/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MLS ישראל">
+<meta property="og:title" content="מוצרים | MLS ישראל">
+<meta property="og:description" content="קטלוג מסכי LED מלא: פוסטר, חוץ, פנים ומסך וילון. ייצור והתקנה בישראל.">
+<meta property="og:image" content="https://led-mls.co.il/assets/images/products-hero.jpg">
+<meta property="og:url" content="https://led-mls.co.il/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="מוצרים | MLS ישראל">
+<meta name="twitter:description" content="קטלוג מסכי LED מלא: פוסטר, חוץ, פנים ומסך וילון. ייצור והתקנה בישראל.">
+<meta name="twitter:image" content="https://led-mls.co.il/assets/images/products-hero.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Assistant:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   MLS ISRAEL — Design tokens
+   Palette: Void Navy / Signal Blue / Pixel Cyan / Warm White / Slate Ink
+   Type: Rubik (display) + Assistant (body) + JetBrains Mono (specs/data)
+   ========================================================================== */
+
+:root{
+  --void-navy: #0A0A0A;
+  --navy-raised: #181818;
+  --signal-blue: #FF6A1A;
+  --signal-blue-dim: #D6560F;
+  --pixel-cyan: #FFA94D;
+  --warm-white: #0A0A0A;
+  --slate-ink: #F5F1EC;
+  --slate-mid: #A69C93;
+  --slate-line: #2A2A2A;
+  --amber: #FFB020;
+
+  --font-display: 'Rubik', 'Segoe UI', sans-serif;
+  --font-body: 'Assistant', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --container: 1240px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font-body);
+  color:var(--slate-ink);
+  background:var(--warm-white);
+  line-height:1.6;
+  direction:rtl;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  max-width:100vw;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+ul{ list-style:none; }
+h1,h2,h3,h4{ font-family:var(--font-display); line-height:1.15; letter-spacing:-0.01em; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 28px; }
+.mono{ font-family:var(--font-mono); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ---------- Pixel grid signature motif ---------- */
+.pixel-field{
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(14px,1fr));
+  grid-auto-rows:14px;
+  gap:3px;
+  opacity:0.5;
+  pointer-events:none;
+  overflow:hidden;
+}
+.pixel-field span{
+  background:rgba(255,106,26,0.14);
+  border-radius:1px;
+}
+.pixel-field span.lit{
+  background:var(--pixel-cyan);
+  animation:pulse 3.2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ opacity:.25; }
+  50%{ opacity:.9; }
+}
+
+/* ---------- Header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:100;
+  background:rgba(10,10,10,0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--slate-line);
+}
+.site-header .container{
+  display:flex; align-items:center; justify-content:space-between;
+  height:76px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+}
+.logo-img{ height:44px; width:auto; display:block; }
+.footer-brand .logo-img{ height:38px; }
+
+.nav-desktop{ display:flex; align-items:center; gap:34px; }
+.nav-desktop a{
+  color:var(--slate-ink); font-weight:600; font-size:0.95rem;
+  transition:color .2s;
+}
+.nav-desktop a:hover{ color:var(--signal-blue); }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:8px; padding:12px 26px; border-radius:var(--radius-sm);
+  font-weight:700; font-size:0.95rem; cursor:pointer; border:none;
+  transition:transform .15s ease, box-shadow .15s ease, background .2s;
+}
+.btn-primary{
+  background:var(--signal-blue); color:#fff;
+  box-shadow:0 8px 20px -8px rgba(255,106,26,0.5);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 24px -8px rgba(255,106,26,0.6); }
+.btn-ghost{
+  background:transparent; color:var(--slate-ink); border:1px solid var(--slate-line);
+}
+.btn-ghost:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+.btn-dark{
+  background:var(--slate-ink); color:var(--signal-blue);
+}
+
+.nav-toggle{ display:none; background:none; border:none; color:var(--slate-ink); font-size:1.6rem; cursor:pointer; }
+
+@media (max-width:960px){
+  .nav-desktop{ display:none; }
+  .nav-toggle{ display:block; }
+}
+
+/* ---------- Header mascot (partially hidden behind button) ---------- */
+.hdr-mascot-wrap{ position:relative; }
+.hdr-mascot-clip{
+  position:absolute; top:100%; right:-10px; width:145px; height:131px;
+  overflow:hidden; pointer-events:none; z-index:5;
+}
+.hdr-mascot-img{ position:absolute; top:-95px; right:0; width:145px; display:block; will-change:transform; transform:translateY(-52px); animation:hdrPeek 15s ease-in-out infinite; transition:transform .45s cubic-bezier(.34,1.56,.64,1); }
+.hdr-mascot-wrap:hover .hdr-mascot-img{ animation:none; transform:translateY(6px) rotate(-2deg); }
+@keyframes hdrPeek{
+  0%, 86%   { transform:translateY(-52px) rotate(0deg); }
+  90%       { transform:translateY(6px) rotate(-3deg); }
+  93%       { transform:translateY(-2px) rotate(1deg); }
+  96%       { transform:translateY(3px) rotate(-1deg); }
+  100%      { transform:translateY(-52px) rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .hdr-mascot-img{ transform:translateY(4px); }
+}
+@media (max-width:640px){
+  .hdr-mascot-clip{ width:98px; height:89px; right:-6px; }
+  .hdr-mascot-img{ width:98px; top:-64px; }
+}
+
+/* ---------- Hero ---------- */
+.hero{
+  position:relative;
+  background:radial-gradient(ellipse 80% 60% at 30% -10%, rgba(255,106,26,0.14), transparent 60%), var(--void-navy);
+  color:var(--slate-ink);
+  overflow:hidden;
+  padding:96px 0 110px;
+  border-bottom:1px solid var(--slate-line);
+}
+.hero .container{ position:relative; z-index:2; }
+.eyebrow{
+  font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.16em;
+  color:var(--signal-blue-dim); text-transform:uppercase; margin-bottom:18px;
+  display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{ content:''; width:22px; height:2px; background:var(--signal-blue); }
+.hero h1{
+  font-size:clamp(2.2rem,4.6vw,3.6rem); font-weight:800; max-width:820px;
+  margin-bottom:22px;
+}
+.hero h1 span{ color:var(--signal-blue); }
+.hero p.lead{
+  font-size:1.15rem; color:var(--slate-mid); max-width:600px; margin-bottom:38px;
+}
+.hero-actions{ display:flex; gap:16px; flex-wrap:wrap; }
+
+.hero-stats{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--slate-line);
+  margin-top:70px; border-radius:var(--radius-md); overflow:hidden;
+  border:1px solid var(--slate-line);
+}
+.hero-stats div{ background:var(--navy-raised); padding:22px 20px; }
+.hero-stats b{ font-family:var(--font-mono); font-size:1.6rem; color:var(--signal-blue); display:block; }
+.hero-stats span{ font-size:0.85rem; color:var(--slate-mid); }
+
+@media (max-width:760px){
+  .hero-stats{ grid-template-columns:repeat(2,1fr); }
+}
+
+/* ---------- Sections ---------- */
+section{ padding:96px 0; }
+.section-head{ max-width:640px; margin-bottom:56px; }
+.section-head .eyebrow{ color:var(--signal-blue); }
+.section-head h2{ font-size:clamp(1.8rem,3vw,2.6rem); color:var(--slate-ink); margin-bottom:14px; }
+.section-head p{ color:var(--slate-mid); font-size:1.05rem; }
+
+/* ---------- Scroll-triggered heading underline marker ---------- */
+.section-head h2, .page-hero h1, .hero h1{
+  position:relative; display:inline-block; padding-bottom:16px;
+}
+.section-head h2::after, .page-hero h1::after, .hero h1::after{
+  content:''; position:absolute; bottom:0; right:0; height:3px; width:0;
+  background:linear-gradient(90deg, var(--signal-blue), var(--amber));
+  border-radius:2px;
+  transition:width 1s cubic-bezier(.16,1,.3,1);
+}
+.section-head h2.underline-in::after, .page-hero h1.underline-in::after, .hero h1.underline-in::after{
+  width:72px;
+}
+@media (prefers-reduced-motion: reduce){
+  .section-head h2::after, .page-hero h1::after, .hero h1::after{ transition:none; width:72px; }
+}
+.section-alt{ background:var(--navy-raised); }
+.section-dark{ background:var(--void-navy); color:var(--slate-ink); }
+.section-dark .section-head h2{ color:var(--slate-ink); }
+.section-dark .section-head p{ color:var(--slate-mid); }
+
+/* ---------- Card grids ---------- */
+.grid{ display:grid; gap:24px; }
+.grid-3{ grid-template-columns:repeat(3,1fr); }
+.grid-4{ grid-template-columns:repeat(4,1fr); }
+@media (max-width:960px){ .grid-3,.grid-4{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px){ .grid-3,.grid-4{ grid-template-columns:1fr; } }
+
+.card{
+  background:var(--navy-raised); border:1px solid var(--slate-line); border-radius:var(--radius-md);
+  padding:30px; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.card:hover{ transform:translateY(-6px); box-shadow:0 24px 44px -24px rgba(0,0,0,0.5); border-color:var(--signal-blue); }
+.card .num{ font-family:var(--font-mono); color:var(--signal-blue); font-size:0.8rem; margin-bottom:14px; display:block; transition:transform .3s ease; }
+.card:hover .num{ transform:scale(1.15) translateY(-2px); }
+.card h3{ font-size:1.2rem; margin-bottom:10px; }
+.card p{ color:var(--slate-mid); font-size:0.95rem; }
+.card a.more{ display:inline-block; margin-top:16px; font-weight:700; color:var(--signal-blue); font-size:0.9rem; transition:transform .25s ease; }
+.card:hover a.more{ transform:translateX(-6px); }
+
+.card-dark{
+  background:var(--navy-raised); border:1px solid var(--signal-blue); color:var(--slate-ink);
+  transition:box-shadow .25s ease;
+}
+.card-dark:hover{ box-shadow:0 0 0 3px rgba(255,106,26,0.14); }
+.card-dark h3{ color:var(--slate-ink); }
+.card-dark p{ color:var(--slate-mid); }
+
+/* ---------- Scroll reveal ---------- */
+[data-reveal]{
+  opacity:0; transform:translateY(26px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+[data-reveal].revealed{ opacity:1; transform:translateY(0); }
+@media (prefers-reduced-motion: reduce){
+  [data-reveal]{ opacity:1; transform:none; transition:none; }
+}
+
+/* ---------- Spec table ---------- */
+.spec-table{ width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:0.88rem; }
+.spec-table th,.spec-table td{ padding:12px 14px; text-align:right; border-bottom:1px solid var(--slate-line); }
+.spec-table th{ color:var(--slate-mid); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+/* ---------- CTA band ---------- */
+.cta-band{
+  background:linear-gradient(120deg,var(--signal-blue),var(--signal-blue-dim));
+  color:#fff; border-radius:var(--radius-md); padding:56px; position:relative;
+  display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+}
+.cta-band h3{ font-size:1.7rem; margin-bottom:8px; }
+.cta-band p{ color:rgba(255,255,255,0.8); }
+.cta-mascot-wrap{ position:relative; display:inline-block; }
+.cta-mascot{
+  position:absolute; bottom:-6px; right:calc(100% - 24px);
+  width:150px; pointer-events:none; z-index:2;
+  filter:drop-shadow(0 12px 18px rgba(0,0,0,0.35));
+}
+@media (max-width:760px){
+  .cta-mascot{ width:110px; right:calc(100% - 16px); }
+}
+@media (max-width:640px){
+  .cta-mascot{ display:none; }
+}
+
+/* ---------- Form ---------- */
+.form-wrap{ background:var(--navy-raised); border:1px solid var(--slate-line); border-radius:var(--radius-md); padding:40px; }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+@media (max-width:640px){ .form-row{ grid-template-columns:1fr; } }
+label{ display:block; font-size:0.85rem; font-weight:700; margin-bottom:6px; color:var(--slate-ink); }
+input,select,textarea{
+  width:100%; padding:12px 14px; border:1px solid var(--slate-line); border-radius:var(--radius-sm);
+  font-family:var(--font-body); font-size:0.95rem; background:var(--void-navy); color:var(--slate-ink);
+}
+input:focus,select:focus,textarea:focus{ outline:2px solid var(--signal-blue); outline-offset:1px; border-color:var(--signal-blue); }
+.chip-group{ display:flex; gap:10px; flex-wrap:wrap; }
+.chip{
+  padding:8px 16px; border:1px solid var(--slate-line); border-radius:99px; font-size:0.85rem; cursor:pointer;
+  transition:all .15s;
+}
+.chip:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+
+/* ---------- Footer ---------- */
+footer{ background:var(--navy-raised); color:var(--slate-mid); padding:70px 0 30px; border-top:1px solid var(--slate-line); }
+.footer-grid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:50px; }
+@media (max-width:800px){ .footer-grid{ grid-template-columns:1fr 1fr; } }
+footer h4{ color:var(--slate-ink); font-size:0.9rem; margin-bottom:16px; font-family:var(--font-display); }
+footer li{ margin-bottom:10px; font-size:0.9rem; }
+footer li a:hover{ color:var(--signal-blue); }
+.footer-bottom{
+  border-top:1px solid var(--slate-line); padding-top:24px;
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:0.82rem;
+}
+.footer-brand{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+
+/* ---------- Breadcrumb / page hero (inner pages) ---------- */
+.page-hero{
+  background:radial-gradient(ellipse 80% 60% at 30% -10%, rgba(255,106,26,0.14), transparent 60%), var(--void-navy); color:var(--slate-ink); padding:64px 0; position:relative; overflow:hidden;
+  border-bottom:1px solid var(--slate-line);
+}
+.page-hero h1{ font-size:clamp(1.9rem,3.6vw,2.8rem); }
+.page-hero .eyebrow{ color:var(--signal-blue-dim); }
+.page-hero p{ color:var(--slate-mid); max-width:560px; margin-top:14px; }
+
+/* ---------- Mobile nav drawer ---------- */
+.mobile-nav{
+  position:fixed; inset:0; background:var(--warm-white); z-index:200;
+  display:flex; flex-direction:column; padding:28px; transform:translateX(100%);
+  transition:transform .25s ease; overflow-y:auto; border-left:1px solid var(--slate-line);
+}
+.mobile-nav.open{ transform:translateX(0); }
+.mobile-nav a{ color:var(--slate-ink); font-size:1.2rem; padding:14px 0; border-bottom:1px solid var(--slate-line); font-weight:600; }
+.mobile-nav .close-btn{ align-self:flex-start; background:none; border:none; color:var(--slate-ink); font-size:1.8rem; margin-bottom:20px; cursor:pointer; }
+
+.badge{
+  display:inline-flex; align-items:center; gap:6px; background:rgba(255,169,77,0.14);
+  color:var(--pixel-cyan); font-size:0.78rem; font-weight:700; padding:6px 12px; border-radius:99px;
+  margin-bottom:16px; font-family:var(--font-mono);
+}
+
+.whatsapp-float{
+  position:fixed; bottom:24px; right:24px; z-index:999;
+  width:58px; height:58px; border-radius:50%;
+  background:#25D366; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 20px rgba(0,0,0,0.28);
+  transition:transform .2s ease;
+}
+.whatsapp-float:hover{ transform:scale(1.08); }
+.whatsapp-float svg{ width:30px; height:30px; fill:#fff; }
+@media (max-width:640px){
+  .whatsapp-float{ width:52px; height:52px; bottom:18px; right:18px; }
+  .whatsapp-float svg{ width:26px; height:26px; }
+}
+
+/* ---------- Mobile polish (global) ---------- */
+@media (max-width:640px){
+  section{ padding:56px 0; }
+  .hero{ padding:52px 0 60px; }
+  .page-hero{ padding:40px 0; }
+  .cta-band{ padding:32px 22px; text-align:center; justify-content:center; }
+  .cta-band > a{ width:100%; }
+  .section-head{ margin-bottom:36px; }
+  .card{ padding:22px; }
+  .btn{ padding:12px 20px; font-size:0.9rem; }
+  .hero-actions{ flex-direction:column; align-items:stretch; }
+  .hero-actions .btn{ width:100%; }
+  table.spec-table{ font-size:0.78rem; }
+  .spec-table th, .spec-table td{ padding:9px 8px; white-space:nowrap; }
+}
+@media (max-width:400px){
+  .footer-grid{ grid-template-columns:1fr !important; }
+}
+</style>
+</head>
+<body>
+<div id="scrollProgress"></div>
+<div id="preloader"><img src="assets/images/logo.png" alt="MLS ישראל"><div class="pre-bar"><i></i></div></div>
+<style>
+/* ===== finish & mobile enhancements ===== */
+#preloader{ position:fixed; inset:0; z-index:2000; background:var(--void-navy); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; transition:opacity .5s ease, visibility .5s; }
+#preloader.hide{ opacity:0; visibility:hidden; }
+#preloader img{ height:52px; width:auto; animation:preFloat 1.4s ease-in-out infinite; }
+@keyframes preFloat{ 0%,100%{ transform:translateY(0); opacity:.85; } 50%{ transform:translateY(-8px); opacity:1; } }
+#preloader .pre-bar{ width:120px; height:3px; border-radius:2px; background:var(--slate-line); overflow:hidden; }
+#preloader .pre-bar i{ display:block; height:100%; width:40%; background:linear-gradient(90deg,var(--signal-blue),var(--amber)); animation:preSlide 1s ease-in-out infinite; }
+@keyframes preSlide{ 0%{ transform:translateX(120%);} 100%{ transform:translateX(-320%);} }
+#scrollProgress{ position:fixed; top:0; right:0; height:3px; width:0; z-index:200; background:linear-gradient(90deg,var(--signal-blue),var(--amber)); box-shadow:0 0 8px rgba(255,106,26,0.5); transition:width .1s linear; }
+#backToTop{ position:fixed; bottom:150px; right:24px; z-index:997; width:46px; height:46px; border-radius:50%; border:1px solid var(--slate-line); background:rgba(24,24,24,0.9); color:var(--slate-ink); font-size:1.2rem; cursor:pointer; opacity:0; transform:translateY(12px); pointer-events:none; transition:all .25s ease; backdrop-filter:blur(6px); }
+#backToTop.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+#backToTop:hover{ border-color:var(--signal-blue); color:var(--signal-blue); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .btn:focus-visible, .type-chip:focus-visible { outline:2px solid var(--signal-blue); outline-offset:2px; border-radius:4px; }
+.btn{ position:relative; overflow:hidden; }
+.btn .ripple{ position:absolute; border-radius:50%; transform:scale(0); background:rgba(255,255,255,0.35); animation:rip .6s ease-out; pointer-events:none; }
+@keyframes rip{ to{ transform:scale(2.4); opacity:0; } }
+body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); mix-blend-mode:overlay; }
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background:var(--void-navy); }
+::-webkit-scrollbar-thumb{ background:var(--slate-line); border-radius:6px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--signal-blue); }
+#mobileCta{ position:fixed; bottom:0; right:0; left:0; z-index:996; display:none; gap:10px; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(10,10,10,0.94); backdrop-filter:blur(10px); border-top:1px solid var(--slate-line); }
+#mobileCta a{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 12px; border-radius:var(--radius-sm); font-weight:700; font-size:0.95rem; }
+#mobileCta .mc-quote{ background:var(--signal-blue); color:#fff; }
+#mobileCta .mc-wa{ background:#25D366; color:#fff; }
+#mobileCta svg{ width:20px; height:20px; fill:#fff; }
+@media (max-width:768px){
+  #mobileCta{ display:flex; }
+  .whatsapp-float{ bottom:88px !important; }
+  .instagram-float{ bottom:150px !important; }
+  #backToTop{ bottom:212px; right:14px; }
+  body{ padding-bottom:66px; }
+}
+@keyframes ctaShake{ 0%,100%{ transform:rotate(0) scale(1); } 15%{ transform:rotate(-3deg) scale(1.04); } 35%{ transform:rotate(3deg) scale(1.04); } 55%{ transform:rotate(-2deg) scale(1.03); } 75%{ transform:rotate(1.5deg) scale(1.02); } }
+@keyframes ctaIdleDance{ 0%,78%,100%{ transform:rotate(0) scale(1); } 82%{ transform:rotate(-3deg) scale(1.04); } 86%{ transform:rotate(3deg) scale(1.04); } 90%{ transform:rotate(-2deg) scale(1.03); } 94%{ transform:rotate(1.5deg) scale(1.02); } 98%{ transform:rotate(0.5deg) scale(1.01); } }
+@media (hover:none){
+  .btn-primary, .whatsapp-float, #mobileCta .mc-quote{ animation:ctaIdleDance 4.5s ease-in-out infinite; }
+}
+@media (hover:hover){
+  .btn-primary:hover{ animation:ctaShake 0.6s ease-in-out; }
+  .whatsapp-float:hover{ animation:ctaShake 0.6s ease-in-out; }
+}
+@media (prefers-reduced-motion: reduce){
+  #preloader img, #preloader .pre-bar i, .btn .ripple, .btn-primary, .whatsapp-float, #mobileCta .mc-quote{ animation:none !important; }
+  body::after{ display:none; }
+}
+</style>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <img src="assets/images/logo.png" alt="MLS ישראל" class="logo-img">
+    </a>
+    <nav class="nav-desktop">
+      <a href="solutions.html">פתרונות</a>
+      <a href="products.html">מוצרים</a>
+      <a href="place.html">נסה למקם</a>
+      <a href="about.html">אודות</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="hdr-mascot-wrap">
+        <a href="contact.html" class="btn btn-primary desktop-cta">קבלו הצעת מחיר</a>
+        <div class="hdr-mascot-clip">
+          <img src="assets/images/mascot-hang.png" alt="" class="hdr-mascot-img" aria-hidden="true">
+        </div>
+      </div>
+      <button class="nav-toggle" aria-label="פתח תפריט">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav">
+  <button class="close-btn" aria-label="סגור תפריט">×</button>
+  <a href="solutions.html">פתרונות</a>
+  <a href="products.html">מוצרים</a>
+  <a href="place.html">נסה למקם</a>
+  <a href="about.html">אודות</a>
+  <a href="contact.html">צור קשר</a>
+</div>
+
+<section data-reveal>
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">MLS ישראל · קטלוג מוצרים</div>
+      <h1>ארבעה קווי מוצר, פתרון לכל קיר</h1>
+      <p>מסך פוסטר נייד, מסכי חוץ ושלטי חוצות, מסכי פנים ומסך וילון שקוף — כל אחד עם המפרט, השימוש והיתרונות שלו.</p>
+    </div>
+    <div class="product-grid">
+
+      <article class="product-card" id="poster" data-reveal>
+        <div class="product-card-img">
+          <img src="assets/images/products/product-poster.jpg" alt="מסך פוסטר נייד על עמדת גלגלים" loading="lazy">
+          <span class="product-card-badge">נייד</span>
+        </div>
+        <div class="product-card-body">
+          <h3>מסך פוסטר</h3>
+          <p>מסך נייד על עמדת גלגלים — נכנס לכל חלל ומזיז בקלות. אידיאלי לחלונות ראווה, לובי ותצוגות זמניות.</p>
+          <div class="spec-chips">
+            <span>P1.25–P2.5</span>
+            <span>400–800 nit</span>
+            <span>IP30</span>
+          </div>
+          <a href="contact.html" class="more">בקשו הצעת מחיר ←</a>
+        </div>
+      </article>
+
+      <article class="product-card" id="outdoor" data-reveal>
+        <div class="product-card-img">
+          <img src="assets/images/products/product-outdoor.jpg" alt="מסכי חוץ ושלטי חוצות" loading="lazy">
+          <span class="product-card-badge">עמיד לחוץ</span>
+        </div>
+        <div class="product-card-body">
+          <h3>מסכי חוץ ושלטי חוצות</h3>
+          <p>עמידים במים ובשמש, בהירים גם באור יום מלא. לשילוט חוצות, גגות, קירות חוץ וצמתים מרכזיים.</p>
+          <div class="spec-chips">
+            <span>P2–P10</span>
+            <span>4,500–6,500 cd/m²</span>
+            <span>IP65</span>
+          </div>
+          <a href="contact.html" class="more">בקשו הצעת מחיר ←</a>
+        </div>
+      </article>
+
+      <article class="product-card" id="indoor" data-reveal>
+        <div class="product-card-img">
+          <img src="assets/images/products/product-indoor.jpg" alt="מסך פנים לאולמות ומשרדים" loading="lazy">
+          <span class="product-card-badge">פיץ' עדין</span>
+        </div>
+        <div class="product-card-body">
+          <h3>מסכי פנים</h3>
+          <p>שטוחים, דקים וחדים לצפייה מקרוב. לאולמות, משרדים, כניסות ומרכזי מבקרים.</p>
+          <div class="spec-chips">
+            <span>P1.25–P3.07</span>
+            <span>400–800 cd/m²</span>
+            <span>IP30</span>
+          </div>
+          <a href="contact.html" class="more">בקשו הצעת מחיר ←</a>
+        </div>
+      </article>
+
+      <article class="product-card" id="curtain" data-reveal>
+        <div class="product-card-img">
+          <img src="assets/images/products/product-curtain.jpg" alt="מסך וילון שקוף על זכוכית" loading="lazy">
+          <span class="product-card-badge">שקוף</span>
+        </div>
+        <div class="product-card-body">
+          <h3>מסך וילון</h3>
+          <p>מסך שקוף שיושב ישירות על הזכוכית במקום פוסטר מודבק — שומר על המבט החוצה ועל האור הטבעי.</p>
+          <div class="spec-chips">
+            <span>שקיפות גבוהה</span>
+            <span>על זכוכית</span>
+            <span>לפי בקשה</span>
+          </div>
+          <a href="contact.html" class="more">בקשו הצעת מחיר ←</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .product-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:24px;
+  }
+  .product-card{
+    scroll-margin-top:96px;
+    display:flex; flex-direction:column;
+    background:var(--navy-raised); border:1px solid var(--slate-line);
+    border-radius:var(--radius-md); overflow:hidden;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .product-card:hover{
+    transform:translateY(-6px); box-shadow:0 24px 44px -24px rgba(0,0,0,0.5);
+    border-color:var(--signal-blue);
+  }
+  .product-card-img{ position:relative; aspect-ratio:1/1; overflow:hidden; }
+  .product-card-img img{ width:100%; height:100%; object-fit:cover; transition:transform .45s ease; }
+  .product-card:hover .product-card-img img{ transform:scale(1.06); }
+  .product-card-badge{
+    position:absolute; top:12px; right:12px;
+    font-family:var(--font-mono); font-size:0.72rem; font-weight:700;
+    color:#fff; background:rgba(10,10,10,0.7); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:6px 12px; border-radius:99px;
+  }
+  .product-card-body{ padding:22px 22px 24px; display:flex; flex-direction:column; flex:1; }
+  .product-card-body h3{ font-size:1.15rem; margin-bottom:8px; }
+  .product-card-body p{ color:var(--slate-mid); font-size:0.92rem; line-height:1.6; margin-bottom:16px; }
+  .spec-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .spec-chips span{
+    font-family:var(--font-mono); font-size:0.72rem; font-weight:600; color:var(--pixel-cyan);
+    background:rgba(255,169,77,0.12); border:1px solid rgba(255,169,77,0.25);
+    padding:5px 10px; border-radius:99px;
+  }
+  .product-card .more{
+    margin-top:auto; font-weight:700; color:var(--signal-blue); font-size:0.9rem;
+    transition:transform .25s ease;
+  }
+  .product-card:hover .more{ transform:translateX(-6px); }
+  @media (max-width:960px){ .product-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .product-grid{ grid-template-columns:1fr; } }
+</style>
+
+<section class="section-alt" data-reveal>
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">מקרוב</div>
+      <h2>כך זה נראה בפועל</h2>
+      <p>חזית וגב הקבינט — בדיוק מה שמתקינים אצלכם.</p>
+    </div>
+    <div class="product-gallery">
+      <div class="gallery-tile" data-reveal>
+        <img src="assets/images/gallery/gallery-cabinet-dark.png" alt="קבינט LED סטנדרטי — חזית וגב" loading="lazy">
+        <span class="gallery-tag">קבינט סטנדרטי</span>
+      </div>
+      <div class="gallery-tile" data-reveal>
+        <img src="assets/images/gallery/gallery-rental-dark.png" alt="קבינט השכרה לחוץ ולאירועים" loading="lazy">
+        <span class="gallery-tag">קבינט חוץ / אירועים</span>
+      </div>
+      <div class="gallery-tile" data-reveal>
+        <img src="assets/images/gallery/gallery-finepitch-dark.png" alt="מסך פנים ברזולוציה עדינה — חזית וגב" loading="lazy">
+        <span class="gallery-tag">פיץ' עדין לפנים</span>
+      </div>
+      <div class="gallery-tile" data-reveal>
+        <img src="assets/images/gallery/gallery-indoor-dark.png" alt="מסך פנים — חזית וגב" loading="lazy">
+        <span class="gallery-tag">מסך פנים</span>
+      </div>
+      <div class="gallery-tile" data-reveal>
+        <img src="assets/images/gallery/gallery-poster-dark.png" alt="מסך פוסטר על עמדת גלגלים" loading="lazy">
+        <span class="gallery-tag">מסך פוסטר נייד</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .product-gallery{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:24px;
+  }
+  .gallery-tile{
+    position:relative; border-radius:var(--radius-md); overflow:hidden;
+    border:1px solid var(--slate-line); background:var(--navy-raised); aspect-ratio:5/4;
+  }
+  .gallery-tile img{ width:100%; height:100%; object-fit:contain; padding:16px; display:block; transition:transform .45s ease; }
+  .gallery-tile:hover img{ transform:scale(1.05); }
+  .gallery-tag{
+    position:absolute; bottom:12px; right:12px; left:12px;
+    background:rgba(10,10,10,0.75); backdrop-filter:blur(6px);
+    color:#fff; font-size:0.85rem; font-weight:600;
+    padding:9px 14px; border-radius:99px; text-align:center;
+  }
+  @media (max-width:960px){ .product-gallery{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .product-gallery{ grid-template-columns:1fr; } }
+</style>
+
+<section data-reveal>
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">טבלת השוואה</div>
+      <h2>פרמטרים עיקריים לפי קטגוריה</h2>
+      <p>נתונים מבוססים על גיליונות המפרט הרשמיים שלנו. המפרט הסופי משתנה לפי דגם ופרויקט — ערכים סופיים מאושרים מולנו לפני הזמנה.</p>
+    </div>
+
+    <div style="overflow-x:auto; border:1px solid var(--slate-line); border-radius:var(--radius-md);">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>קטגוריה</th>
+            <th><a class="term-link" href="#faq-pitch">טווח פיץ' פיקסלים</a></th>
+            <th><a class="term-link" href="#faq-nit">בהירות</a></th>
+            <th><a class="term-link" href="#faq-ip">דירוג עמידות</a></th>
+            <th><a class="term-link" href="#faq-refresh">קצב רענון</a></th>
+            <th>שימוש טיפוסי</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>מסכי פוסטר</td><td>P1.25 – P2.5</td><td>400–800 nit</td><td>IP30</td><td>3840–7680Hz</td><td>חלונות ראווה, לובי</td></tr>
+          <tr><td>מסכי חוץ (רגיל ופרימיום)</td><td>P2 – P10</td><td>4500–6500 cd/m²</td><td>IP65</td><td>3840Hz</td><td>שילוט חוצות ופרסום</td></tr>
+          <tr><td>מסכי פנים</td><td>P1.25 – P3.07</td><td>400–800 cd/m²</td><td>IP30</td><td>3840–7680Hz</td><td>אולמות, משרדים</td></tr>
+          <tr><td>מסך וילון</td><td>לפי בקשה</td><td>לפי בקשה</td><td>לפי בקשה</td><td>לפי בקשה</td><td>חלונות ראווה, זכוכית</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<section class="section-alt" data-reveal>
+  <div class="container" style="max-width:760px;">
+    <div class="section-head">
+      <div class="eyebrow">שאלות נפוצות</div>
+      <h2>מה כל נתון בטבלה אומר</h2>
+      <p>כדי שתרגישו בנוח לקרוא את המפרט הטכני, בלי הפתעות.</p>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item" id="faq-pitch" data-reveal open>
+        <summary>מה זה פיץ' פיקסלים (Pixel Pitch)?</summary>
+        <p>המרחק במילימטרים בין מרכז פיקסל אחד למרכז הפיקסל הסמוך לו. ככל שהמספר קטן יותר, הרזולוציה גבוהה יותר וניתן לצפות מקרוב בלי לראות "גרעיניות". מסכי פנים לצפייה מקרוב משתמשים בפיץ' קטן (למשל P1.25), בעוד מסכי חוץ שנצפים ממרחק רב יכולים להשתמש בפיץ' גדול יותר (למשל P10) בלי לפגוע באיכות הנתפסת — וזה גם חוסך בעלות.</p>
+      </details>
+      <details class="faq-item" id="faq-nit" data-reveal>
+        <summary>מה ההבדל בין nit ל-cd/m²?</summary>
+        <p>שני שמות לאותה יחידת מדידה של בהירות — אין הבדל. ככל שהערך גבוה יותר, המסך "חזק" יותר ונראה בבירור גם בתאורה חזקה. 400–800 nit מספיקים למסך פנים בחלל מבוקר תאורה, ואילו מסך חוץ שנחשף לשמש ישירה זקוק ל-4,500–6,500 cd/m² כדי להתגבר על אור היום.</p>
+      </details>
+      <details class="faq-item" id="faq-ip" data-reveal>
+        <summary>מה זה דירוג העמידות IP?</summary>
+        <p>תקן בינלאומי לעמידות בפני חדירת מוצקים ונוזלים, בפורמט IPXY. הספרה הראשונה (X) מתארת הגנה מפני אבק ומוצקים (0 עד 6), והשנייה (Y) הגנה מפני מים (0 עד 8). לדוגמה IP30 מספק הגנה בסיסית בלבד וללא הגנה ממים — מתאים רק לשימוש פנימי. IP65 אטום לחלוטין לאבק ועמיד בסילוני מים מכל כיוון — בדיוק מה שנדרש למסך חוץ שחשוף לגשם.</p>
+      </details>
+      <details class="faq-item" id="faq-refresh" data-reveal>
+        <summary>למה קצב הרענון (Refresh Rate) חשוב?</summary>
+        <p>כמה פעמים בשנייה המסך "מצייר" מחדש את התמונה, נמדד ב-Hz. קצב גבוה (כמו 3,840Hz) חשוב בעיקר כדי שהמסך ייראה חלק גם דרך עדשת מצלמה — בשידורים חיים, צילומי אירועים או תוכן לרשתות חברתיות. קצב נמוך מדי עלול לגרום לפסים או הבהוב בצילום, גם אם לעין האנושית המסך נראה תקין לגמרי.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-list{ display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+  .faq-item{
+    background:var(--navy-raised); border:1px solid var(--slate-line); border-radius:var(--radius-md);
+    padding:6px 22px;
+  }
+  .faq-item summary{
+    cursor:pointer; padding:16px 0; font-weight:700; font-size:1rem; color:var(--slate-ink);
+    list-style:none; display:flex; align-items:center; justify-content:space-between;
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{
+    content:'+'; font-size:1.4rem; color:var(--signal-blue); font-weight:400; margin-right:12px; flex-shrink:0;
+    transition:transform .2s ease;
+  }
+  .faq-item[open] summary::after{ content:'−'; }
+  .faq-item p{ color:var(--slate-mid); font-size:0.92rem; line-height:1.7; padding-bottom:18px; }
+
+  /* Clickable glossary terms in the spec table */
+  .spec-table .term-link{
+    color:var(--slate-ink); text-decoration:none;
+    border-bottom:1px dashed var(--signal-blue); padding-bottom:1px; cursor:help;
+    transition:color .18s;
+  }
+  .spec-table .term-link::after{
+    content:'?'; font-size:0.7em; font-weight:700; vertical-align:super;
+    color:var(--signal-blue); margin-right:2px;
+  }
+  .spec-table .term-link:hover{ color:var(--signal-blue); }
+  .faq-item.faq-flash{ animation:faqFlash 1.3s ease; }
+  @keyframes faqFlash{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,106,26,0); }
+    25%{ box-shadow:0 0 0 3px rgba(255,106,26,0.55); }
+  }
+</style>
+
+<script>
+(function(){
+  function openFaq(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.open = true;
+    el.classList.remove('faq-flash');
+    void el.offsetWidth; // restart animation
+    el.classList.add('faq-flash');
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+    setTimeout(function(){ el.classList.remove('faq-flash'); }, 1400);
+  }
+  document.querySelectorAll('.term-link').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      openFaq(a.getAttribute('href').slice(1));
+    });
+  });
+})();
+</script>
+
+<section data-reveal>
+  <div class="container" style="max-width:640px; text-align:center;">
+    <div class="card" data-reveal style="background:var(--navy-raised); border:1px solid var(--signal-blue);">
+      <h3 style="color:var(--slate-ink);">לא בטוחים מה מתאים לכם?</h3>
+      <p style="color:var(--slate-mid); margin-bottom:20px;">נשמח לעזור לבחור את הדגם והפיץ' הנכונים לפי גודל החלל, מרחק הצפייה והתקציב.</p>
+      <a href="contact.html" class="btn btn-primary">דברו איתנו</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h3>צריכים הצעת מחיר מדויקת?</h3>
+        <p>ספרו לנו על גודל הקיר ומרחק הצפייה — נחזור עם קונפיגורציה מותאמת.</p>
+      </div>
+      <div class="cta-mascot-wrap">
+        <img src="assets/images/mascot-lean.png" alt="" class="cta-mascot" aria-hidden="true">
+        <a href="contact.html" class="btn btn-dark">קבלו הצעת מחיר</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/images/logo.png" alt="MLS ישראל" class="logo-img">
+        </div>
+        <p style="max-width:320px; font-size:0.9rem;">מסכי LED מקצועיים מבית MLS ישראל — פתרונות תצוגה מתקדמים לשוק הישראלי.</p>
+      </div>
+      <div>
+        <h4>ניווט</h4>
+        <ul>
+          <li><a href="solutions.html">פתרונות</a></li>
+          <li><a href="products.html">מוצרים</a></li>
+          <li><a href="about.html">אודות</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>מוצרים</h4>
+        <ul>
+          <li><a href="products.html">מסכי פוסטר</a></li>
+          <li><a href="products.html">מסכי חוץ</a></li>
+          <li><a href="products.html">מסכי פנים</a></li>
+          <li><a href="products.html">מסך וילון</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>צור קשר</h4>
+        <ul>
+          <li><a href="contact.html">טופס יצירת קשר</a></li>
+          <li><a href="tel:+972585008500">058-500-8500</a></li>
+          <li><a href="mailto:info@led-mls.co.il">info@led-mls.co.il</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 MLS ישראל. כל הזכויות שמורות.</span>
+      <span>led-mls.co.il</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Pixel field generator — echoes the RGB pixel matrix of an actual LED wall
+document.querySelectorAll('.pixel-field').forEach(field=>{
+  const count = 260;
+  let html = '';
+  for(let i=0;i<count;i++){
+    const lit = Math.random() < 0.12;
+    html += `<span class="${lit ? 'lit':''}" style="animation-delay:${(Math.random()*3).toFixed(2)}s"></span>`;
+  }
+  field.innerHTML = html;
+});
+
+// Mobile nav
+const navToggle = document.querySelector('.nav-toggle');
+const mobileNav = document.querySelector('.mobile-nav');
+const closeBtn = document.querySelector('.close-btn');
+if(navToggle && mobileNav){
+  navToggle.addEventListener('click', ()=> mobileNav.classList.add('open'));
+  closeBtn.addEventListener('click', ()=> mobileNav.classList.remove('open'));
+  mobileNav.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> mobileNav.classList.remove('open')));
+}
+
+// Chip multi-select (visual only)
+document.querySelectorAll('.chip-group').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      chip.classList.toggle('active');
+      chip.style.background = chip.classList.contains('active') ? '#2450FF' : '';
+      chip.style.color = chip.classList.contains('active') ? '#fff' : '';
+      chip.style.borderColor = chip.classList.contains('active') ? '#2450FF' : '';
+    });
+  });
+});
+
+// Contact / quote forms — demo submit handler
+document.querySelectorAll('form[data-demo-form]').forEach(form=>{
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const original = btn.textContent;
+    btn.textContent = 'הפנייה נשלחה ✓';
+    btn.disabled = true;
+    setTimeout(()=>{ btn.textContent = original; btn.disabled = false; form.reset(); }, 2500);
+  });
+});
+
+</script>
+<a href="https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED" class="whatsapp-float" target="_blank" rel="noopener" aria-label="שלחו לנו הודעה בוואטסאפ">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16.001 3C9.107 3 3.5 8.607 3.5 15.5c0 2.32.63 4.494 1.73 6.362L3 29l7.32-2.19a12.44 12.44 0 0 0 5.68 1.39h.001c6.894 0 12.5-5.607 12.5-12.5S22.895 3 16.001 3zm0 22.75h-.001a10.2 10.2 0 0 1-5.2-1.424l-.373-.222-3.86 1.155 1.176-3.76-.243-.386A10.19 10.19 0 0 1 5.75 15.5c0-5.652 4.599-10.25 10.251-10.25 5.652 0 10.25 4.598 10.25 10.25 0 5.653-4.598 10.25-10.25 10.25zm5.62-7.68c-.308-.154-1.82-.898-2.102-1.001-.282-.103-.487-.154-.692.154-.205.308-.795 1.001-.975 1.206-.18.205-.36.231-.667.077-.308-.154-1.3-.479-2.477-1.528-.916-.817-1.534-1.826-1.714-2.134-.18-.308-.019-.475.135-.628.139-.138.308-.36.462-.54.154-.18.205-.308.308-.513.103-.205.051-.385-.026-.539-.077-.154-.692-1.668-.949-2.284-.25-.6-.504-.519-.692-.529-.18-.008-.385-.01-.59-.01-.205 0-.539.077-.821.385-.282.308-1.077 1.052-1.077 2.566s1.103 2.977 1.257 3.182c.154.205 2.171 3.316 5.26 4.65.735.317 1.309.507 1.756.649.738.235 1.41.202 1.94.122.592-.088 1.82-.744 2.077-1.463.257-.719.257-1.335.18-1.463-.077-.129-.282-.205-.59-.36z"/></svg>
+</a>
+
+<a href="https://www.instagram.com/mls_israel" class="instagram-float" target="_blank" rel="noopener" aria-label="עקבו אחרינו באינסטגרם">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2Zm0 1.62c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.19.4-.55.22-.94.47-1.35.88-.41.41-.66.8-.88 1.35-.16.42-.35 1.04-.4 2.19-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.19.22.55.47.94.88 1.35.41.41.8.66 1.35.88.42.16 1.04.35 2.19.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.19-.4.55-.22.94-.47 1.35-.88.41-.41.66-.8.88-1.35.16-.42.35-1.04.4-2.19.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.19a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.42-.16-1.04-.35-2.19-.4-1.24-.06-1.61-.07-4.75-.07Zm0 2.76a5.42 5.42 0 1 1 0 10.84 5.42 5.42 0 0 1 0-10.84Zm0 1.62a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Zm5.6-2.9a1.27 1.27 0 1 1 0 2.53 1.27 1.27 0 0 1 0-2.53Z"/></svg>
+</a>
+
+<style>
+  .instagram-float{
+    position:fixed; bottom:92px; right:24px; z-index:999;
+    width:58px; height:58px; border-radius:50%;
+    background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.28); transition:transform .2s ease;
+  }
+  .instagram-float:hover{ transform:scale(1.08); }
+  .instagram-float svg{ width:30px; height:30px; fill:#fff; }
+  @media (max-width:640px){
+    .whatsapp-float{ right:10px; bottom:12px; width:48px; height:48px; }
+    .whatsapp-float svg{ width:24px; height:24px; }
+    .instagram-float{ right:10px; bottom:68px; width:48px; height:48px; }
+    .instagram-float svg{ width:24px; height:24px; }
+  }
+</style>
+
+<div class="mascot-popup" id="mascotPopup" role="button" tabindex="0" aria-label="דברו איתנו בוואטסאפ">
+  <img src="assets/images/mascot.png" alt="מוזמנים לדבר איתנו גם בוואטסאפ">
+</div>
+
+<style>
+  .mascot-popup{
+    position:fixed; bottom:92px; right:14px; z-index:998;
+    width:200px; pointer-events:none;
+    opacity:0; transform:translateY(30px) scale(0.85);
+    transition:opacity .5s cubic-bezier(.34,1.56,.64,1), transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mascot-popup img{ width:100%; display:block; filter:drop-shadow(0 10px 22px rgba(0,0,0,0.4)); }
+  .mascot-popup.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; cursor:pointer; }
+  @media (max-width:640px){
+    .mascot-popup{ width:150px; bottom:80px; right:10px; }
+  }
+</style>
+
+<script>
+(function(){
+  var popup = document.getElementById('mascotPopup');
+  if (!popup) return;
+  var waLink = 'https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED';
+  function openWA(){ window.open(waLink, '_blank', 'noopener'); }
+  popup.addEventListener('click', openWA);
+  popup.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') openWA(); });
+
+  function cycle(){
+    popup.classList.add('show');
+    setTimeout(function(){ popup.classList.remove('show'); }, 5000);
+  }
+  setTimeout(function(){
+    cycle();
+    setInterval(cycle, 20000);
+  }, 4000);
+})();
+</script>
+
+
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  if (revealEls.length) {
+    var groups = new Map();
+    revealEls.forEach(function(el){
+      var parent = el.parentElement;
+      if (!groups.has(parent)) groups.set(parent, []);
+      groups.get(parent).push(el);
+    });
+    groups.forEach(function(list){
+      list.forEach(function(el, i){ el.style.transitionDelay = (i * 0.08) + 's'; });
+    });
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      revealEls.forEach(function(el){ io.observe(el); });
+    } else {
+      revealEls.forEach(function(el){ el.classList.add('revealed'); });
+    }
+  }
+
+  var statEls = document.querySelectorAll('.hero-stats b');
+  if (statEls.length && 'IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        io2.unobserve(entry.target);
+        var el = entry.target;
+        var raw = el.textContent.trim();
+        var match = raw.match(/^(\d+)(.*)$/);
+        if (match) {
+          var target = parseInt(match[1], 10);
+          var suffix = match[2];
+          var dur = 1200;
+          var start = performance.now();
+          function tick(now){
+            var p = Math.min(1, (now - start) / dur);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased) + suffix;
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        } else {
+          el.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1), opacity .5s';
+          el.style.opacity = '0';
+          el.style.transform = 'scale(0.5)';
+          requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+              el.style.opacity = '1';
+              el.style.transform = 'scale(1)';
+            });
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    statEls.forEach(function(el){ io2.observe(el); });
+  }
+
+  var headings = document.querySelectorAll('.section-head h2, .page-hero h1, .hero h1');
+  if (headings.length && 'IntersectionObserver' in window) {
+    var io3 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('underline-in');
+          io3.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    headings.forEach(function(h){ io3.observe(h); });
+  } else {
+    headings.forEach(function(h){ h.classList.add('underline-in'); });
+  }
+})();
+</script>
+
+<button id="backToTop" aria-label="חזרה למעלה">↑</button>
+<div id="mobileCta">
+  <a href="contact.html" class="mc-quote">קבלו הצעת מחיר</a>
+  <a href="https://wa.me/972585008500?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93%20%D7%A2%D7%9C%20%D7%9E%D7%A1%D7%9B%D7%99%20LED" class="mc-wa" target="_blank" rel="noopener"><svg viewBox="0 0 32 32"><path d="M16 3C9.1 3 3.5 8.6 3.5 15.5c0 2.3.6 4.5 1.7 6.4L3 29l7.3-2.2c1.8 1 3.7 1.4 5.7 1.4 6.9 0 12.5-5.6 12.5-12.5S22.9 3 16 3zm5.6 15.1c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.2c-.2.2-.4.2-.7.1s-1.3-.5-2.5-1.5c-.9-.8-1.5-1.8-1.7-2.1s0-.5.1-.6c.1-.1.3-.4.5-.5.1-.2.2-.3.3-.5s0-.4 0-.5c-.1-.2-.7-1.7-.9-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1.1 1-1.1 2.6 1.1 3 1.3 3.2c.2.2 2.2 3.3 5.3 4.6.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.3z"/></svg>וואטסאפ</a>
+</div>
+<script>
+(function(){
+  var pre=document.getElementById('preloader');
+  function hidePre(){ if(pre) pre.classList.add('hide'); }
+  if(document.readyState==='complete') setTimeout(hidePre,300);
+  else window.addEventListener('load',function(){ setTimeout(hidePre,300); });
+  setTimeout(hidePre,3500);
+  var prog=document.getElementById('scrollProgress'), btt=document.getElementById('backToTop');
+  function onScroll(){ var st=window.pageYOffset||document.documentElement.scrollTop; var h=document.documentElement.scrollHeight-document.documentElement.clientHeight; var p=h>0?(st/h)*100:0; if(prog) prog.style.width=p+'%'; if(btt) btt.classList.toggle('show', st>600); }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  if(btt) btt.addEventListener('click',function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+  document.addEventListener('click',function(e){ var b=e.target.closest('.btn'); if(!b) return; var r=document.createElement('span'); r.className='ripple'; var rect=b.getBoundingClientRect(); var size=Math.max(rect.width,rect.height); r.style.width=r.style.height=size+'px'; r.style.left=(e.clientX-rect.left-size/2)+'px'; r.style.top=(e.clientY-rect.top-size/2)+'px'; b.appendChild(r); setTimeout(function(){ r.remove(); },600); });
+})();
+</script>
+</body>
+</html>
