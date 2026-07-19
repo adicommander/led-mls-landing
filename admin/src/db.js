@@ -1,12 +1,17 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
-    ? false
-    : { rejectUnauthorized: false },
-});
+// Strip sslmode from the URL so our explicit ssl config below always wins
+// (pg >= 8.12 lets a URL sslmode override the config object).
+const rawUrl = process.env.DATABASE_URL || '';
+const connectionString = rawUrl.replace(/([?&])sslmode=[^&]*&?/, '$1').replace(/[?&]$/, '');
+const ssl = rawUrl.includes('localhost')
+  ? false
+  : process.env.DB_CA_CERT
+    ? { ca: process.env.DB_CA_CERT }
+    : { rejectUnauthorized: false };
+
+const pool = new Pool({ connectionString, ssl });
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
