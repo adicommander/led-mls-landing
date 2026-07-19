@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LED-MLS ישראל — האתר בבנייה</title>
 <meta name="description" content="LED-MLS ישראל — הנציגות הרשמית של MLS, יצרנית מסכי ה-LED המובילה בעולם. האתר בעברית נמצא בבנייה ויעלה בקרוב.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23050810'/><circle cx='50' cy='50' r='22' fill='%232f7bff'/><circle cx='50' cy='50' r='34' fill='none' stroke='%232f7bff' stroke-opacity='.35' stroke-width='6'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0603'/><circle cx='50' cy='50' r='22' fill='%23ff6600'/><circle cx='50' cy='50' r='34' fill='none' stroke='%23ff6600' stroke-opacity='.35' stroke-width='6'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Karantina:wght@300;400;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#050810;
-  --panel:#0a0f1a;
-  --led:#2f7bff;
-  --led-bright:#5aa2ff;
-  --led-soft:rgba(47,123,255,.14);
-  --cyan:#2ee6ff;
-  --text:#e7eaf2;
-  --dim:#8590a6;
-  --line:rgba(160,190,255,.10);
+  --bg:#0a0603;
+  --panel:#140d06;
+  --led:#ff6600;
+  --led-bright:#ff9900;
+  --led-soft:rgba(255,102,0,.14);
+  --cyan:#ffcc99;
+  --text:#f2ece2;
+  --dim:#a3927c;
+  --line:rgba(255,170,80,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
@@ -39,7 +39,7 @@ body::before{
   content:"";
   position:fixed;inset:0;
   background:
-    radial-gradient(circle at center, rgba(170,200,255,.05) 1px, transparent 1.6px);
+    radial-gradient(circle at center, rgba(255,210,160,.05) 1px, transparent 1.6px);
   background-size:14px 14px;
   pointer-events:none;
   z-index:0;
@@ -49,8 +49,8 @@ body::after{
   content:"";
   position:fixed;inset:0;
   background:
-    radial-gradient(52% 42% at 78% 18%, rgba(47,123,255,.13), transparent 62%),
-    radial-gradient(46% 38% at 16% 82%, rgba(46,230,255,.07), transparent 60%);
+    radial-gradient(52% 42% at 78% 18%, rgba(255,102,0,.13), transparent 62%),
+    radial-gradient(46% 38% at 16% 82%, rgba(255,153,0,.06), transparent 60%);
   pointer-events:none;
   z-index:0;
 }
@@ -60,7 +60,7 @@ body::after{
   position:relative;
   z-index:2;
   border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg,#080d18,#060910);
+  background:linear-gradient(180deg,#140b03,#0c0602);
   overflow:hidden;
   padding:.65rem 0;
 }
@@ -75,7 +75,7 @@ body::after{
   font-size:1.35rem;
   letter-spacing:.12em;
   color:var(--led-bright);
-  text-shadow:0 0 8px rgba(90,162,255,.8), 0 0 26px rgba(47,123,255,.4);
+  text-shadow:0 0 8px rgba(255,153,0,.8), 0 0 26px rgba(255,102,0,.4);
   white-space:nowrap;
   padding-inline-start:3.2rem;
 }
@@ -99,7 +99,7 @@ main{
   display:inline-flex;
   align-items:center;
   gap:.55rem;
-  border:1px solid rgba(90,162,255,.4);
+  border:1px solid rgba(255,153,0,.4);
   background:var(--led-soft);
   color:var(--led-bright);
   border-radius:999px;
@@ -127,17 +127,17 @@ h1{
   color:#fff;
   text-shadow:
     0 0 12px rgba(255,255,255,.35),
-    0 0 42px rgba(47,123,255,.6),
-    0 0 120px rgba(47,123,255,.35);
+    0 0 42px rgba(255,102,0,.6),
+    0 0 120px rgba(255,102,0,.35);
   animation:rise .8s .1s ease both, flicker 7s 1.2s infinite;
 }
 h1 em{
   font-style:normal;
   color:var(--led-bright);
   text-shadow:
-    0 0 10px rgba(90,162,255,.95),
-    0 0 44px rgba(47,123,255,.6),
-    0 0 130px rgba(47,123,255,.4);
+    0 0 10px rgba(255,153,0,.95),
+    0 0 44px rgba(255,102,0,.6),
+    0 0 130px rgba(255,102,0,.4);
 }
 @keyframes flicker{
   0%,7.5%,9%,100%{opacity:1}
@@ -155,7 +155,7 @@ h1 em{
   color:#fff;
   animation:rise .8s .15s ease both;
 }
-.rep a{color:var(--led-bright);text-decoration:none;border-bottom:1px solid rgba(90,162,255,.45)}
+.rep a{color:var(--led-bright);text-decoration:none;border-bottom:1px solid rgba(255,153,0,.45)}
 .rep a:hover{color:var(--cyan)}
 
 .sub{
@@ -186,7 +186,7 @@ h1 em{
 }
 .chips span{
   border:1px solid var(--line);
-  background:rgba(160,190,255,.05);
+  background:rgba(255,190,120,.05);
   color:var(--dim);
   border-radius:999px;
   padding:.42rem 1rem;
@@ -205,7 +205,7 @@ h1 em{
 .progress i{
   width:1.35rem;height:.5rem;
   border-radius:2px;
-  background:rgba(170,200,255,.09);
+  background:rgba(255,210,160,.09);
   overflow:hidden;
   position:relative;
 }
@@ -213,7 +213,7 @@ h1 em{
   content:"";
   position:absolute;inset:0;
   background:var(--led-bright);
-  box-shadow:0 0 12px rgba(90,162,255,.85);
+  box-shadow:0 0 12px rgba(255,153,0,.85);
   opacity:0;
   animation:fill 3.6s infinite;
 }
@@ -254,20 +254,20 @@ h1 em{
   transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 .btn--led{
-  color:#04101f;
-  background:var(--led-bright);
-  box-shadow:0 0 24px rgba(90,162,255,.4), 0 8px 24px rgba(0,0,0,.5);
+  color:#1a0d00;
+  background:linear-gradient(90deg,var(--led),var(--led-bright));
+  box-shadow:0 0 24px rgba(255,153,0,.4), 0 8px 24px rgba(0,0,0,.5);
 }
 .btn--led:hover{
   transform:translateY(-2px);
-  box-shadow:0 0 44px rgba(90,162,255,.6), 0 12px 28px rgba(0,0,0,.5);
+  box-shadow:0 0 44px rgba(255,153,0,.6), 0 12px 28px rgba(0,0,0,.5);
 }
 .btn--ghost{
   color:var(--text);
   border:1px solid var(--line);
-  background:rgba(160,190,255,.04);
+  background:rgba(255,190,120,.04);
 }
-.btn--ghost:hover{background:rgba(160,190,255,.09);transform:translateY(-2px)}
+.btn--ghost:hover{background:rgba(255,190,120,.09);transform:translateY(-2px)}
 
 footer{
   position:relative;
