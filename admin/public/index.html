@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>MLS ישראל — מערכת ניהול</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0603'/><circle cx='50' cy='50' r='22' fill='%23ff6600'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0805;--panel:#160e07;--card:#1d130a;--line:rgba(255,170,80,.14);
+  --led:#ff6600;--led2:#ff9900;--text:#f2ece2;--dim:#a3927c;
+  --ok:#5dbb63;--bad:#e05252;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-size:.95rem}
+input,textarea,select{font-family:inherit;font-size:.95rem;color:var(--text);background:#241709;border:1px solid var(--line);border-radius:10px;padding:.65rem .9rem;width:100%}
+input:focus,textarea:focus,select:focus{outline:2px solid rgba(255,153,0,.4)}
+.btn{background:linear-gradient(90deg,var(--led),var(--led2));color:#1a0d00;font-weight:600;padding:.7rem 1.4rem}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);padding:.6rem 1.1rem}
+.hidden{display:none!important}
+.muted{color:var(--dim);font-size:.85rem}
+a{color:var(--led2)}
+
+/* auth screens */
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  background:radial-gradient(60% 50% at 50% 30%,rgba(255,102,0,.09),transparent 70%)}
+.auth .card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:2.2rem;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.auth h1{font-size:1.5rem;margin-bottom:.4rem}
+.auth h1 b{color:var(--led)}
+.auth p{margin-bottom:1.4rem}
+.auth label{display:block;font-size:.85rem;color:var(--dim);margin:1rem 0 .35rem}
+.auth .btn{width:100%;margin-top:1.4rem}
+.err{background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.4);color:#ff9d9d;border-radius:10px;padding:.6rem .9rem;font-size:.88rem;margin-top:1rem}
+.code-input{letter-spacing:.6em;text-align:center;font-size:1.6rem;direction:ltr}
+
+/* shell */
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--panel);border-inline-end:1px solid var(--line);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+aside .logo{font-weight:700;font-size:1.15rem;margin-bottom:1.2rem}
+aside .logo b{color:var(--led)}
+aside button{background:transparent;color:var(--dim);text-align:start;padding:.7rem 1rem;border-radius:10px;font-size:.95rem}
+aside button.active,aside button:hover{background:rgba(255,102,0,.12);color:var(--text)}
+aside .spacer{flex:1}
+main{padding:2rem;max-width:1200px}
+h2{font-size:1.3rem;margin-bottom:1.2rem}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.9rem;margin-bottom:1.6rem}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem}
+.stat .n{font-size:1.7rem;font-weight:700;color:var(--led2)}
+.stat .t{font-size:.82rem;color:var(--dim)}
+
+/* toolbar + table */
+.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.toolbar input{max-width:260px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--dim);border-radius:999px;padding:.45rem 1rem;font-size:.85rem}
+.chip.active{background:rgba(255,102,0,.16);color:var(--led2);border-color:rgba(255,153,0,.5)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:.75rem .9rem;text-align:start;font-size:.9rem;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-weight:500;font-size:.8rem;background:var(--panel)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(255,102,0,.06)}
+.status{display:inline-block;border-radius:999px;padding:.2rem .7rem;font-size:.78rem}
+.status.new{background:rgba(255,153,0,.15);color:var(--led2)}
+.status.in_progress{background:rgba(90,162,255,.15);color:#7db4ff}
+.status.won{background:rgba(93,187,99,.15);color:var(--ok)}
+.status.lost{background:rgba(224,82,82,.13);color:#ff9d9d}
+
+/* drawer */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9}
+.drawer{position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(480px,94vw);background:var(--panel);border-inline-end:1px solid var(--line);z-index:10;padding:1.6rem;overflow-y:auto}
+.drawer h3{margin-bottom:.2rem}
+.drawer .close{position:absolute;top:1rem;inset-inline-end:1rem;background:transparent;color:var(--dim);font-size:1.4rem}
+.kv{margin:.9rem 0;display:grid;grid-template-columns:auto 1fr;gap:.3rem .8rem;font-size:.9rem}
+.kv b{color:var(--dim);font-weight:400}
+.msgbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.8rem;margin:.5rem 0;font-size:.88rem;white-space:pre-wrap}
+.msgbox .muted{display:block;margin-bottom:.3rem}
+.row{display:flex;gap:.6rem;margin:.7rem 0}
+.section{border-top:1px solid var(--line);margin-top:1.2rem;padding-top:1rem}
+.toast{position:fixed;bottom:1.4rem;inset-inline-start:50%;transform:translateX(50%);background:#241709;border:1px solid var(--line);color:var(--text);padding:.8rem 1.4rem;border-radius:12px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.wa{background:#1faa53;color:#fff;font-weight:600;padding:.6rem 1.1rem;border-radius:10px;text-decoration:none;font-size:.9rem;display:inline-block}
+@media(max-width:760px){.shell{grid-template-columns:1fr}aside{flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line)}aside .logo{margin:0}main{padding:1rem}}
+</style>
+</head>
+<body>
+
+<div id="view-auth" class="auth">
+  <div class="card">
+    <h1>MLS <b>ישראל</b> · ניהול</h1>
+    <div id="step-login">
+      <p class="muted">כניסה למערכת ניהול הלידים</p>
+      <label>אימייל</label><input id="login-email" type="email" autocomplete="username" dir="ltr">
+      <label>סיסמה</label><input id="login-pass" type="password" autocomplete="current-password" dir="ltr">
+      <button class="btn" id="btn-login">כניסה</button>
+    </div>
+    <div id="step-code" class="hidden">
+      <p class="muted">שלחנו קוד בן 6 ספרות למייל שלך. <span id="mail-warn" class="hidden" style="color:#ff9d9d">(שליחת המייל נכשלה — הקוד זמין ביומן השרת)</span></p>
+      <label>קוד אימות</label><input id="login-code" class="code-input" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      <button class="btn" id="btn-verify">אימות</button>
+      <button class="btn-ghost" style="width:100%;margin-top:.6rem" id="btn-back">חזרה</button>
+    </div>
+    <div id="step-newpass" class="hidden">
+      <p class="muted">נדרשת החלפת סיסמה לפני ההמשך</p>
+      <label>סיסמה נוכחית</label><input id="np-current" type="password" dir="ltr">
+      <label>סיסמה חדשה (10+ תווים)</label><input id="np-next" type="password" dir="ltr">
+      <button class="btn" id="btn-newpass">שמור והמשך</button>
+    </div>
+    <div id="auth-err" class="err hidden"></div>
+  </div>
+</div>
+
+<div id="view-app" class="shell hidden">
+  <aside>
+    <div class="logo">MLS <b>ישראל</b></div>
+    <button data-page="leads" class="active">📋 לידים</button>
+    <button data-page="users" id="nav-users">👥 משתמשים</button>
+    <button data-page="settings">⚙️ הגדרות</button>
+    <div class="spacer"></div>
+    <button id="btn-logout">יציאה ↩</button>
+  </aside>
+  <main>
+    <div id="page-leads">
+      <h2>לידים</h2>
+      <div class="stats" id="stats"></div>
+      <div class="toolbar">
+        <input id="q" placeholder="חיפוש שם / טלפון / הודעה...">
+        <button class="chip active" data-status="">הכול</button>
+        <button class="chip" data-status="new">חדש</button>
+        <button class="chip" data-status="in_progress">בטיפול</button>
+        <button class="chip" data-status="won">נסגר בהצלחה</button>
+        <button class="chip" data-status="lost">לא רלוונטי</button>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>שם</th><th>טלפון</th><th>הודעה</th><th>סטטוס</th><th>מטפל</th><th>התקבל</th></tr></thead>
+        <tbody id="leads-body"></tbody>
+      </table>
+    </div>
+    <div id="page-users" class="hidden">
+      <h2>משתמשים</h2>
+      <div class="toolbar">
+        <input id="u-email" placeholder="email@example.com" style="max-width:220px" dir="ltr">
+        <input id="u-name" placeholder="שם מלא" style="max-width:160px">
+        <select id="u-role" style="max-width:130px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
+        <button class="btn" id="btn-adduser">הוסף משתמש</button>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>אימייל</th><th>שם</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
+        <tbody id="users-body"></tbody>
+      </table>
+    </div>
+    <div id="page-settings" class="hidden">
+      <h2>הגדרות</h2>
+      <div class="card" style="max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem">
+        <h3 style="margin-bottom:.8rem">החלפת סיסמה</h3>
+        <label class="muted">סיסמה נוכחית</label><input id="s-current" type="password" dir="ltr" style="margin:.3rem 0 .8rem">
+        <label class="muted">סיסמה חדשה (10+ תווים)</label><input id="s-next" type="password" dir="ltr" style="margin:.3rem 0 .8rem">
+        <button class="btn" id="btn-changepass">עדכן סיסמה</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="drawer-wrap" class="hidden">
+  <div class="overlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer"></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let PRE='', ME=null, FILTER={status:'',q:''};
+
+async function api(path,opts={}){
+  const r=await fetch(path,{headers:{'Content-Type':'application/json'},credentials:'same-origin',...opts});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||('שגיאה '+r.status));
+  return d;
+}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+function authErr(msg){const e=$('#auth-err');e.textContent=msg;e.classList.remove('hidden');}
+function fmtDate(s){return new Date(s).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'});}
+const STATUS_HE={new:'חדש',in_progress:'בטיפול',won:'נסגר בהצלחה',lost:'לא רלוונטי'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---- auth flow ---- */
+$('#btn-login').onclick=async()=>{
+  $('#auth-err').classList.add('hidden');
+  const b=$('#btn-login');b.disabled=true;
+  try{
+    const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:$('#login-email').value,password:$('#login-pass').value})});
+    PRE=d.pre;
+    $('#step-login').classList.add('hidden');$('#step-code').classList.remove('hidden');
+    if(!d.emailSent)$('#mail-warn').classList.remove('hidden');
+    $('#login-code').focus();
+  }catch(e){authErr(e.message);}finally{b.disabled=false;}
+};
+$('#btn-verify').onclick=async()=>{
+  $('#auth-err').classList.add('hidden');
+  const b=$('#btn-verify');b.disabled=true;
+  try{
+    const d=await api('/api/auth/verify',{method:'POST',body:JSON.stringify({pre:PRE,code:$('#login-code').value})});
+    ME=d.user;
+    if(ME.must_change_password){$('#step-code').classList.add('hidden');$('#step-newpass').classList.remove('hidden');}
+    else enterApp();
+  }catch(e){authErr(e.message);}finally{b.disabled=false;}
+};
+$('#btn-back').onclick=()=>{$('#step-code').classList.add('hidden');$('#step-login').classList.remove('hidden');};
+$('#btn-newpass').onclick=async()=>{
+  $('#auth-err').classList.add('hidden');
+  try{
+    await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#np-current').value,next:$('#np-next').value})});
+    toast('הסיסמה עודכנה');enterApp();
+  }catch(e){authErr(e.message);}
+};
+$('#btn-logout').onclick=async()=>{await api('/api/auth/logout',{method:'POST'});location.reload();};
+
+function enterApp(){
+  $('#view-auth').classList.add('hidden');$('#view-app').classList.remove('hidden');
+  if(ME.role!=='admin')$('#nav-users').classList.add('hidden');
+  loadLeads();loadStats();
+}
+
+/* ---- nav ---- */
+document.querySelectorAll('aside button[data-page]').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('aside button[data-page]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['leads','users','settings'].forEach(p=>$('#page-'+p).classList.add('hidden'));
+    $('#page-'+btn.dataset.page).classList.remove('hidden');
+    if(btn.dataset.page==='users')loadUsers();
+    if(btn.dataset.page==='leads'){loadLeads();loadStats();}
+  };
+});
+
+/* ---- leads ---- */
+async function loadStats(){
+  const d=await api('/api/stats');
+  $('#stats').innerHTML=`
+    <div class="stat"><div class="n">${d.total}</div><div class="t">סה״כ לידים</div></div>
+    <div class="stat"><div class="n">${d.week}</div><div class="t">בשבוע האחרון</div></div>
+    <div class="stat"><div class="n">${d.byStatus.new||0}</div><div class="t">ממתינים לטיפול</div></div>
+    <div class="stat"><div class="n">${d.byStatus.won||0}</div><div class="t">נסגרו בהצלחה</div></div>`;
+}
+async function loadLeads(){
+  const p=new URLSearchParams();if(FILTER.status)p.set('status',FILTER.status);if(FILTER.q)p.set('q',FILTER.q);
+  const d=await api('/api/leads?'+p);
+  $('#leads-body').innerHTML=d.leads.map(l=>`
+    <tr onclick="openLead(${l.id})">
+      <td>${l.id}</td><td>${esc(l.name)}</td><td dir="ltr">${esc(l.phone)}</td>
+      <td>${esc((l.message||'').slice(0,48))}${(l.message||'').length>48?'…':''}</td>
+      <td><span class="status ${l.status}">${STATUS_HE[l.status]}</span></td>
+      <td>${esc(l.assigned_name||'—')}</td><td>${fmtDate(l.created_at)}</td>
+    </tr>`).join('')||'<tr><td colspan="7" class="muted">אין לידים עדיין</td></tr>';
+}
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');FILTER.status=c.dataset.status;loadLeads();
+});
+let qT;$('#q').oninput=e=>{clearTimeout(qT);qT=setTimeout(()=>{FILTER.q=e.target.value;loadLeads();},350);};
+
+async function openLead(id){
+  const d=await api('/api/leads/'+id);
+  const l=d.lead;
+  const wa=l.phone?('https://wa.me/'+l.phone.replace(/\D/g,'').replace(/^0/,'972')):null;
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>${esc(l.name)} <span class="muted">#${l.id}</span></h3>
+    <div class="kv">
+      <b>טלפון</b><span dir="ltr">${esc(l.phone)||'—'}</span>
+      <b>מייל</b><span dir="ltr">${esc(l.email)||'—'}</span>
+      <b>התקבל</b><span>${fmtDate(l.created_at)} ${l.page?('· '+esc(l.page)):''}</span>
+    </div>
+    <div class="msgbox">${esc(l.message)||'(ללא הודעה)'}</div>
+    <div class="row">
+      <select id="d-status">${Object.entries(STATUS_HE).map(([k,v])=>`<option value="${k}"${k===l.status?' selected':''}>${v}</option>`).join('')}</select>
+      ${wa?`<a class="wa" href="${wa}" target="_blank" rel="noopener">וואטסאפ 💬</a>`:''}
+    </div>
+    <div class="section">
+      <h4>הערות פנימיות</h4>
+      <div id="d-notes">${d.notes.map(n=>`<div class="msgbox"><span class="muted">${esc(n.user_name||'')} · ${fmtDate(n.created_at)}</span>${esc(n.body)}</div>`).join('')||'<p class="muted">אין הערות</p>'}</div>
+      <div class="row"><input id="d-note" placeholder="הוסף הערה..."><button class="btn" onclick="addNote(${l.id})">שמור</button></div>
+    </div>
+    <div class="section">
+      <h4>תכתובת עם הלקוח</h4>
+      <div>${d.messages.map(m=>`<div class="msgbox"><span class="muted">${m.direction==='out'?'נשלח':'התקבל'} · ${esc(m.user_name||'')} · ${fmtDate(m.created_at)}</span><b>${esc(m.subject)}</b>\n${esc(m.body)}</div>`).join('')||'<p class="muted">אין תכתובת</p>'}</div>
+      ${l.email?`
+      <input id="d-subj" placeholder="נושא" style="margin:.5rem 0">
+      <textarea id="d-body" rows="4" placeholder="תוכן ההודעה ללקוח..."></textarea>
+      <div class="row"><button class="btn" onclick="sendEmail(${l.id})">שלח מייל ללקוח ✉</button></div>`
+      :'<p class="muted">ללקוח אין כתובת מייל — אפשר ליצור קשר בוואטסאפ</p>'}
+    </div>`;
+  $('#d-status').onchange=async e=>{await api('/api/leads/'+l.id,{method:'PATCH',body:JSON.stringify({status:e.target.value})});toast('סטטוס עודכן');loadLeads();loadStats();};
+  $('#drawer-wrap').classList.remove('hidden');
+}
+function closeDrawer(){$('#drawer-wrap').classList.add('hidden');}
+async function addNote(id){
+  const v=$('#d-note').value.trim();if(!v)return;
+  await api('/api/leads/'+id+'/notes',{method:'POST',body:JSON.stringify({body:v})});
+  openLead(id);
+}
+async function sendEmail(id){
+  try{
+    await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#d-subj').value,body:$('#d-body').value})});
+    toast('המייל נשלח ללקוח ✓');openLead(id);
+  }catch(e){toast(e.message);}
+}
+
+/* ---- users ---- */
+async function loadUsers(){
+  const d=await api('/api/users');
+  $('#users-body').innerHTML=d.users.map(u=>`
+    <tr>
+      <td>${u.id}</td><td dir="ltr">${esc(u.email)}</td><td>${esc(u.name)}</td>
+      <td>${u.role==='admin'?'מנהל':'נציג'}</td>
+      <td>${u.is_active?'✓':'✗'}</td>
+      <td style="white-space:nowrap">
+        <button class="chip" onclick="toggleUser(${u.id},${!u.is_active})">${u.is_active?'השבת':'הפעל'}</button>
+        <button class="chip" onclick="resetUser(${u.id})">איפוס סיסמה</button>
+        <button class="chip" onclick="delUser(${u.id})">מחק</button>
+      </td>
+    </tr>`).join('');
+}
+$('#btn-adduser').onclick=async()=>{
+  try{
+    const d=await api('/api/users',{method:'POST',body:JSON.stringify({email:$('#u-email').value,name:$('#u-name').value,role:$('#u-role').value})});
+    toast('משתמש נוצר. סיסמה זמנית: '+d.tempPassword);
+    $('#u-email').value='';$('#u-name').value='';loadUsers();
+  }catch(e){toast(e.message);}
+};
+async function toggleUser(id,active){try{await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({is_active:active})});loadUsers();}catch(e){toast(e.message);}}
+async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית: '+d.tempPassword);}catch(e){toast(e.message);}}
+async function delUser(id){if(!confirm('למחוק את המשתמש לצמיתות?'))return;try{await api('/api/users/'+id,{method:'DELETE'});loadUsers();}catch(e){toast(e.message);}}
+
+/* ---- settings ---- */
+$('#btn-changepass').onclick=async()=>{
+  try{
+    await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#s-current').value,next:$('#s-next').value})});
+    toast('הסיסמה עודכנה ✓');$('#s-current').value='';$('#s-next').value='';
+  }catch(e){toast(e.message);}
+};
+
+/* ---- boot: resume session if cookie valid ---- */
+api('/api/auth/me').then(d=>{ME=d.user;enterApp();}).catch(()=>{});
+</script>
+</body>
+</html>

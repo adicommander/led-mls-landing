@@ -1,0 +1,22 @@
+{
+  "name": "mls-israel-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MLS Israel admin API: auth with email 2FA, leads CRM, user management",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.14",
+    "pg": "^8.12.0"
+  }
+}
