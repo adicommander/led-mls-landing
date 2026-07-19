@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LED-MLS ישראל — האתר בבנייה</title>
+<meta name="description" content="LED-MLS ישראל — הנציגות הרשמית של MLS, יצרנית מסכי ה-LED המובילה בעולם. האתר בעברית נמצא בבנייה ויעלה בקרוב.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23050810'/><circle cx='50' cy='50' r='22' fill='%232f7bff'/><circle cx='50' cy='50' r='34' fill='none' stroke='%232f7bff' stroke-opacity='.35' stroke-width='6'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@300;400;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050810;
+  --panel:#0a0f1a;
+  --led:#2f7bff;
+  --led-bright:#5aa2ff;
+  --led-soft:rgba(47,123,255,.14);
+  --cyan:#2ee6ff;
+  --text:#e7eaf2;
+  --dim:#8590a6;
+  --line:rgba(160,190,255,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rubik',sans-serif;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  position:relative;
+}
+
+/* ---- LED pixel-grid backdrop ---- */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(circle at center, rgba(170,200,255,.05) 1px, transparent 1.6px);
+  background-size:14px 14px;
+  pointer-events:none;
+  z-index:0;
+}
+/* soft ambient glow pools */
+body::after{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(52% 42% at 78% 18%, rgba(47,123,255,.13), transparent 62%),
+    radial-gradient(46% 38% at 16% 82%, rgba(46,230,255,.07), transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ---- LED ticker strip ---- */
+.ticker{
+  position:relative;
+  z-index:2;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#080d18,#060910);
+  overflow:hidden;
+  padding:.65rem 0;
+}
+.ticker__track{
+  display:flex;
+  width:max-content;
+  animation:slide 26s linear infinite;
+}
+.ticker span{
+  font-family:'Karantina',cursive;
+  font-weight:400;
+  font-size:1.35rem;
+  letter-spacing:.12em;
+  color:var(--led-bright);
+  text-shadow:0 0 8px rgba(90,162,255,.8), 0 0 26px rgba(47,123,255,.4);
+  white-space:nowrap;
+  padding-inline-start:3.2rem;
+}
+.ticker span i{font-style:normal;color:var(--dim);text-shadow:none;padding-inline:1.1rem}
+/* RTL: track slides to the right */
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(50%)}}
+
+/* ---- main ---- */
+main{
+  position:relative;
+  z-index:1;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:4rem 1.5rem 3rem;
+}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  border:1px solid rgba(90,162,255,.4);
+  background:var(--led-soft);
+  color:var(--led-bright);
+  border-radius:999px;
+  padding:.45rem 1.1rem;
+  font-size:.86rem;
+  font-weight:500;
+  letter-spacing:.04em;
+  animation:rise .8s ease both;
+}
+.badge .dot{
+  width:.55rem;height:.55rem;border-radius:50%;
+  background:var(--led-bright);
+  box-shadow:0 0 10px var(--led-bright);
+  animation:blink 1.6s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+h1{
+  font-family:'Karantina',cursive;
+  font-weight:700;
+  font-size:clamp(4.6rem, 15vw, 11.5rem);
+  line-height:.9;
+  margin-top:1.6rem;
+  letter-spacing:.02em;
+  color:#fff;
+  text-shadow:
+    0 0 12px rgba(255,255,255,.35),
+    0 0 42px rgba(47,123,255,.6),
+    0 0 120px rgba(47,123,255,.35);
+  animation:rise .8s .1s ease both, flicker 7s 1.2s infinite;
+}
+h1 em{
+  font-style:normal;
+  color:var(--led-bright);
+  text-shadow:
+    0 0 10px rgba(90,162,255,.95),
+    0 0 44px rgba(47,123,255,.6),
+    0 0 130px rgba(47,123,255,.4);
+}
+@keyframes flicker{
+  0%,7.5%,9%,100%{opacity:1}
+  8%{opacity:.55}
+  8.5%{opacity:.85}
+  62%{opacity:1}
+  62.4%{opacity:.7}
+  62.8%{opacity:1}
+}
+
+.rep{
+  margin-top:1.2rem;
+  font-size:clamp(1.05rem, 2.4vw, 1.35rem);
+  font-weight:500;
+  color:#fff;
+  animation:rise .8s .15s ease both;
+}
+.rep a{color:var(--led-bright);text-decoration:none;border-bottom:1px solid rgba(90,162,255,.45)}
+.rep a:hover{color:var(--cyan)}
+
+.sub{
+  margin-top:1rem;
+  font-size:clamp(1.1rem, 2.4vw, 1.4rem);
+  font-weight:300;
+  color:var(--text);
+  animation:rise .8s .2s ease both;
+}
+.sub strong{font-weight:500;color:#fff}
+.note{
+  margin-top:.7rem;
+  color:var(--dim);
+  font-size:1rem;
+  font-weight:300;
+  animation:rise .8s .3s ease both;
+}
+
+/* ---- product chips ---- */
+.chips{
+  margin-top:2.2rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  justify-content:center;
+  max-width:640px;
+  animation:rise .8s .35s ease both;
+}
+.chips span{
+  border:1px solid var(--line);
+  background:rgba(160,190,255,.05);
+  color:var(--dim);
+  border-radius:999px;
+  padding:.42rem 1rem;
+  font-size:.88rem;
+  font-weight:300;
+}
+
+/* ---- LED progress segments ---- */
+.progress{
+  margin-top:2.4rem;
+  display:flex;
+  gap:.45rem;
+  direction:ltr;
+  animation:rise .8s .4s ease both;
+}
+.progress i{
+  width:1.35rem;height:.5rem;
+  border-radius:2px;
+  background:rgba(170,200,255,.09);
+  overflow:hidden;
+  position:relative;
+}
+.progress i::after{
+  content:"";
+  position:absolute;inset:0;
+  background:var(--led-bright);
+  box-shadow:0 0 12px rgba(90,162,255,.85);
+  opacity:0;
+  animation:fill 3.6s infinite;
+}
+.progress i:nth-child(1)::after{animation-delay:0s}
+.progress i:nth-child(2)::after{animation-delay:.3s}
+.progress i:nth-child(3)::after{animation-delay:.6s}
+.progress i:nth-child(4)::after{animation-delay:.9s}
+.progress i:nth-child(5)::after{animation-delay:1.2s}
+.progress i:nth-child(6)::after{animation-delay:1.5s}
+.progress i:nth-child(7)::after{animation-delay:1.8s}
+.progress i:nth-child(8)::after{animation-delay:2.1s}
+@keyframes fill{
+  0%{opacity:0}
+  12%{opacity:1}
+  60%{opacity:1}
+  75%{opacity:0}
+  100%{opacity:0}
+}
+
+/* ---- contact ---- */
+.contact{
+  margin-top:3rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  justify-content:center;
+  animation:rise .8s .5s ease both;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  text-decoration:none;
+  font-weight:500;
+  font-size:1.02rem;
+  padding:.85rem 1.7rem;
+  border-radius:12px;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.btn--led{
+  color:#04101f;
+  background:var(--led-bright);
+  box-shadow:0 0 24px rgba(90,162,255,.4), 0 8px 24px rgba(0,0,0,.5);
+}
+.btn--led:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 44px rgba(90,162,255,.6), 0 12px 28px rgba(0,0,0,.5);
+}
+.btn--ghost{
+  color:var(--text);
+  border:1px solid var(--line);
+  background:rgba(160,190,255,.04);
+}
+.btn--ghost:hover{background:rgba(160,190,255,.09);transform:translateY(-2px)}
+
+footer{
+  position:relative;
+  z-index:1;
+  border-top:1px solid var(--line);
+  padding:1.2rem 1.5rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--dim);
+  font-size:.85rem;
+  font-weight:300;
+}
+footer .sig{display:inline-flex;align-items:center;gap:.45rem}
+footer .sig b{color:var(--led-bright);font-weight:500}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--led-bright)}
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <span>האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i> האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i></span>
+    <span>האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i> האתר בבנייה <i>●</i> בקרוב עולים לאוויר <i>●</i> LED-MLS ישראל <i>●</i></span>
+  </div>
+</div>
+
+<main>
+  <span class="badge"><span class="dot"></span> האתר בעברית — בבנייה ממש עכשיו</span>
+
+  <h1>LED<em>·</em>MLS</h1>
+
+  <p class="rep">הנציגות הרשמית בישראל של <a href="https://www.led-mls.com" target="_blank" rel="noopener">LED-MLS.COM</a> — יצרנית מסכי ה-LED המובילה בעולם</p>
+
+  <p class="sub">האתר החדש שלנו <strong>בבנייה</strong> — ובקרוב הוא יאיר כאן בעברית.</p>
+  <p class="note">בינתיים אפשר לדבר איתנו ישירות, או להתרשם מהמוצרים באתר הבינלאומי.</p>
+
+  <div class="chips">
+    <span>מסכי LED לחוץ</span>
+    <span>מסכי LED לפנים</span>
+    <span>מסכי השכרה לאירועים ובמות</span>
+    <span>מסכי פוסטר לקמעונאות</span>
+    <span>מסכי COB ברזולוציה גבוהה</span>
+  </div>
+
+  <div class="progress" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+
+  <div class="contact">
+    <a class="btn btn--led" href="mailto:adi@ok2go.co.il">שלחו לנו מייל</a>
+    <a class="btn btn--ghost" href="https://www.led-mls.com" target="_blank" rel="noopener">לאתר הבינלאומי ←</a>
+  </div>
+</main>
+
+<footer>
+  <span class="sig"><b>LED-MLS.co.il</b> © 2026 · כל הזכויות שמורות</span>
+  <span>הנציגות הרשמית של MLS בישראל · הדף הזה זמני — האתר המלא בדרך</span>
+</footer>
+
+</body>
+</html>
