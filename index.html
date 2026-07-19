@@ -407,6 +407,15 @@ footer li a:hover{ color:var(--signal-blue); }
   .footer-grid{ grid-template-columns:1fr !important; }
 }
 </style>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "44d14326-dce9-4f3d-b8a2-f19b495c2200",
+    });
+  });
+</script>
 </head>
 <body>
 <div id="scrollProgress"></div>
