@@ -33,7 +33,7 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeade
 const leadLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 15, standardHeaders: true, legacyHeaders: false });
 
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
-const publicUser = (u) => ({ id: u.id, email: u.email, name: u.name, role: u.role, is_active: u.is_active, must_change_password: u.must_change_password, created_at: u.created_at });
+const publicUser = (u) => ({ id: u.id, email: u.email, name: u.name, first_name: u.first_name, last_name: u.last_name, phone: u.phone, role: u.role, is_active: u.is_active, must_change_password: u.must_change_password, created_at: u.created_at });
 
 function setSessionCookie(res, user) {
   const token = jwt.sign({ uid: user.id, role: user.role, typ: 'session' }, JWT_SECRET, { expiresIn: `${SESSION_HOURS}h` });
@@ -146,15 +146,18 @@ app.get('/api/users', auth, adminOnly, async (req, res) => {
 
 app.post('/api/users', auth, adminOnly, async (req, res) => {
   const email = String(req.body.email || '').toLowerCase().trim();
-  const name = String(req.body.name || '').trim();
+  const firstName = String(req.body.first_name || '').trim();
+  const lastName = String(req.body.last_name || '').trim();
+  const phone = String(req.body.phone || '').trim();
+  const name = `${firstName} ${lastName}`.trim();
   const role = req.body.role === 'admin' ? 'admin' : 'agent';
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'כתובת מייל לא תקינה' });
   const temp = crypto.randomBytes(9).toString('base64url');
   const hash = await bcrypt.hash(temp, 12);
   try {
     const { rows } = await pool.query(
-      `INSERT INTO users (email, name, password_hash, role, must_change_password) VALUES ($1,$2,$3,$4,true) RETURNING *`,
-      [email, name, hash, role]);
+      `INSERT INTO users (email, name, first_name, last_name, phone, password_hash, role, must_change_password) VALUES ($1,$2,$3,$4,$5,$6,$7,true) RETURNING *`,
+      [email, name, firstName, lastName, phone, hash, role]);
     await mail.send({
       to: email,
       subject: 'הוזמנת למערכת הניהול של MLS ישראל',
@@ -172,7 +175,10 @@ app.patch('/api/users/:id', auth, adminOnly, async (req, res) => {
   const id = Number(req.params.id);
   const target = (await pool.query('SELECT * FROM users WHERE id=$1', [id])).rows[0];
   if (!target) return res.status(404).json({ error: 'not found' });
-  const name = req.body.name !== undefined ? String(req.body.name).trim() : target.name;
+  const firstName = req.body.first_name !== undefined ? String(req.body.first_name).trim() : target.first_name;
+  const lastName = req.body.last_name !== undefined ? String(req.body.last_name).trim() : target.last_name;
+  const phone = req.body.phone !== undefined ? String(req.body.phone).trim() : target.phone;
+  const name = `${firstName} ${lastName}`.trim() || target.name;
   const role = req.body.role !== undefined ? (req.body.role === 'admin' ? 'admin' : 'agent') : target.role;
   const active = req.body.is_active !== undefined ? !!req.body.is_active : target.is_active;
   if (id === req.user.id && (!active || role !== 'admin')) {
@@ -187,7 +193,8 @@ app.patch('/api/users/:id', auth, adminOnly, async (req, res) => {
     resetInfo = { tempPassword: temp };
   }
   const { rows } = await pool.query(
-    'UPDATE users SET name=$1, role=$2, is_active=$3 WHERE id=$4 RETURNING *', [name, role, active, id]);
+    'UPDATE users SET name=$1, first_name=$2, last_name=$3, phone=$4, role=$5, is_active=$6 WHERE id=$7 RETURNING *',
+    [name, firstName, lastName, phone, role, active, id]);
   await log(req.user.id, 'user.updated', target.email);
   res.json({ user: publicUser(rows[0]), ...resetInfo });
 });

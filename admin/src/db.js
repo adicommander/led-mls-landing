@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL DEFAULT '',
+  first_name TEXT NOT NULL DEFAULT '',
+  last_name TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'agent' CHECK (role IN ('admin','agent')),
   is_active BOOLEAN NOT NULL DEFAULT true,
@@ -106,6 +109,15 @@ async function init() {
   appSchema = await resolveSchema();
   console.log(`Using schema "${appSchema}" for app tables.`);
   await pool.query(SCHEMA);
+  // migrations for databases created before these columns existed
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT NOT NULL DEFAULT ''`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT NOT NULL DEFAULT ''`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT ''`);
+  await pool.query(`
+    UPDATE users SET
+      first_name = split_part(name, ' ', 1),
+      last_name = ltrim(substr(name, length(split_part(name, ' ', 1)) + 1))
+    WHERE first_name = '' AND last_name = '' AND name <> ''`);
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
   if (rows[0].n === 0) {
     const email = (process.env.SEED_ADMIN_EMAIL || '').toLowerCase().trim();

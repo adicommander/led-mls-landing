@@ -108,8 +108,11 @@ h1,h2,h3,h4{ font-family:var(--font-display); line-height:1.15; letter-spacing:-
 .brand{
   display:flex; align-items:center; gap:10px;
 }
-.logo-img{ height:44px; width:auto; display:block; }
-.footer-brand .logo-img{ height:38px; }
+.logo-img{ height:58px; width:auto; display:block; }
+.footer-brand .logo-img{ height:46px; }
+.brand-name{ font-family:var(--font-display); font-weight:800; font-size:1.35rem; color:var(--slate-ink); letter-spacing:0.01em; white-space:nowrap; }
+.brand-name b{ color:var(--signal-blue); }
+@media (max-width:640px){ .logo-img{ height:46px; } .brand-name{ font-size:1.1rem; } }
 
 .nav-desktop{ display:flex; align-items:center; gap:34px; }
 .nav-desktop a{
@@ -461,6 +464,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   <div class="container">
     <a href="index.html" class="brand">
       <img src="assets/images/logo.png" alt="MLS ישראל" class="logo-img">
+      <span class="brand-name">MLS <b>ישראל</b></span>
     </a>
     <nav class="nav-desktop">
       <a href="solutions.html">פתרונות</a>
@@ -559,6 +563,18 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
       // Load a lighter 540p all-keyframe encode on small screens so scroll-scrubbing stays smooth
       var isMobile = window.matchMedia('(max-width:760px)').matches;
       v.src = isMobile ? 'assets/video/showcase-tour-mobile.mp4' : 'assets/video/showcase-tour.mp4';
+      v.setAttribute('webkit-playsinline','');
+      v.muted = true;
+      v.load();
+      // Mobile browsers refuse to decode/render video frames until a user
+      // gesture "unlocks" the element — prime it on the first touch so the
+      // scroll-scrubbed tour renders instead of staying black.
+      var prime = function(){
+        var p = v.play();
+        if (p && p.then) p.then(function(){ v.pause(); }).catch(function(){});
+        else v.pause();
+      };
+      window.addEventListener('touchstart', prime, { once:true, passive:true });
     })();
     </script>
 

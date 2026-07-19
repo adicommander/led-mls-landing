@@ -70,9 +70,10 @@ tbody tr:hover{background:rgba(255,102,0,.06)}
 .status.won{background:rgba(93,187,99,.15);color:var(--ok)}
 .status.lost{background:rgba(224,82,82,.13);color:#ff9d9d}
 
-/* drawer */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9}
-.drawer{position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(480px,94vw);background:var(--panel);border-inline-end:1px solid var(--line);z-index:10;padding:1.6rem;overflow-y:auto}
+/* centered popup */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9;backdrop-filter:blur(3px)}
+.drawer{position:fixed;top:50%;inset-inline-start:50%;transform:translate(50%,-50%);width:min(620px,94vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px rgba(0,0,0,.6);z-index:10;padding:1.8rem;overflow-y:auto;animation:pop .22s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes pop{from{opacity:0;transform:translate(50%,-50%) scale(.94)}to{opacity:1;transform:translate(50%,-50%) scale(1)}}
 .drawer h3{margin-bottom:.2rem}
 .drawer .close{position:absolute;top:1rem;inset-inline-end:1rem;background:transparent;color:var(--dim);font-size:1.4rem}
 .kv{margin:.9rem 0;display:grid;grid-template-columns:auto 1fr;gap:.3rem .8rem;font-size:.9rem}
@@ -142,13 +143,15 @@ tbody tr:hover{background:rgba(255,102,0,.06)}
     <div id="page-users" class="hidden">
       <h2>משתמשים</h2>
       <div class="toolbar">
-        <input id="u-email" placeholder="email@example.com" style="max-width:220px" dir="ltr">
-        <input id="u-name" placeholder="שם מלא" style="max-width:160px">
-        <select id="u-role" style="max-width:130px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
+        <input id="u-email" placeholder="email@example.com" style="max-width:210px" dir="ltr">
+        <input id="u-first" placeholder="שם פרטי" style="max-width:130px">
+        <input id="u-last" placeholder="שם משפחה" style="max-width:130px">
+        <input id="u-phone" placeholder="טלפון נייד" style="max-width:140px" dir="ltr">
+        <select id="u-role" style="max-width:120px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
         <button class="btn" id="btn-adduser">הוסף משתמש</button>
       </div>
       <table>
-        <thead><tr><th>#</th><th>אימייל</th><th>שם</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
+        <thead><tr><th>#</th><th>אימייל</th><th>שם פרטי</th><th>שם משפחה</th><th>טלפון</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
         <tbody id="users-body"></tbody>
       </table>
     </div>
@@ -315,14 +318,18 @@ async function sendEmail(id){
 }
 
 /* ---- users ---- */
+let USERS=[];
 async function loadUsers(){
   const d=await api('/api/users');
+  USERS=d.users;
   $('#users-body').innerHTML=d.users.map(u=>`
     <tr>
-      <td>${u.id}</td><td dir="ltr">${esc(u.email)}</td><td>${esc(u.name)}</td>
+      <td>${u.id}</td><td dir="ltr">${esc(u.email)}</td><td>${esc(u.first_name)}</td><td>${esc(u.last_name)}</td>
+      <td dir="ltr">${esc(u.phone)||'—'}</td>
       <td>${u.role==='admin'?'מנהל':'נציג'}</td>
       <td>${u.is_active?'✓':'✗'}</td>
       <td style="white-space:nowrap">
+        <button class="chip" onclick="editUser(${u.id})">עריכה</button>
         <button class="chip" onclick="toggleUser(${u.id},${!u.is_active})">${u.is_active?'השבת':'הפעל'}</button>
         <button class="chip" onclick="resetUser(${u.id})">איפוס סיסמה</button>
         <button class="chip" onclick="delUser(${u.id})">מחק</button>
@@ -331,11 +338,38 @@ async function loadUsers(){
 }
 $('#btn-adduser').onclick=async()=>{
   try{
-    const d=await api('/api/users',{method:'POST',body:JSON.stringify({email:$('#u-email').value,name:$('#u-name').value,role:$('#u-role').value})});
+    const d=await api('/api/users',{method:'POST',body:JSON.stringify({
+      email:$('#u-email').value,first_name:$('#u-first').value,last_name:$('#u-last').value,
+      phone:$('#u-phone').value,role:$('#u-role').value})});
     toast('משתמש נוצר. סיסמה זמנית: '+d.tempPassword);
-    $('#u-email').value='';$('#u-name').value='';loadUsers();
+    ['u-email','u-first','u-last','u-phone'].forEach(i=>$('#'+i).value='');
+    loadUsers();
   }catch(e){toast(e.message);}
 };
+function editUser(id){
+  const u=USERS.find(x=>x.id===id);if(!u)return;
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>עריכת משתמש <span class="muted" dir="ltr">${esc(u.email)}</span></h3>
+    <label class="muted" style="display:block;margin:.9rem 0 .3rem">שם פרטי</label><input id="e-first" value="${esc(u.first_name)}">
+    <label class="muted" style="display:block;margin:.9rem 0 .3rem">שם משפחה</label><input id="e-last" value="${esc(u.last_name)}">
+    <label class="muted" style="display:block;margin:.9rem 0 .3rem">טלפון נייד</label><input id="e-phone" dir="ltr" value="${esc(u.phone)}">
+    <label class="muted" style="display:block;margin:.9rem 0 .3rem">תפקיד</label>
+    <select id="e-role"><option value="agent"${u.role==='agent'?' selected':''}>נציג</option><option value="admin"${u.role==='admin'?' selected':''}>מנהל</option></select>
+    <div class="row" style="margin-top:1.4rem">
+      <button class="btn" onclick="saveUser(${u.id})">שמור</button>
+      <button class="btn-ghost" onclick="closeDrawer()">ביטול</button>
+    </div>`;
+  $('#drawer-wrap').classList.remove('hidden');
+}
+async function saveUser(id){
+  try{
+    await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({
+      first_name:$('#e-first').value,last_name:$('#e-last').value,
+      phone:$('#e-phone').value,role:$('#e-role').value})});
+    toast('נשמר ✓');closeDrawer();loadUsers();
+  }catch(e){toast(e.message);}
+}
 async function toggleUser(id,active){try{await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({is_active:active})});loadUsers();}catch(e){toast(e.message);}}
 async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית: '+d.tempPassword);}catch(e){toast(e.message);}}
 async function delUser(id){if(!confirm('למחוק את המשתמש לצמיתות?'))return;try{await api('/api/users/'+id,{method:'DELETE'});loadUsers();}catch(e){toast(e.message);}}
