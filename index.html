@@ -169,6 +169,10 @@ h1,h2,h3,h4{ font-family:var(--font-display); line-height:1.15; letter-spacing:-
   .hdr-mascot-clip{ width:98px; height:89px; right:-6px; }
   .hdr-mascot-img{ width:98px; top:-64px; }
 }
+/* mobile: header CTA is redundant — the fixed bottom bar already has quote + WhatsApp */
+@media (max-width:768px){
+  .hdr-mascot-wrap{ display:none; }
+}
 
 /* ---------- Hero ---------- */
 .hero{
