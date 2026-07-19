@@ -191,6 +191,12 @@ $('#btn-login').onclick=async()=>{
   const b=$('#btn-login');b.disabled=true;
   try{
     const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:$('#login-email').value,password:$('#login-pass').value})});
+    if(d.ok){ // 2FA disabled — straight in
+      ME=d.user;
+      if(ME.must_change_password){$('#step-login').classList.add('hidden');$('#step-newpass').classList.remove('hidden');}
+      else enterApp();
+      return;
+    }
     PRE=d.pre;
     $('#step-login').classList.add('hidden');$('#step-code').classList.remove('hidden');
     if(!d.emailSent)$('#mail-warn').classList.remove('hidden');

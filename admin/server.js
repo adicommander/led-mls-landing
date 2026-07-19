@@ -79,6 +79,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
   await pool.query('UPDATE users SET failed_attempts=0, locked_until=NULL WHERE id=$1', [user.id]);
 
+  if (process.env.TWOFA_ENABLED === 'false') {
+    setSessionCookie(res, user);
+    await log(user.id, 'login.success', '2fa disabled by config');
+    return res.json({ ok: true, user: publicUser(user) });
+  }
+
   const code = String(crypto.randomInt(100000, 1000000));
   await pool.query('UPDATE login_codes SET used=true WHERE user_id=$1 AND NOT used', [user.id]);
   await pool.query(
