@@ -748,17 +748,41 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   ready(() => {
     const dur = video.duration;
     const isMobile = window.matchMedia('(max-width:760px)').matches;
-    const seekEps = isMobile ? 0.04 : 0.012;
+
+    // Mobile jank fix: keep scrolling on the animation thread so the browser
+    // URL bar never collapses mid-scroll and rendering never pauses during
+    // momentum — the two main causes of stutter on phones.
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    if (isMobile) ScrollTrigger.normalizeScroll(true);
+
+    // Mobile: decouple video seeking from scroll events — a rAF loop eases the
+    // playhead toward the scroll position, so frames advance smoothly instead
+    // of jumping on every scroll tick.
+    let targetT = 0;
+    if (isMobile) {
+      let curT = 0;
+      const tick = () => {
+        curT += (targetT - curT) * 0.22;
+        if (Math.abs(video.currentTime - curT) > 0.033) {
+          if (typeof video.fastSeek === 'function') video.fastSeek(curT);
+          else video.currentTime = curT;
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
 
     ScrollTrigger.create({
       trigger: '#tour-wrap',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: isMobile ? 0.8 : 0.4,
+      scrub: isMobile ? 1 : 0.4,
       onUpdate: self => {
         const p = self.progress;
         const t = p * dur;
-        if (Math.abs(video.currentTime - t) > seekEps) {
+        if (isMobile) {
+          targetT = t;
+        } else if (Math.abs(video.currentTime - t) > 0.012) {
           if (typeof video.fastSeek === 'function') video.fastSeek(t);
           else video.currentTime = t;
         }
