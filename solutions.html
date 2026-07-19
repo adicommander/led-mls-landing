@@ -979,6 +979,17 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
 .card{ border:none; box-shadow:0 1px 0 rgba(0,0,0,0.04); }
 .card:hover{ border:none; box-shadow:0 12px 34px rgba(0,0,0,0.10); }
 .section-alt .card{ background:#FFFFFF; }
+/* ===== Apple 1:1 — no mascots, no floating chrome ===== */
+.whatsapp-float, .instagram-float, #backToTop, #mobileCta{ display:none !important; }
+.hdr-mascot-clip, .cta-mascot, img[src*="mascot"]{ display:none !important; }
+@media (max-width:768px){ body{ padding-bottom:0; } }
+/* generous air + confident type, desktop only */
+@media (min-width:769px){
+  section{ padding:112px 0; }
+  .section-head{ margin-bottom:64px; }
+}
+.hero h1{ font-size:clamp(2.6rem,5vw,4.4rem); }
+.hero p.lead{ font-size:1.25rem; }
 </style>
 </body>
 </html>
