@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool, Client } = require('pg');
 const bcrypt = require('bcryptjs');
 
 // Strip sslmode from the URL so our explicit ssl config below always wins
@@ -11,9 +11,34 @@ const ssl = rawUrl.includes('localhost')
     ? { ca: process.env.DB_CA_CERT }
     : { rejectUnauthorized: false };
 
-// PG 15+ blocks CREATE in schema public for non-owner users (DO dev databases
-// included), so all app tables live in a dedicated "app" schema.
-const pool = new Pool({ connectionString, ssl, options: '-c search_path=app,public' });
+// PG 15+ blocks CREATE in schema public for non-owner users, and DO dev
+// databases restrict CREATE SCHEMA too — so at boot we probe for a schema the
+// app user can actually write to, and route every connection there.
+let appSchema = 'public';
+const pool = new Pool({ connectionString, ssl });
+pool.on('connect', (client) => {
+  client.query(`SET search_path TO "${appSchema}", public`).catch(() => {});
+});
+
+async function resolveSchema() {
+  const probe = new Client({ connectionString, ssl });
+  await probe.connect();
+  try {
+    const who = await probe.query('SELECT current_user, current_database()');
+    console.log('DB user/database:', JSON.stringify(who.rows[0]));
+    const { rows } = await probe.query(`
+      SELECT nspname FROM pg_namespace
+      WHERE has_schema_privilege(current_user, oid, 'CREATE')
+        AND nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'
+      ORDER BY (nspname = 'app') DESC, (nspname = current_user) DESC, (nspname = 'public') DESC`);
+    console.log('Writable schemas:', rows.map(r => r.nspname).join(', ') || '(none)');
+    if (rows.length) return rows[0].nspname;
+    await probe.query('CREATE SCHEMA IF NOT EXISTS app');
+    return 'app';
+  } finally {
+    await probe.end();
+  }
+}
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -78,7 +103,8 @@ CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
 `;
 
 async function init() {
-  await pool.query('CREATE SCHEMA IF NOT EXISTS app');
+  appSchema = await resolveSchema();
+  console.log(`Using schema "${appSchema}" for app tables.`);
   await pool.query(SCHEMA);
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
   if (rows[0].n === 0) {
