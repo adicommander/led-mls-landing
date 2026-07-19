@@ -292,12 +292,148 @@ footer a:hover{color:var(--led-bright)}
   from{opacity:0;transform:translateY(18px)}
   to{opacity:1;transform:translateY(0)}
 }
+
+/* ==== floating LED screen models (background scene) ==== */
+.scene{
+  position:fixed;inset:0;
+  z-index:0;
+  perspective:1400px;
+  pointer-events:none;
+  overflow:hidden;
+}
+.scr{
+  position:absolute;
+  transform:translate3d(var(--px,0px),var(--py,0px),0);
+  transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
+}
+.scr__inner{
+  position:relative;
+  transform-style:preserve-3d;
+  animation:float var(--dur,16s) ease-in-out infinite alternate;
+}
+@keyframes float{
+  from{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-10px)}
+  to{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(14px)}
+}
+.panel{
+  position:relative;
+  background:#000;
+  border:.45rem solid #171009;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,153,0,.14),
+    0 30px 70px rgba(0,0,0,.65),
+    0 0 80px rgba(255,102,0,var(--glow,.22));
+}
+/* the "content" playing on each screen */
+.panel::before{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    radial-gradient(120% 90% at 20% 15%, rgba(255,204,153,.85), transparent 45%),
+    radial-gradient(100% 100% at 85% 80%, #ff9900 0%, transparent 55%),
+    linear-gradient(115deg, #2a1000 0%, #ff6600 35%, #7a2d00 62%, #ffb347 92%);
+  background-size:230% 230%;
+  animation:play var(--play,9s) ease-in-out infinite alternate;
+}
+/* LED pixel + scanline texture over the content */
+.panel::after{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle, rgba(0,0,0,.5) 1px, transparent 1.4px),
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:5px 5px, 100% 3px;
+}
+@keyframes play{
+  from{background-position:0% 0%}
+  to{background-position:100% 100%}
+}
+
+/* — outdoor billboard, right side — */
+.scr--billboard{top:7%;inset-inline-end:-4%;width:min(34vw,520px);opacity:.85}
+.scr--billboard .panel{aspect-ratio:16/9;--glow:.3}
+.scr--billboard .legs{display:flex;justify-content:space-evenly;height:48px}
+.scr--billboard .legs i{width:9px;background:linear-gradient(180deg,#2a1a0c,#0d0704);border-radius:0 0 3px 3px}
+
+/* — modular rental panel hanging on truss, left top — */
+.scr--rental{top:5%;inset-inline-start:-2%;width:min(26vw,400px);opacity:.55;filter:blur(1.4px)}
+.scr--rental .panel{aspect-ratio:4/3;border-radius:4px}
+.scr--rental .panel::before{animation-duration:12s;filter:brightness(.9)}
+.scr--rental .modules{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.65) 0 1px, transparent 1px calc(100%/5)),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.65) 0 1px, transparent 1px calc(100%/4));
+}
+.scr--rental .cables{display:flex;justify-content:space-between;padding:0 16%;height:36px}
+.scr--rental .cables i{width:3px;background:linear-gradient(180deg,rgba(23,16,9,0),#171009)}
+
+/* — advertising poster totem, left bottom — */
+.scr--totem{bottom:9%;inset-inline-start:5%;width:min(13vw,190px);opacity:.8}
+.scr--totem .panel{aspect-ratio:9/19;border-radius:12px;--glow:.28}
+.scr--totem .panel::before{
+  background:
+    radial-gradient(140% 60% at 50% 0%, rgba(255,204,153,.8), transparent 55%),
+    linear-gradient(200deg, #ffb347 0%, #ff6600 42%, #301300 88%);
+  background-size:180% 260%;
+  animation-duration:7s;
+}
+.scr--totem .base{height:12px;margin:8px auto 0;width:74%;background:#171009;border-radius:3px;box-shadow:0 10px 22px rgba(0,0,0,.6)}
+
+/* — indoor wide screen, right bottom (far) — */
+.scr--indoor{bottom:12%;inset-inline-end:7%;width:min(22vw,340px);opacity:.5;filter:blur(2px)}
+.scr--indoor .panel{aspect-ratio:21/9;border-radius:6px}
+.scr--indoor .panel::before{animation-duration:10s;filter:brightness(1.05)}
+
+/* readability veil between the scene and the content */
+.veil{
+  position:fixed;inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:radial-gradient(62% 56% at 50% 46%, rgba(10,6,3,.8), rgba(10,6,3,.35) 62%, transparent 100%);
+}
+
+@media (max-width:760px){
+  .scr--rental,.scr--indoor{display:none}
+  .scr--billboard{inset-inline-end:-22%;width:62vw;opacity:.5;filter:blur(1px)}
+  .scr--totem{width:26vw;bottom:5%;opacity:.45;filter:blur(1px)}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
 }
 </style>
 </head>
 <body>
+
+<div class="scene" aria-hidden="true">
+  <div class="scr scr--rental" data-depth="26">
+    <div class="scr__inner" style="--ry:14deg;--rx:4deg;--dur:19s">
+      <div class="cables"><i></i><i></i></div>
+      <div class="panel" style="--play:12s"><div class="modules"></div></div>
+    </div>
+  </div>
+  <div class="scr scr--billboard" data-depth="14">
+    <div class="scr__inner" style="--ry:-16deg;--rx:2deg;--dur:15s">
+      <div class="panel" style="--play:8s"></div>
+      <div class="legs"><i></i><i></i></div>
+    </div>
+  </div>
+  <div class="scr scr--totem" data-depth="20">
+    <div class="scr__inner" style="--ry:18deg;--dur:13s">
+      <div class="panel" style="--play:7s"></div>
+      <div class="base"></div>
+    </div>
+  </div>
+  <div class="scr scr--indoor" data-depth="34">
+    <div class="scr__inner" style="--ry:-20deg;--rx:-3deg;--dur:17s">
+      <div class="panel" style="--play:10s"></div>
+    </div>
+  </div>
+</div>
+<div class="veil" aria-hidden="true"></div>
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker__track">
@@ -329,15 +465,32 @@ footer a:hover{color:var(--led-bright)}
   </div>
 
   <div class="contact">
-    <a class="btn btn--led" href="mailto:adi@ok2go.co.il">שלחו לנו מייל</a>
+    <a class="btn btn--led" href="mailto:sales@led-mls.co.il">שלחו לנו מייל</a>
     <a class="btn btn--ghost" href="https://www.led-mls.com" target="_blank" rel="noopener">לאתר הבינלאומי ←</a>
   </div>
 </main>
 
 <footer>
   <span class="sig"><b>LED-MLS.co.il</b> © 2026 · כל הזכויות שמורות</span>
-  <span>הנציגות הרשמית של MLS בישראל · הדף הזה זמני — האתר המלא בדרך</span>
+  <span>הנציגות הרשמית של MLS בישראל · <a href="mailto:sales@led-mls.co.il">sales@led-mls.co.il</a></span>
 </footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var screens = document.querySelectorAll('.scr');
+  addEventListener('pointermove', function(e){
+    if (reduce.matches) return;
+    var x = e.clientX / innerWidth - .5;
+    var y = e.clientY / innerHeight - .5;
+    screens.forEach(function(el){
+      var d = parseFloat(el.dataset.depth || 10);
+      el.style.setProperty('--px', (-x * d) + 'px');
+      el.style.setProperty('--py', (-y * d) + 'px');
+    });
+  }, {passive: true});
+})();
+</script>
 
 </body>
 </html>
