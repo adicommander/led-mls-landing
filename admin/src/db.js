@@ -11,7 +11,9 @@ const ssl = rawUrl.includes('localhost')
     ? { ca: process.env.DB_CA_CERT }
     : { rejectUnauthorized: false };
 
-const pool = new Pool({ connectionString, ssl });
+// PG 15+ blocks CREATE in schema public for non-owner users (DO dev databases
+// included), so all app tables live in a dedicated "app" schema.
+const pool = new Pool({ connectionString, ssl, options: '-c search_path=app,public' });
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -76,6 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
 `;
 
 async function init() {
+  await pool.query('CREATE SCHEMA IF NOT EXISTS app');
   await pool.query(SCHEMA);
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
   if (rows[0].n === 0) {
