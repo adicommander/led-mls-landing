@@ -514,6 +514,11 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
             <input id="phone" type="tel" required>
           </div>
 
+          <div style="margin-bottom:18px;">
+            <label for="email">אימייל</label>
+            <input id="email" type="email" inputmode="email" dir="ltr" placeholder="you@example.com">
+          </div>
+
           <div style="margin-bottom:24px;">
             <label for="msg">איזה מסך אתם מחפשים? *</label>
             <textarea id="msg" rows="4" placeholder="לדוגמה: מסך חוץ לחזית חנות, בערך 3x2 מטר..." required></textarea>
@@ -646,6 +651,7 @@ document.querySelectorAll('form[data-demo-form]').forEach(form=>{
     const payload = {
       name: document.getElementById('name').value.trim(),
       phone: document.getElementById('phone').value.trim(),
+      email: document.getElementById('email').value.trim(),
       message: document.getElementById('msg').value.trim(),
       page: location.pathname
     };
