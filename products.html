@@ -1167,6 +1167,14 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
 .cta-band{ display:none; }                      /* repeated "get a quote" bands */
 .hero .btn-ghost{ color:var(--signal-blue); border-color:var(--signal-blue); background:rgba(255,255,255,0.05); font-weight:700; }
 .hero .btn-ghost:hover{ background:var(--signal-blue); color:#fff; border-color:var(--signal-blue); }
+/* ===== eyebrow labels: proper Hebrew typography (no letter tracking) ===== */
+.eyebrow{ font-family:var(--font-body); letter-spacing:normal; text-transform:none; font-size:1rem; font-weight:700; color:var(--signal-blue); gap:12px; }
+.eyebrow::before{ width:28px; height:2px; }
+.hero .eyebrow{ color:var(--pixel-cyan); }
+/* ===== place tool: readable screen-type chips (were black-on-black) ===== */
+.type-chip{ background:#FFFFFF; color:var(--slate-ink); border-color:rgba(0,0,0,0.16); }
+.type-chip:hover{ background:#FFF6F0; border-color:var(--signal-blue); color:var(--signal-blue); }
+.type-chip.active{ background:var(--signal-blue); border-color:var(--signal-blue); color:#fff; }
 </style>
 </body>
 </html>
