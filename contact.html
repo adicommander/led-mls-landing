@@ -942,6 +942,11 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
 .page-hero .container{ text-align:center; }
 .page-hero .eyebrow{ justify-content:center; }
 .page-hero p{ margin-inline:auto; }
+/* ===== single quote CTA (keep only in header) + readable hero catalog button ===== */
+.hero-actions .btn-primary{ display:none; }   /* hero quote btn — header already has it */
+.cta-band{ display:none; }                      /* repeated "get a quote" bands */
+.hero .btn-ghost{ color:var(--signal-blue); border-color:var(--signal-blue); background:rgba(255,255,255,0.05); font-weight:700; }
+.hero .btn-ghost:hover{ background:var(--signal-blue); color:#fff; border-color:var(--signal-blue); }
 </style>
 </body>
 </html>
