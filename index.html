@@ -1277,6 +1277,13 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
 .type-chip{ background:#FFFFFF; color:var(--slate-ink); border-color:rgba(0,0,0,0.16); }
 .type-chip:hover{ background:#FFF6F0; border-color:var(--signal-blue); color:var(--signal-blue); }
 .type-chip.active{ background:var(--signal-blue); border-color:var(--signal-blue); color:#fff; }
+/* ===== brighter, more luminous hero carousel ===== */
+.hero-bg-slide{ filter:brightness(1.22) saturate(1.12) contrast(1.02); }
+.hero-bg-scrim{ background:
+  radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255,106,26,0.16), transparent 60%),
+  linear-gradient(180deg, rgba(10,10,10,0.42) 0%, rgba(10,10,10,0.28) 45%, rgba(10,10,10,0.70) 100%); }
+.hero h1{ text-shadow:0 2px 20px rgba(0,0,0,0.5); }
+.hero p.lead{ text-shadow:0 1px 14px rgba(0,0,0,0.55); }
 </style>
 </body>
 </html>
