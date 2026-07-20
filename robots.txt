@@ -1,0 +1,51 @@
+# MLS ישראל — robots.txt
+# Search engines and AI assistants are welcome to index and cite this site.
+
+User-agent: *
+Allow: /
+
+# --- AI / LLM crawlers (explicitly allowed for GEO) ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# The admin app is not for indexing
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://led-mls.co.il/sitemap.xml
