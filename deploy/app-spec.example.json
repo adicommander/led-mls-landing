@@ -1,0 +1,159 @@
+{
+  "spec": {
+    "name": "led-mls-landing",
+    "region": "fra",
+    "domains": [
+      {
+        "domain": "led-mls.co.il",
+        "type": "PRIMARY",
+        "zone": "led-mls.co.il"
+      },
+      {
+        "domain": "www.led-mls.co.il",
+        "type": "ALIAS",
+        "zone": "led-mls.co.il"
+      }
+    ],
+    "static_sites": [
+      {
+        "name": "site",
+        "git": {
+          "repo_clone_url": "https://github.com/adicommander/led-mls-landing.git",
+          "branch": "main"
+        },
+        "source_dir": "/",
+        "output_dir": "/",
+        "index_document": "index.html",
+        "catchall_document": "index.html"
+      }
+    ],
+    "services": [
+      {
+        "name": "api",
+        "git": {
+          "repo_clone_url": "https://github.com/adicommander/led-mls-landing.git",
+          "branch": "main"
+        },
+        "source_dir": "/admin",
+        "http_port": 8080,
+        "instance_size_slug": "basic-xxs",
+        "instance_count": 1,
+        "envs": [
+          {
+            "key": "JWT_SECRET",
+            "value": "<SET-IN-DO-CONSOLE>",
+            "type": "SECRET"
+          },
+          {
+            "key": "DATABASE_URL",
+            "value": "${maindb.DATABASE_URL}",
+            "scope": "RUN_TIME"
+          },
+          {
+            "key": "DB_CA_CERT",
+            "value": "${maindb.CA_CERT}",
+            "scope": "RUN_TIME"
+          },
+          {
+            "key": "SEED_ADMIN_EMAIL",
+            "value": "adi@led-mls.co.il"
+          },
+          {
+            "key": "SEED_ADMIN_PASSWORD",
+            "value": "<SET-IN-DO-CONSOLE>",
+            "type": "SECRET"
+          },
+          {
+            "key": "LEADS_NOTIFY_EMAIL",
+            "value": "sales@led-mls.co.il"
+          },
+          {
+            "key": "SMTP_HOST",
+            "value": "smtp.office365.com"
+          },
+          {
+            "key": "SMTP_PORT",
+            "value": "587"
+          },
+          {
+            "key": "SMTP_USER",
+            "value": ""
+          },
+          {
+            "key": "SMTP_PASS",
+            "value": "<SET-IN-DO-CONSOLE>",
+            "type": "SECRET"
+          },
+          {
+            "key": "SMTP_FROM",
+            "value": "MLS Israel <adi@led-mls.co.il>"
+          },
+          {
+            "key": "TWOFA_ENABLED",
+            "value": "false"
+          },
+          {
+            "key": "ONESIGNAL_APP_ID",
+            "value": ""
+          },
+          {
+            "key": "ONESIGNAL_API_KEY",
+            "value": "<SET-IN-DO-CONSOLE>",
+            "type": "SECRET"
+          },
+          {
+            "key": "EMAIL_FROM_ADDRESS",
+            "value": "noreply@mail.led-mls.co.il"
+          },
+          {
+            "key": "EMAIL_FROM_NAME",
+            "value": "MLS ישראל"
+          }
+        ]
+      }
+    ],
+    "databases": [
+      {
+        "name": "maindb",
+        "engine": "PG",
+        "production": false
+      }
+    ],
+    "ingress": {
+      "rules": [
+        {
+          "match": {
+            "path": {
+              "prefix": "/api"
+            }
+          },
+          "component": {
+            "name": "api",
+            "preserve_path_prefix": true
+          }
+        },
+        {
+          "match": {
+            "path": {
+              "prefix": "/admin"
+            }
+          },
+          "component": {
+            "name": "api",
+            "preserve_path_prefix": true
+          }
+        },
+        {
+          "match": {
+            "path": {
+              "prefix": "/"
+            }
+          },
+          "component": {
+            "name": "site"
+          }
+        }
+      ]
+    }
+  }
+}
