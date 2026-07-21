@@ -746,25 +746,37 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
 
   ready(() => {
     const dur = video.duration;
+    const fps = 24;
     const isMobile = window.matchMedia('(max-width:760px)').matches;
 
-    // Mobile jank fix: keep scrolling on the animation thread so the browser
-    // URL bar never collapses mid-scroll and rendering never pauses during
-    // momentum — the two main causes of stutter on phones.
+    // Keep scrolling on the animation thread so the mobile URL bar never
+    // collapses mid-scroll and rendering never pauses during momentum.
     ScrollTrigger.config({ ignoreMobileResize: true });
     if (isMobile) ScrollTrigger.normalizeScroll(true);
 
-    // Mobile: decouple video seeking from scroll events — a rAF loop eases the
-    // playhead toward the scroll position, so frames advance smoothly instead
-    // of jumping on every scroll tick.
-    let targetT = 0;
+    // Mobile: a SINGLE smoother. ScrollTrigger maps scroll->progress with no
+    // time-smoothing of its own (scrub:true below); one rAF loop eases the
+    // video playhead toward that target and seeks only when it crosses a new
+    // frame boundary. This removes the previous double-smoothing (which felt
+    // floaty), uses precise currentTime seeks (fastSeek renders imprecisely on
+    // iOS), and waits until the clip is actually decodable before seeking.
+    let targetT = 0, playable = false;
     if (isMobile) {
-      let curT = 0;
+      const markPlayable = () => { playable = true; };
+      if (video.readyState >= 3) playable = true;
+      else {
+        video.addEventListener('canplay', markPlayable, { once: true });
+        video.addEventListener('loadeddata', markPlayable, { once: true });
+      }
+      let curT = 0, lastFrame = -1;
       const tick = () => {
-        curT += (targetT - curT) * 0.22;
-        if (Math.abs(video.currentTime - curT) > 0.033) {
-          if (typeof video.fastSeek === 'function') video.fastSeek(curT);
-          else video.currentTime = curT;
+        if (playable) {
+          curT += (targetT - curT) * 0.3;
+          const frame = Math.round(curT * fps);
+          if (frame !== lastFrame) {
+            lastFrame = frame;
+            video.currentTime = Math.min(dur - 0.001, frame / fps);
+          }
         }
         requestAnimationFrame(tick);
       };
@@ -775,7 +787,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
       trigger: '#tour-wrap',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: isMobile ? 1 : 0.4,
+      scrub: isMobile ? true : 0.4,
       onUpdate: self => {
         const p = self.progress;
         const t = p * dur;
