@@ -585,7 +585,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
       var v=document.getElementById('tourVideo');
       // Load a lighter 540p all-keyframe encode on small screens so scroll-scrubbing stays smooth
       var isMobile = window.matchMedia('(max-width:760px)').matches;
-      v.src = isMobile ? 'assets/video/showcase-tour-mobile-new.mp4' : 'assets/video/showcase-tour-new.mp4';
+      v.src = isMobile ? 'assets/video/showcase-tour-mobile-vertical.mp4' : 'assets/video/showcase-tour-new.mp4';
       v.setAttribute('webkit-playsinline','');
       v.muted = true;
       v.load();
@@ -1285,10 +1285,10 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
   linear-gradient(180deg, rgba(10,10,10,0.42) 0%, rgba(10,10,10,0.28) 45%, rgba(10,10,10,0.70) 100%); }
 .hero h1{ text-shadow:0 2px 20px rgba(0,0,0,0.5); }
 .hero p.lead{ text-shadow:0 1px 14px rgba(0,0,0,0.55); }
-/* mobile: show the FULL landscape tour video (contain, not cropped) on a dark cinematic stage */
+/* mobile: dedicated 9:16 tour video (full scene centered, blurred fill) fills the screen edge-to-edge */
 @media (max-width:760px){
   #tour-pin{ background:#05070C !important; }
-  #tourVideo{ object-fit:contain !important; object-position:center; }
+  #tourVideo{ object-fit:cover !important; object-position:center; }
 }
 </style>
 <style id="ive-bright">
