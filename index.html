@@ -521,10 +521,9 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
 
 <section class="hero">
   <div class="hero-bg-slides" id="heroBgSlides">
-    <div class="hero-bg-slide active" style="background-image:url('assets/images/hero-bg/hero-bg-4-poolside.jpg')"></div>
-    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-1-abstract.jpg')"></div>
-    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-2-storefront.jpg')"></div>
-    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-bg-3-billboard.jpg')"></div>
+    <div class="hero-bg-slide active" style="background-image:url('assets/images/hero-bg/hero-1-bright.jpg')"></div>
+    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-2-bright.jpg')"></div>
+    <div class="hero-bg-slide" style="background-image:url('assets/images/hero-bg/hero-3-bright.jpg')"></div>
   </div>
   <div class="hero-bg-scrim"></div>
   <button class="hero-bg-arrow hero-bg-arrow-prev" id="heroBgPrev" aria-label="תמונה קודמת">‹</button>
@@ -532,8 +531,8 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   <div class="pixel-field"></div>
   <div class="container">
     <div class="eyebrow">MLS ישראל</div>
-    <h1>מסכי LED שאנחנו <span>מייצרים ומתקינים.</span></h1>
-    <p class="lead">אנחנו מייצרים ומתקינים מסכי LED מהמתקדמים בעולם — עם ליווי מקצועי מתחילת הפרויקט ועד ההפעלה, מלאי זמין ומחירים הכי משתלמים בשוק.</p>
+    <h1>מסכי LED. <span>מהמפעל שלנו, לקיר שלכם.</span></h1>
+    <p class="lead">מייצרים בעצמנו. מתקינים בעצמנו. ומלווים אתכם מהרעיון הראשון ועד שהמסך נדלק — עם מלאי זמין ומחיר הוגן.</p>
     <div class="hero-actions">
       <a href="contact.html" class="btn btn-primary">בקשו הצעת מחיר</a>
       <a href="products.html" class="btn btn-ghost">לקטלוג המוצרים</a>
@@ -586,7 +585,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
       var v=document.getElementById('tourVideo');
       // Load a lighter 540p all-keyframe encode on small screens so scroll-scrubbing stays smooth
       var isMobile = window.matchMedia('(max-width:760px)').matches;
-      v.src = isMobile ? 'assets/video/showcase-tour-mobile.mp4' : 'assets/video/showcase-tour.mp4';
+      v.src = isMobile ? 'assets/video/showcase-tour-mobile-new.mp4' : 'assets/video/showcase-tour-new.mp4';
       v.setAttribute('webkit-playsinline','');
       v.muted = true;
       v.load();
@@ -608,38 +607,30 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
       <div class="tour-dot" data-dot="0"><span>01</span></div>
       <div class="tour-dot" data-dot="1"><span>02</span></div>
       <div class="tour-dot" data-dot="2"><span>03</span></div>
-      <div class="tour-dot" data-dot="3"><span>04</span></div>
     </div>
 
     <div class="tour-kicker">MLS ישראל — סיור במוצרים</div>
     <div class="tour-scrollhint"><span>גללו</span><i></i></div>
 
     <div class="tour-caption" data-cap="0">
-      <div class="tour-eyebrow">01 · חלון הראווה</div>
-      <h2 class="tour-title">מסך <span>וילון</span></h2>
-      <p class="tour-sub">מסך שקוף שיושב ישירות על הזכוכית — במקום פוסטר מודבק</p>
-      <div class="tour-specs"><span>שקיפות גבוהה</span><span>התקנה על זכוכית</span></div>
+      <div class="tour-eyebrow">01 · על הבניין</div>
+      <h2 class="tour-title">שלטי <span>חוצות</span></h2>
+      <p class="tour-sub">ענק ובהיר, נראה מרחוק. לגגות, לחזיתות ולצמתים.</p>
+      <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
     </div>
 
     <div class="tour-caption" data-cap="1">
       <div class="tour-eyebrow">02 · ליד הבריכה</div>
-      <h2 class="tour-title">מסך <span>חוץ</span></h2>
-      <p class="tour-sub">עמיד במים ובשמש — בהיר גם באור יום מלא</p>
+      <h2 class="tour-title">מסכי <span>חוץ</span></h2>
+      <p class="tour-sub">עמיד בגשם ובשמש. בהיר וחד גם בצהריים.</p>
       <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
     </div>
 
     <div class="tour-caption" data-cap="2">
-      <div class="tour-eyebrow">03 · על הבניין</div>
-      <h2 class="tour-title">שלטי <span>חוצות</span></h2>
-      <p class="tour-sub">שילוט פרסום ענק שנראה מרחק ניכר — לגגות, קירות חוץ וצמתים מרכזיים</p>
-      <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
-    </div>
-
-    <div class="tour-caption" data-cap="3">
-      <div class="tour-eyebrow">04 · בתוך הווילה</div>
-      <h2 class="tour-title">מסך <span>פנים</span></h2>
-      <p class="tour-sub">שטוח, דק וחד — לצפייה מקרוב</p>
-      <div class="tour-specs"><span>IP30</span><span>400–800 cd/m²</span><span>P1.25–P3.07</span></div>
+      <div class="tour-eyebrow">03 · על הזכוכית</div>
+      <h2 class="tour-title">מסך <span>וילון</span></h2>
+      <p class="tour-sub">שקוף לגמרי. יושב על הזכוכית, ומשאיר לכם את המבט החוצה.</p>
+      <div class="tour-specs"><span>שקיפות גבוהה</span><span>התקנה על זכוכית</span></div>
     </div>
 
   </div>
@@ -653,8 +644,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   }
   .tour-scrim{
     position:absolute; inset:0; pointer-events:none;
-    background:
-      linear-gradient(to top, rgba(5,7,12,0.9) 0%, rgba(5,7,12,0.15) 30%, rgba(5,7,12,0.05) 55%, rgba(5,7,12,0.3) 100%);
+    background:linear-gradient(to top, rgba(8,11,18,0.5) 0%, rgba(8,11,18,0.12) 22%, rgba(8,11,18,0) 42%);
   }
   .tour-kicker{
     position:absolute; top:28px; right:0; left:0; text-align:center;
@@ -742,12 +732,11 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   //   1.15–4.30s  outdoor / pool screen
   //   5.90–8.50s  outdoor / building screen
   //   9.00–10.04s indoor screen
-  const stageAt = [0.04, 0.27, 0.72, 0.95]; // caption "peak" position per stage, as a fraction of duration
+  const stageAt = [0.06, 0.40, 0.90]; // billboard, outdoor, curtain
   const stageActive = [
-    [0.0, 0.082],
-    [0.115, 0.428],
-    [0.588, 0.846],
-    [0.897, 1.0]
+    [0.0, 0.16],
+    [0.24, 0.62],
+    [0.74, 1.0]
   ];
 
   function ready(fn){
@@ -822,7 +811,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   <div class="container">
     <div class="section-head">
       <div class="eyebrow">התהליך שלנו</div>
-      <h2>מרגע הפנייה ועד ההפעלה</h2>
+      <h2>מהשיחה הראשונה ועד שהמסך דולק</h2>
       <p>ליווי צמוד בכל שלב — מהייעוץ הראשוני ועד תמיכה שוטפת אחרי ההתקנה.</p>
     </div>
     <div class="timeline">
@@ -832,12 +821,12 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
         <p>מבינים את הצרכים, השטח, מרחק הצפייה והתקציב שלכם.</p>
       </div>
       <div class="timeline-step" data-reveal>
-        <div class="timeline-img"><img src="assets/images/timeline/step2-planning.jpg" alt="תכנון טכני" loading="lazy"><span class="timeline-num">02</span></div>
+        <div class="timeline-img"><img src="assets/images/timeline/step2-planning-v2.jpg" alt="תכנון טכני" loading="lazy"><span class="timeline-num">02</span></div>
         <h3>תכנון טכני</h3>
-        <p>קביעת פיץ', גודל וקונפיגורציה מדויקים לפרויקט הספציפי.</p>
+        <p>קביעת מרווח הפיקסלים, גודל ותצורה מדויקים לפרויקט הספציפי.</p>
       </div>
       <div class="timeline-step" data-reveal>
-        <div class="timeline-img"><img src="assets/images/timeline/step3-production.jpg" alt="הפקת המסך" loading="lazy"><span class="timeline-num">03</span></div>
+        <div class="timeline-img"><img src="assets/images/timeline/step3-production-v2.jpg" alt="הפקת המסך" loading="lazy"><span class="timeline-num">03</span></div>
         <h3>הפקת המסך</h3>
         <p>אנחנו מייצרים את המסך בהתאם למפרט שסוכם יחד איתכם.</p>
       </div>
@@ -847,7 +836,7 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
         <p>צוות טכני שלנו מבצע את ההתקנה בשטח מקצה לקצה.</p>
       </div>
       <div class="timeline-step" data-reveal>
-        <div class="timeline-img"><img src="assets/images/timeline/step5-testing.jpg" alt="הרצה ובדיקות" loading="lazy"><span class="timeline-num">05</span></div>
+        <div class="timeline-img"><img src="assets/images/timeline/step5-testing-v2.jpg" alt="הרצה ובדיקות" loading="lazy"><span class="timeline-num">05</span></div>
         <h3>הרצה ובדיקות</h3>
         <p>כיול צבע, בהירות ותצוגה — ווידוא שהכול עובד מושלם לפני מסירה.</p>
       </div>
@@ -1284,6 +1273,183 @@ h1,h2,h3,h4{ letter-spacing:-0.02em; }
   linear-gradient(180deg, rgba(10,10,10,0.42) 0%, rgba(10,10,10,0.28) 45%, rgba(10,10,10,0.70) 100%); }
 .hero h1{ text-shadow:0 2px 20px rgba(0,0,0,0.5); }
 .hero p.lead{ text-shadow:0 1px 14px rgba(0,0,0,0.55); }
+</style>
+<style id="ive-bright">
+/* ===== Brightness + consistency + larger headings (Apple pass) ===== */
+/* brighter, cleaner surfaces */
+body{ background:#FFFFFF; }
+.section-alt{ background:#FBFBFD; }
+footer, .form-wrap, .cta-band{ background:#FBFBFD; }
+.card, .section-alt .card{ background:#FFFFFF; box-shadow:0 1px 3px rgba(0,0,0,0.06); border:none; }
+.card:hover{ box-shadow:0 14px 40px rgba(0,0,0,0.10); border:none; }
+.site-header{ background:rgba(255,255,255,0.85); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); }
+.slate-line, hr{ border-color:rgba(0,0,0,0.07); }
+/* larger, confident headings */
+.hero h1{ font-size:clamp(2.9rem,5.4vw,4.8rem); letter-spacing:-0.03em; }
+.page-hero h1{ font-size:clamp(2.4rem,4.4vw,3.6rem); letter-spacing:-0.03em; }
+.section-head h2{ font-size:clamp(2.2rem,3.8vw,3.4rem); letter-spacing:-0.025em; }
+.section-head p{ font-size:1.15rem; }
+.card h3{ font-size:1.35rem; letter-spacing:-0.01em; }
+/* uniform buttons across the whole site */
+.btn{ border-radius:980px; padding:14px 30px; font-size:1rem; font-weight:600; letter-spacing:-0.01em; border:1px solid transparent; transition:transform .15s ease, background .2s ease, box-shadow .2s ease; }
+.btn-primary, .btn-dark{ background:var(--signal-blue); color:#fff; box-shadow:none; }
+.btn-primary:hover, .btn-dark:hover{ background:var(--signal-blue-dim); color:#fff; transform:translateY(-1px); box-shadow:0 6px 18px rgba(255,106,26,0.28); }
+.btn-ghost{ background:#F5F5F7; color:var(--slate-ink); border-color:transparent; }
+.btn-ghost:hover{ background:#ECECEE; color:var(--slate-ink); border-color:transparent; transform:translateY(-1px); }
+.nav-desktop a{ font-weight:500; }
+</style>
+<style id="ive-hero-light">
+/* ===== Bright, Apple-style hero — bright banner images, no filter ===== */
+.hero{ background:#FFFFFF !important; color:var(--slate-ink) !important; border-bottom:1px solid rgba(0,0,0,0.06); padding:118px 0 88px; position:relative; }
+.hero .pixel-field{ display:none !important; }
+.hero-bg-slides{ display:block !important; }
+.hero-bg-slide{ filter:none !important; }
+/* subtle light veil only for text readability */
+.hero-bg-scrim{ display:block !important; background:linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.30)) !important; }
+.hero-bg-arrow{ display:flex !important; color:#1D1D1F !important; background:rgba(255,255,255,0.78) !important; border:1px solid rgba(0,0,0,0.08) !important; }
+.hero-bg-arrow:hover{ background:#fff !important; border-color:var(--signal-blue) !important; }
+.hero .container{ position:relative; z-index:2; }
+.hero .eyebrow{ color:var(--signal-blue) !important; justify-content:center; }
+.hero h1{ color:var(--slate-ink) !important; text-shadow:0 1px 10px rgba(255,255,255,0.55); }
+.hero h1 span{ color:var(--signal-blue) !important; -webkit-text-stroke:0 !important; }
+.hero p.lead{ color:#2c2c2e !important; text-shadow:0 1px 8px rgba(255,255,255,0.5); }
+.hero-stats{ background:rgba(255,255,255,0.45) !important; border:1px solid rgba(0,0,0,0.06) !important; }
+.hero-stats div{ background:rgba(245,245,247,0.94) !important; -webkit-backdrop-filter:blur(6px) !important; backdrop-filter:blur(6px) !important; }
+.hero-stats b{ color:var(--signal-blue) !important; }
+.hero-stats span{ color:var(--slate-mid) !important; }
+.hero .btn-ghost{ background:rgba(255,255,255,0.85) !important; color:var(--slate-ink) !important; border:1px solid transparent !important; font-weight:600 !important; }
+.hero .btn-ghost:hover{ background:#fff !important; color:var(--slate-ink) !important; }
+</style>
+<style id="ive-apple">
+/* ===== Apple-grade refinement: quieter color, larger type, glass + white lift ===== */
+/* quieter orange — accent reserved for CTAs & tiny links only */
+.eyebrow{ color:#86868B !important; font-weight:600 !important; letter-spacing:0.04em !important; font-size:1.05rem !important; }
+.hero .eyebrow, .page-hero .eyebrow{ font-size:1.2rem !important; }
+.hero h1 span, .page-hero h1 span, .section-head h2 span{ color:var(--slate-ink) !important; -webkit-text-stroke:0 !important; }
+.tour-title span{ color:#ffffff !important; -webkit-text-stroke:0 !important; }
+.card .num{ color:#86868B !important; }
+/* bigger, tighter, confident headings (Apple scale) */
+.hero h1{ font-size:clamp(3.4rem,6.6vw,6rem) !important; line-height:1.03 !important; letter-spacing:-0.035em !important; font-weight:800 !important; }
+.page-hero h1{ font-size:clamp(3rem,5.2vw,4.8rem) !important; line-height:1.04 !important; letter-spacing:-0.035em !important; font-weight:800 !important; }
+.section-head h2{ font-size:clamp(2.7rem,4.8vw,4.3rem) !important; line-height:1.06 !important; letter-spacing:-0.03em !important; font-weight:800 !important; }
+.section-head p{ font-size:1.3rem !important; color:var(--slate-mid) !important; line-height:1.5 !important; }
+.hero p.lead{ font-size:1.45rem !important; line-height:1.5 !important; }
+.card h3{ font-size:1.6rem !important; letter-spacing:-0.015em !important; }
+.tour-title{ font-size:clamp(3.2rem,10.5vw,7.5rem) !important; letter-spacing:-0.03em !important; }
+/* premium white lift-shadow on dark headings (pops over imagery, clean over white) */
+.hero h1, .page-hero h1, .section-head h2, .card h3, .cta-band h3{
+  text-shadow:0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(255,255,255,0.55) !important;
+}
+.hero h1{ text-shadow:0 1px 0 rgba(255,255,255,0.95), 0 3px 24px rgba(255,255,255,0.7) !important; }
+strong,b{ font-weight:700; }
+/* Apple frosted-glass sticky header */
+.site-header{
+  background:rgba(255,255,255,0.72) !important;
+  -webkit-backdrop-filter:saturate(180%) blur(20px) !important;
+  backdrop-filter:saturate(180%) blur(20px) !important;
+  border-bottom:1px solid rgba(0,0,0,0.07) !important;
+}
+/* more air */
+@media (min-width:769px){ section:not(#tour-wrap):not(.hero){ padding:132px 0 !important; } .section-head{ margin-bottom:72px !important; } }
+#tour-wrap{ padding:0 !important; margin:0 !important; }
+</style>
+<style id="ive-tour-cap">
+#tour-wrap{ background:#FFFFFF !important; }
+#tour-pin{ background:#FFFFFF; }
+.tour-eyebrow{ display:none !important; }
+.tour-rail{ display:none !important; }
+.tour-title, .tour-eyebrow, .tour-sub{ text-shadow:0 2px 20px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.45); }
+.tour-specs span{ background:rgba(0,0,0,0.28) !important; }
+</style>
+<style id="ive-underline">
+.section-head{ text-align:center !important; margin-inline:auto !important; }
+.section-head .eyebrow{ justify-content:center !important; }
+.hdr-underline{ display:block; width:min(48%,300px); height:18px; margin:18px auto 0; pointer-events:none; }
+.hdr-underline svg{ width:100%; height:100%; overflow:visible; display:block; }
+.hdr-underline path{ fill:none; stroke:#FF6A1A; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1); }
+@media (prefers-reduced-motion:reduce){ .hdr-underline path{ transition:none !important; } }
+</style>
+<script>
+(function(){
+  var heads=document.querySelectorAll(".section-head h2");
+  heads.forEach(function(h){
+    if(h.querySelector(".hdr-underline")) return;
+    var u=document.createElement("span"); u.className="hdr-underline";
+    u.innerHTML='<svg viewBox="0 0 300 18" preserveAspectRatio="none"><path d="M5,12 C58,3 112,17 156,9 C206,2 256,16 295,7"/></svg>';
+    h.appendChild(u);
+    var p=u.querySelector("path"); var len=p.getTotalLength();
+    p.style.strokeDasharray=len; p.style.strokeDashoffset=len; u._p=p;
+  });
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target._p.style.strokeDashoffset="0"; io.unobserve(e.target); } }); },{threshold:0.6});
+    document.querySelectorAll(".hdr-underline").forEach(function(u){ io.observe(u); });
+  } else { document.querySelectorAll(".hdr-underline path").forEach(function(p){ p.style.strokeDashoffset="0"; }); }
+})();
+</script>
+<style id="ive-doodles">
+.sec-doodle{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.has-doodle > .container{ position:relative; z-index:1; }
+.sec-doodle svg{ position:absolute; height:auto; opacity:0.10; }
+.sec-doodle .d-a{ top:8%; right:-8%; width:52%; max-width:640px; }
+.sec-doodle .d-b{ bottom:5%; left:-10%; width:46%; max-width:560px; }
+.sec-doodle path{ fill:none; stroke:#FF6A1A; stroke-width:2.5; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+@media (max-width:768px){ .sec-doodle{ display:none; } }
+</style>
+<script>
+(function(){
+  document.querySelectorAll("section").forEach(function(sec){
+    if(sec.id==="tour-wrap") return;
+    if(!sec.querySelector(".section-head")) return;
+    if(sec.querySelector(".sec-doodle")) return;
+    sec.classList.add("has-doodle");
+    var d=document.createElement("div"); d.className="sec-doodle"; d.setAttribute("aria-hidden","true");
+    d.innerHTML='<svg class="d-a" viewBox="0 0 720 90" preserveAspectRatio="none"><path d="M0,45 C130,-10 270,95 400,35 C520,-15 640,85 720,25"/></svg><svg class="d-b" viewBox="0 0 700 90" preserveAspectRatio="none"><path d="M0,25 C110,85 250,-8 370,52 C490,100 620,12 700,60"/></svg>';
+    sec.insertBefore(d, sec.firstChild);
+  });
+})();
+</script>
+<style id="ive-polish">
+/* ===== Global polish ===== */
+html{ -webkit-text-size-adjust:100%; }
+body{ text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+*{ -webkit-tap-highlight-color:transparent; }
+body{ max-width:100%; }
+/* larger, confident headings */
+.hero h1{ font-size:clamp(3.4rem,7vw,6.4rem) !important; letter-spacing:-0.04em !important; line-height:1.02 !important; }
+.page-hero h1{ font-size:clamp(3rem,5.6vw,5rem) !important; letter-spacing:-0.038em !important; line-height:1.04 !important; }
+.section-head h2{ font-size:clamp(2.6rem,5vw,4.6rem) !important; letter-spacing:-0.032em !important; line-height:1.06 !important; }
+.hero p.lead{ font-size:clamp(1.15rem,1.6vw,1.5rem) !important; }
+.section-head p{ font-size:clamp(1.1rem,1.4vw,1.35rem) !important; }
+.card h3, .product-card-body h3{ font-size:1.6rem !important; }
+/* smoother, premium motion */
+.card, .product-card, .gallery-tile, .btn, .timeline-step, .type-chip{ transition:transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1), background .25s ease, color .2s ease, border-color .2s ease !important; }
+.card:hover, .product-card:hover{ transform:translateY(-6px) !important; box-shadow:0 18px 50px rgba(0,0,0,0.12) !important; }
+[data-reveal]{ transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1) !important; }
+img{ backface-visibility:hidden; }
+/* ===== Mobile responsiveness ===== */
+@media (max-width:768px){
+  section{ padding:64px 0 !important; }
+  .container{ padding:0 20px !important; }
+  .hero{ padding:84px 0 58px !important; }
+  .hero h1{ font-size:clamp(2.4rem,10vw,3.5rem) !important; }
+  .page-hero h1{ font-size:clamp(2.1rem,8.5vw,3rem) !important; }
+  .section-head h2{ font-size:clamp(2rem,8vw,2.9rem) !important; }
+  .hero p.lead, .section-head p{ font-size:1.08rem !important; }
+  .section-head{ margin-bottom:34px !important; }
+  .btn{ min-height:48px; padding:13px 24px !important; }
+  .product-grid{ grid-template-columns:1fr !important; gap:18px !important; }
+  .product-gallery{ grid-template-columns:1fr 1fr !important; gap:12px !important; }
+  .grid-3, .grid-4{ grid-template-columns:1fr !important; }
+  .timeline{ grid-template-columns:1fr !important; }
+  .hero-stats{ grid-template-columns:1fr 1fr !important; }
+  .spec-table{ font-size:0.82rem !important; }
+  .card h3, .product-card-body h3{ font-size:1.35rem !important; }
+  .hdr-underline{ width:min(62%,220px) !important; margin-top:12px !important; }
+}
+@media (max-width:480px){
+  .product-gallery{ grid-template-columns:1fr !important; }
+  .hero h1{ font-size:clamp(2.1rem,11vw,3rem) !important; }
+}
 </style>
 </body>
 </html>
