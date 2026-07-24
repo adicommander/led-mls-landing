@@ -613,16 +613,16 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
     <div class="tour-scrollhint"><span>גללו</span><i></i></div>
 
     <div class="tour-caption" data-cap="0">
-      <div class="tour-eyebrow">01 · על הבניין</div>
-      <h2 class="tour-title">שלטי <span>חוצות</span></h2>
-      <p class="tour-sub">ענק ובהיר, נראה מרחוק. לגגות, לחזיתות ולצמתים.</p>
+      <div class="tour-eyebrow">01 · ליד הבריכה</div>
+      <h2 class="tour-title">מסכי <span>חוץ</span></h2>
+      <p class="tour-sub">עמיד בגשם ובשמש. בהיר וחד גם בצהריים.</p>
       <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
     </div>
 
     <div class="tour-caption" data-cap="1">
-      <div class="tour-eyebrow">02 · ליד הבריכה</div>
-      <h2 class="tour-title">מסכי <span>חוץ</span></h2>
-      <p class="tour-sub">עמיד בגשם ובשמש. בהיר וחד גם בצהריים.</p>
+      <div class="tour-eyebrow">02 · על הבניין</div>
+      <h2 class="tour-title">שלטי <span>חוצות</span></h2>
+      <p class="tour-sub">ענק ובהיר, נראה מרחוק. לגגות, לחזיתות ולצמתים.</p>
       <div class="tour-specs"><span>IP65</span><span>4,500–6,500 cd/m²</span><span>P2–P10</span></div>
     </div>
 
@@ -732,11 +732,13 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
   //   1.15–4.30s  outdoor / pool screen
   //   5.90–8.50s  outdoor / building screen
   //   9.00–10.04s indoor screen
-  const stageAt = [0.06, 0.40, 0.90]; // billboard, outdoor, curtain
+  // mapped to the new footage: 0–2s aerial intro, ~2–4s poolside outdoor screen,
+  // ~4.5–6s building billboard, ~6.5–8.5s glass curtain screen, ~8.5–10s aerial outro
+  const stageAt = [0.29, 0.52, 0.74]; // outdoor, billboard, curtain
   const stageActive = [
-    [0.0, 0.16],
-    [0.24, 0.62],
-    [0.74, 1.0]
+    [0.18, 0.40],
+    [0.45, 0.60],
+    [0.63, 0.85]
   ];
 
   function ready(fn){
