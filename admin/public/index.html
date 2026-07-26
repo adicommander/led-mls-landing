@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>MLS ישראל — מערכת CRM</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0603'/><circle cx='50' cy='50' r='22' fill='%23ff6600'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0d0805;--panel:#160e07;--card:#1d130a;--card2:#241709;--line:rgba(255,170,80,.14);
@@ -125,6 +125,91 @@ tbody tr:hover{background:rgba(255,102,0,.06)}
 .task-item.overdue{border-color:rgba(224,82,82,.5)}
 .checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--led)}
 @media(max-width:760px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line)}aside .logo{display:none}aside .spacer{display:none}main{padding:1rem}}
+</style>
+
+<style id="apple-light">
+/* ===== Apple-inspired light redesign — clean, readable, spacious ===== */
+:root{
+  --bg:#F5F5F7; --panel:#FFFFFF; --card:#FFFFFF; --card2:#F5F5F7;
+  --line:#E7E7EC;
+  --led:#FF6A1A; --led2:#E5560F;
+  --text:#1D1D1F; --dim:#6E6E73;
+  --ok:#2E9E4F; --bad:#D93A3A; --blue:#2F6FE0; --purple:#7A5AF0;
+}
+body{font-family:'Heebo','Assistant',sans-serif;-webkit-font-smoothing:antialiased;color:var(--text);letter-spacing:-0.01em}
+h2.page-title{font-weight:700;letter-spacing:-0.02em}
+h3,h4{letter-spacing:-0.01em}
+
+/* inputs */
+input,textarea,select{background:#FFFFFF;border:1px solid #D9D9E0;border-radius:12px;color:var(--text)}
+input::placeholder,textarea::placeholder{color:#9A9AA0}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--led);box-shadow:0 0 0 3px rgba(255,106,26,.15)}
+
+/* buttons — Apple pill */
+.btn{background:var(--led);color:#fff;border-radius:980px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08);transition:filter .15s ease,transform .1s ease}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.98)}
+.btn-ghost{background:#fff;border:1px solid #D9D9E0;color:var(--text);border-radius:980px}
+.btn-ghost:hover{background:#F0F0F3}
+.chip{border-radius:980px;border:1px solid #DEDEE4;background:#fff;color:var(--dim);transition:background .12s ease}
+.chip:hover{background:#F4F4F6}
+.chip.active{background:rgba(255,106,26,.1);color:var(--led2);border-color:rgba(255,106,26,.4)}
+
+/* surfaces & soft shadows */
+.stat,.panel-box{border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.03)}
+table,.kan-card,.msgbox,.task-item,.bulkbar{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.stat{padding:1.1rem 1.2rem}
+.stat .n{color:var(--text);font-weight:700}
+.stat .n.sm{color:var(--led2)}
+.stat .t{color:var(--dim)}
+th{background:#FAFAFC;color:var(--dim);font-weight:600}
+td{border-bottom:1px solid #EEEEF2}
+tbody tr:hover{background:#FBF7F3}
+
+/* auth */
+.auth{background:radial-gradient(60% 50% at 50% 22%,rgba(255,106,26,.06),transparent 70%),#F5F5F7}
+.auth .card{box-shadow:0 20px 60px rgba(0,0,0,.1);border-radius:22px}
+
+/* sidebar */
+aside{background:#FFFFFF;border-inline-end:1px solid var(--line);box-shadow:1px 0 0 rgba(0,0,0,.03)}
+aside .logo b{color:var(--led)}
+aside button.nav{border-radius:12px}
+aside button.nav.active,aside button.nav:hover{background:rgba(255,106,26,.1);color:var(--text)}
+
+/* funnel + spark */
+.funnel-bar{background:#ECECEF}
+.funnel-bar i{background:linear-gradient(90deg,var(--led),#FF9243)}
+
+/* kanban */
+.kan-col{background:#F0F0F3;border-color:var(--line)}
+.kan-col.dragover{outline-color:var(--led)}
+.kan-card{background:#fff;border-color:var(--line)}
+.kan-card .val{color:var(--led2)}
+
+/* status chips — readable tints on light */
+.st-new{background:#FFF0E6;color:#C4551A}
+.st-contacted{background:#E8F0FE;color:#1E5FD0}
+.st-quoted{background:#F0EAFE;color:#6A45D8}
+.st-negotiation{background:#FFF6E0;color:#9A6B00}
+.st-won{background:#E6F6EA;color:#217A3B}
+.st-lost{background:#FDEBEB;color:#C43333}
+.tag{background:#F0F0F3;color:#6E6E73}
+
+/* popup */
+.overlay{background:rgba(0,0,0,.28);backdrop-filter:blur(6px)}
+.drawer{background:#fff;border:1px solid var(--line);box-shadow:0 30px 90px rgba(0,0,0,.18);border-radius:22px}
+.tabs{border-bottom-color:var(--line)}
+.tabs button.active{color:var(--led2);border-bottom-color:var(--led)}
+.tl-item{border-bottom-color:#EEEEF2}
+.tl-item .dot{background:var(--led)}
+
+/* toast — dark HUD (Apple-style notification) */
+.toast{background:rgba(28,28,30,.94);color:#fff;border:none;box-shadow:0 12px 40px rgba(0,0,0,.28);backdrop-filter:blur(12px);border-radius:14px}
+
+/* misc */
+.badge-count{background:var(--bad)}
+.checkbox{accent-color:var(--led)}
+code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;font-size:.85em}
 </style>
 </head>
 <body>
@@ -296,7 +381,7 @@ async function loadDashboard(){
           <polyline fill="none" stroke="#ff8a1a" stroke-width="1.5" points="${pts}"/>
         </svg>
         <div style="display:flex;gap:1.4rem;margin-top:1rem">
-          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:${s.tasksOverdue?'#ff9d9d':'var(--led2)'}">${s.tasksOverdue}</div><div class="t muted">משימות באיחור</div></div>
+          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:${s.tasksOverdue?'#D93A3A':'var(--led2)'}">${s.tasksOverdue}</div><div class="t muted">משימות באיחור</div></div>
           <div><div class="n" style="font-size:1.3rem;font-weight:700;color:var(--led2)">${s.tasksToday}</div><div class="t muted">משימות להיום</div></div>
         </div>
       </div>
