@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const path = require('path');
-const { pool, init, log } = require('./src/db');
+const { pool, init, log, nextSerial } = require('./src/db');
 const mail = require('./src/mail');
 
 const app = express();
@@ -488,6 +488,172 @@ app.post('/api/leads/bulk-email', auth, async (req, res) => {
   res.json({ ok: true, sent, failed, skipped });
 });
 
+/* ---------- quotes → work orders ---------- */
+
+const QUOTE_STATUSES = ['draft', 'sent', 'accepted', 'rejected', 'ordered'];
+const nis = (n) => '₪' + Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 });
+
+function quoteTotals(items, vatRate) {
+  const list = Array.isArray(items) ? items : [];
+  const subtotal = list.reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.price) || 0), 0);
+  const vat = subtotal * (Number(vatRate) || 0) / 100;
+  return { subtotal, vat, total: subtotal + vat };
+}
+function cleanItems(items) {
+  return (Array.isArray(items) ? items : []).slice(0, 50)
+    .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0 }))
+    .filter(it => it.desc || it.qty || it.price);
+}
+
+// full RTL HTML document — used both for the printable page and the emailed quote
+function quoteDocHtml(q, forPrint) {
+  const isOrder = q.status === 'ordered' && q.order_number;
+  const docTitle = isOrder ? `הזמנת עבודה מס׳ ${q.order_number}` : `הצעת מחיר מס׳ ${q.number}`;
+  const items = Array.isArray(q.items) ? q.items : [];
+  const rows = items.map(it => {
+    const line = (Number(it.qty) || 0) * (Number(it.price) || 0);
+    return `<tr>
+      <td style="padding:12px 14px;border-top:1px solid #eee">${(it.desc || '').replace(/</g, '&lt;')}</td>
+      <td style="padding:12px 14px;border-top:1px solid #eee;text-align:center">${it.qty || 0}</td>
+      <td style="padding:12px 14px;border-top:1px solid #eee">${nis(it.price)}</td>
+      <td style="padding:12px 14px;border-top:1px solid #eee;font-weight:600">${nis(line)}</td></tr>`;
+  }).join('');
+  const dt = (d) => d ? new Date(d).toLocaleDateString('he-IL') : '';
+  return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${docTitle} — MLS ישראל</title>
+<style>
+  body{margin:0;background:#f4f4f6;font-family:'Segoe UI',Arial,sans-serif;color:#1d1d1f}
+  .doc{max-width:720px;margin:24px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+  .doc-head{background:#0a0603;padding:24px 30px;display:flex;align-items:center;justify-content:space-between}
+  .doc-head img{height:46px}
+  .doc-head .num{color:#fff;text-align:end}
+  .doc-head .num b{color:#FF6A1A;font-size:1.1rem;display:block}
+  .doc-body{padding:30px}
+  h1{font-size:1.6rem;margin:0 0 4px}
+  .meta{color:#666;font-size:.9rem;margin-bottom:22px}
+  .party{background:#faf7f4;border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:.92rem}
+  table{width:100%;border-collapse:collapse;font-size:.92rem;border:1px solid #eee;border-radius:12px;overflow:hidden}
+  th{background:#faf7f4;padding:12px 14px;text-align:start;font-size:.8rem;color:#666}
+  .totals{margin-top:18px;margin-inline-start:auto;width:280px;font-size:.95rem}
+  .totals div{display:flex;justify-content:space-between;padding:6px 0}
+  .totals .grand{border-top:2px solid #FF6A1A;margin-top:6px;padding-top:10px;font-weight:800;font-size:1.15rem;color:#FF6A1A}
+  .notes{margin-top:22px;font-size:.88rem;color:#555;line-height:1.6;white-space:pre-wrap}
+  .doc-foot{background:#faf7f4;padding:18px 30px;text-align:center;color:#8a8a8f;font-size:.82rem;border-top:1px solid #eee}
+  .printbtn{display:block;width:max-content;margin:16px auto;background:#FF6A1A;color:#fff;border:none;border-radius:980px;padding:10px 26px;font-size:.95rem;cursor:pointer;text-decoration:none}
+  @media print{body{background:#fff}.doc{box-shadow:none;margin:0;max-width:100%}.printbtn{display:none}}
+</style></head><body>
+<div class="doc">
+  <div class="doc-head"><img src="https://led-mls.co.il/assets/images/logo.png" alt="MLS ישראל"><div class="num"><span>${isOrder ? 'הזמנת עבודה' : 'הצעת מחיר'}</span><b>מס׳ ${isOrder ? q.order_number : q.number}</b></div></div>
+  <div class="doc-body">
+    <h1>${(q.title || docTitle).replace(/</g, '&lt;')}</h1>
+    <div class="meta">תאריך: ${dt(q.created_at)}${q.valid_until && !isOrder ? ` · בתוקף עד: ${dt(q.valid_until)}` : ''}${isOrder ? ` · אושרה: ${dt(q.ordered_at)} · הצעה מקורית מס׳ ${q.number}` : ''}</div>
+    <div class="party"><b>לכבוד:</b> ${(q.lead_name || '').replace(/</g, '&lt;')}${q.lead_phone ? ' · ' + q.lead_phone : ''}${q.lead_email ? ' · ' + q.lead_email : ''}</div>
+    <table><thead><tr><th>פריט</th><th style="text-align:center">כמות</th><th>מחיר יח׳</th><th>סה״כ</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="4" style="padding:14px;color:#999">אין פריטים</td></tr>'}</tbody></table>
+    <div class="totals">
+      <div><span>סכום ביניים</span><span>${nis(q.subtotal)}</span></div>
+      <div><span>מע״מ (${Number(q.vat_rate)}%)</span><span>${nis(q.vat)}</span></div>
+      <div class="grand"><span>סה״כ לתשלום</span><span>${nis(q.total)}</span></div>
+    </div>
+    ${q.notes ? `<div class="notes">${String(q.notes).replace(/</g, '&lt;')}</div>` : ''}
+  </div>
+  <div class="doc-foot">MLS ישראל · מסכי LED מקצועיים · 058-500-8500 · led-mls.co.il</div>
+</div>
+${forPrint ? '<a class="printbtn" href="#" onclick="window.print();return false">🖨️ הדפסה / שמירה כ-PDF</a>' : ''}
+</body></html>`;
+}
+
+app.get('/api/quotes', auth, async (req, res) => {
+  const status = QUOTE_STATUSES.includes(req.query.status) ? req.query.status : null;
+  const params = []; let where = '';
+  if (status) { params.push(status); where = 'WHERE q.status=$1'; }
+  const { rows } = await pool.query(
+    `SELECT q.*, l.name AS lead_name FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id ${where} ORDER BY q.created_at DESC LIMIT 500`, params);
+  res.json({ quotes: rows });
+});
+
+app.get('/api/quotes/:id', auth, async (req, res) => {
+  const q = (await pool.query('SELECT q.*, l.name AS lead_name, l.email AS lead_email, l.phone AS lead_phone FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1', [Number(req.params.id)])).rows[0];
+  if (!q) return res.status(404).json({ error: 'not found' });
+  res.json({ quote: q });
+});
+
+app.post('/api/quotes', auth, async (req, res) => {
+  const leadId = req.body.lead_id ? Number(req.body.lead_id) : null;
+  const title = String(req.body.title || '').trim().slice(0, 200);
+  const items = cleanItems(req.body.items);
+  const vatRate = req.body.vat_rate !== undefined ? (Number(req.body.vat_rate) || 0) : 18;
+  const notes = String(req.body.notes || '').slice(0, 2000);
+  const valid = req.body.valid_until || null;
+  const { subtotal, vat, total } = quoteTotals(items, vatRate);
+  const number = await nextSerial('quote');
+  const { rows } = await pool.query(
+    `INSERT INTO quotes (number, lead_id, created_by, title, items, vat_rate, subtotal, vat, total, notes, valid_until)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+    [number, leadId, req.user.id, title, JSON.stringify(items), vatRate, subtotal, vat, total, notes, valid]);
+  if (leadId) await log(req.user.id, 'quote.created', `הצעת מחיר נוצרה (מס׳ ${number})`, leadId);
+  res.json({ quote: rows[0] });
+});
+
+app.patch('/api/quotes/:id', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const q = (await pool.query('SELECT * FROM quotes WHERE id=$1', [id])).rows[0];
+  if (!q) return res.status(404).json({ error: 'not found' });
+  const title = req.body.title !== undefined ? String(req.body.title).slice(0, 200) : q.title;
+  const items = req.body.items !== undefined ? cleanItems(req.body.items) : q.items;
+  const vatRate = req.body.vat_rate !== undefined ? (Number(req.body.vat_rate) || 0) : Number(q.vat_rate);
+  const notes = req.body.notes !== undefined ? String(req.body.notes).slice(0, 2000) : q.notes;
+  const valid = req.body.valid_until !== undefined ? (req.body.valid_until || null) : q.valid_until;
+  const status = QUOTE_STATUSES.includes(req.body.status) ? req.body.status : q.status;
+  const { subtotal, vat, total } = quoteTotals(items, vatRate);
+  const { rows } = await pool.query(
+    `UPDATE quotes SET title=$1, items=$2, vat_rate=$3, subtotal=$4, vat=$5, total=$6, notes=$7, valid_until=$8, status=$9 WHERE id=$10 RETURNING *`,
+    [title, JSON.stringify(items), vatRate, subtotal, vat, total, notes, valid, status, id]);
+  res.json({ quote: rows[0] });
+});
+
+app.delete('/api/quotes/:id', auth, async (req, res) => {
+  await pool.query('DELETE FROM quotes WHERE id=$1', [Number(req.params.id)]);
+  res.json({ ok: true });
+});
+
+app.post('/api/quotes/:id/send', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const q = (await pool.query('SELECT q.*, l.name AS lead_name, l.email AS lead_email, l.phone AS lead_phone FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1', [id])).rows[0];
+  if (!q) return res.status(404).json({ error: 'not found' });
+  if (!q.lead_email) return res.status(400).json({ error: 'ללקוח אין כתובת מייל' });
+  const result = await mail.send({ to: q.lead_email, subject: `הצעת מחיר מס׳ ${q.number} — MLS ישראל`, text: `הצעת מחיר מס׳ ${q.number}. סה״כ לתשלום: ${nis(q.total)}.`, html: quoteDocHtml(q, false) });
+  if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal מוגדר' });
+  await pool.query(`UPDATE quotes SET status=CASE WHEN status='draft' THEN 'sent' ELSE status END, sent_at=now() WHERE id=$1`, [id]);
+  if (q.lead_id) {
+    await pool.query('INSERT INTO lead_messages (lead_id,user_id,direction,channel,subject,body,delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)', [q.lead_id, req.user.id, `הצעת מחיר ${q.number}`, `הצעת מחיר על סך ${nis(q.total)} נשלחה`]);
+    await log(req.user.id, 'quote.sent', `הצעת מחיר ${q.number} נשלחה ל-${q.lead_email}`, q.lead_id);
+    await pool.query(`UPDATE leads SET status='quoted' WHERE id=$1 AND status IN ('new','contacted')`, [q.lead_id]);
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/quotes/:id/convert', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const q = (await pool.query('SELECT * FROM quotes WHERE id=$1', [id])).rows[0];
+  if (!q) return res.status(404).json({ error: 'not found' });
+  if (q.order_number) return res.status(400).json({ error: 'ההצעה כבר הומרה להזמנת עבודה מס׳ ' + q.order_number });
+  const orderNum = await nextSerial('order');
+  const { rows } = await pool.query(`UPDATE quotes SET status='ordered', order_number=$1, ordered_at=now() WHERE id=$2 RETURNING *`, [orderNum, id]);
+  if (q.lead_id) {
+    await log(req.user.id, 'quote.ordered', `הצעה ${q.number} הומרה להזמנת עבודה מס׳ ${orderNum}`, q.lead_id);
+    await pool.query(`UPDATE leads SET status='won' WHERE id=$1`, [q.lead_id]);
+  }
+  res.json({ quote: rows[0] });
+});
+
+app.get('/api/quotes/:id/print', auth, async (req, res) => {
+  const q = (await pool.query('SELECT q.*, l.name AS lead_name, l.email AS lead_email, l.phone AS lead_phone FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1', [Number(req.params.id)])).rows[0];
+  if (!q) return res.status(404).send('not found');
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  res.send(quoteDocHtml(q, true));
+});
+
 /* ---------- dashboard stats + ui ---------- */
 
 app.get('/api/stats', auth, async (req, res) => {
@@ -514,7 +680,9 @@ app.get('/api/stats', auth, async (req, res) => {
   const wonCount = byStatus.won || 0;
   const lostCount = byStatus.lost || 0;
   const winRate = (wonCount + lostCount) ? Math.round(wonCount * 100 / (wonCount + lostCount)) : 0;
-  res.json({ total, week, byStatus, pipelineValue: valRow.pipeline_value, wonValue: valRow.won_value, forecast, tasksToday, tasksOverdue, winRate, trend });
+  const quotesOpen = (await pool.query(`SELECT COUNT(*)::int AS n FROM quotes WHERE status IN ('draft','sent','accepted')`)).rows[0].n;
+  const ordersRow = (await pool.query(`SELECT COUNT(*)::int AS n, COALESCE(SUM(total),0)::float AS v FROM quotes WHERE status='ordered'`)).rows[0];
+  res.json({ total, week, byStatus, pipelineValue: valRow.pipeline_value, wonValue: valRow.won_value, forecast, tasksToday, tasksOverdue, winRate, trend, quotesOpen, ordersCount: ordersRow.n, ordersValue: ordersRow.v });
 });
 
 app.use('/admin', express.static(path.join(__dirname, 'public'), { index: 'index.html' }));

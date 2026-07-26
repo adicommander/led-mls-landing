@@ -274,6 +274,7 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
     <button class="nav active" data-page="dashboard">📊 דשבורד</button>
     <button class="nav" data-page="pipeline">🗂️ פייפליין</button>
     <button class="nav" data-page="leads">📋 לידים</button>
+    <button class="nav" data-page="quotes">🧾 הצעות מחיר</button>
     <button class="nav" data-page="tasks">✅ משימות <span id="tasks-badge" class="badge-count hidden">0</span></button>
     <button class="nav" data-page="templates">✉️ תבניות</button>
     <button class="nav" data-page="users" id="nav-users">👥 משתמשים</button>
@@ -285,6 +286,7 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
     <div id="page-dashboard"></div>
     <div id="page-pipeline" class="hidden"></div>
     <div id="page-leads" class="hidden"></div>
+    <div id="page-quotes" class="hidden"></div>
     <div id="page-tasks" class="hidden"></div>
     <div id="page-templates" class="hidden"></div>
     <div id="page-users" class="hidden"></div>
@@ -437,10 +439,11 @@ document.querySelectorAll('aside button.nav[data-page]').forEach(btn=>{
 });
 function showPage(name){
   document.querySelectorAll('aside button.nav[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
-  ['dashboard','pipeline','leads','tasks','templates','users','settings'].forEach(p=>$('#page-'+p).classList.toggle('hidden',p!==name));
+  ['dashboard','pipeline','leads','quotes','tasks','templates','users','settings'].forEach(p=>$('#page-'+p).classList.toggle('hidden',p!==name));
   if(name==='dashboard')loadDashboard();
   if(name==='pipeline')loadPipeline();
   if(name==='leads')loadLeads();
+  if(name==='quotes')loadQuotes();
   if(name==='tasks')loadTasks();
   if(name==='templates')loadTemplates();
   if(name==='users')loadUsers();
@@ -472,6 +475,8 @@ async function loadDashboard(){
       <div class="stat"><div class="n sm">${money(s.forecast)}</div><div class="t">תחזית משוקללת</div></div>
       <div class="stat"><div class="n sm">${money(s.wonValue)}</div><div class="t">נסגר בהצלחה (₪)</div></div>
       <div class="stat"><div class="n">${s.winRate}%</div><div class="t">אחוז זכייה</div></div>
+      <div class="stat"><div class="n">${s.quotesOpen||0}</div><div class="t">הצעות מחיר פתוחות</div></div>
+      <div class="stat"><div class="n sm">${s.ordersCount||0} · ${money(s.ordersValue)}</div><div class="t">הזמנות עבודה</div></div>
     </div>
     <div class="grid2">
       <div class="panel-box">
@@ -608,7 +613,7 @@ async function openLead(id){
         <div class="field"><label>צפי סגירה</label><input id="f-close" type="date" value="${l.expected_close?l.expected_close.slice(0,10):''}"></div>
       </div>
       <div class="field"><label>תגיות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
-      <button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button>
+      <div class="row"><button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button><button class="btn-ghost" onclick="editQuote(null,${l.id})">🧾 צור הצעת מחיר</button></div>
     </div>
     <div id="d-timeline" class="tab-pane hidden">
       <div class="row" style="margin-bottom:.6rem"><input id="d-note" placeholder="הוסף הערה..."><button class="btn btn-sm" style="flex:0" onclick="addNote(${l.id})">שמור</button></div>
@@ -668,6 +673,100 @@ async function sendEmail(id){
   try{await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#e-subj').value,body:$('#e-body').value})});toast('המייל נשלח ✓');openLead(id);}
   catch(e){toast(e.message);}
 }
+
+/* ---------- quotes → work orders ---------- */
+const QUOTE_ST={draft:'טיוטה',sent:'נשלחה',accepted:'אושרה',rejected:'נדחתה',ordered:'הזמנת עבודה'};
+const QUOTE_ST_CLASS={draft:'st-new',sent:'st-contacted',accepted:'st-won',rejected:'st-lost',ordered:'st-quoted'};
+const stChipQuote=s=>`<span class="status ${QUOTE_ST_CLASS[s]||''}">${QUOTE_ST[s]||s}</span>`;
+let quoteItems=[],quoteEditId=null,quoteFilter={status:''};
+
+async function loadQuotes(){
+  const p=new URLSearchParams();if(quoteFilter.status)p.set('status',quoteFilter.status);
+  const {quotes}=await api('/api/quotes?'+p);
+  $('#page-quotes').innerHTML=`
+    <h2 class="page-title">הצעות מחיר</h2>
+    <div class="toolbar">
+      <button class="btn btn-sm" onclick="editQuote()">+ הצעה חדשה</button>
+      <button class="chip ${!quoteFilter.status?'active':''}" onclick="setQuoteFilter('')">הכול</button>
+      ${Object.entries(QUOTE_ST).map(([k,v])=>`<button class="chip ${quoteFilter.status===k?'active':''}" onclick="setQuoteFilter('${k}')">${v}</button>`).join('')}
+    </div>
+    <table><thead><tr><th>מס׳</th><th>לקוח</th><th>כותרת</th><th>סה״כ</th><th>סטטוס</th><th>תאריך</th></tr></thead>
+    <tbody>${quotes.map(q=>`<tr onclick="editQuote(${q.id})">
+      <td dir="ltr">${esc(q.status==='ordered'&&q.order_number?('הז׳ '+q.order_number):q.number)}</td>
+      <td>${esc(q.lead_name||'—')}</td><td>${esc(q.title||'')}</td>
+      <td>${money(q.total)}</td><td>${stChipQuote(q.status)}</td><td>${fmtDate(q.created_at)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">אין הצעות מחיר עדיין</td></tr>'}</tbody></table>`;
+}
+function setQuoteFilter(s){quoteFilter.status=s;loadQuotes();}
+function qItemsHtml(){
+  return quoteItems.map((it,i)=>`<div class="row" style="gap:.4rem;margin-bottom:.4rem">
+    <input style="flex:3;min-width:140px" placeholder="תיאור הפריט" value="${esc(it.desc)}" oninput="quoteItems[${i}].desc=this.value">
+    <input style="flex:0;min-width:64px" type="number" min="0" placeholder="כמות" value="${it.qty}" oninput="quoteItems[${i}].qty=+this.value;recalcQuote()">
+    <input style="flex:0;min-width:96px" type="number" min="0" placeholder="מחיר יח׳" value="${it.price}" oninput="quoteItems[${i}].price=+this.value;recalcQuote()">
+    <button class="chip" style="flex:0" onclick="quoteItems.splice(${i},1);renderQuoteItems()">✕</button>
+  </div>`).join('');
+}
+function renderQuoteItems(){$('#q-items').innerHTML=qItemsHtml();recalcQuote();}
+function addQuoteRow(){quoteItems.push({desc:'',qty:1,price:0});renderQuoteItems();}
+function recalcQuote(){
+  const sub=quoteItems.reduce((s,it)=>s+(+it.qty||0)*(+it.price||0),0);
+  const vr=+((document.getElementById('q-vat')||{}).value||0);
+  const vat=sub*vr/100;const el=$('#q-totals');
+  if(el)el.innerHTML=`סכום ביניים: <b>${money(sub)}</b> &nbsp;·&nbsp; מע״מ ${vr}%: <b>${money(vat)}</b> &nbsp;·&nbsp; <span style="color:var(--led2)">סה״כ: <b>${money(sub+vat)}</b></span>`;
+}
+async function editQuote(id,leadId){
+  quoteEditId=id||null;
+  let q=null;
+  const leads=(await api('/api/leads')).leads;
+  if(id){q=(await api('/api/quotes/'+id)).quote;quoteItems=(q.items||[]).map(it=>({desc:it.desc||'',qty:+it.qty||0,price:+it.price||0}));if(!quoteItems.length)quoteItems=[{desc:'',qty:1,price:0}];}
+  else quoteItems=[{desc:'',qty:1,price:0}];
+  const curLead=q?q.lead_id:(leadId||null);
+  const leadOpts='<option value="">— בחר לקוח —</option>'+leads.map(l=>`<option value="${l.id}"${l.id===curLead?' selected':''}>${esc(l.name)}${l.phone?' · '+esc(l.phone):''}</option>`).join('');
+  const validISO=q&&q.valid_until?q.valid_until.slice(0,10):'';
+  const isOrder=q&&q.status==='ordered';
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>${id?('הצעת מחיר מס׳ '+q.number):'הצעת מחיר חדשה'} ${q?stChipQuote(q.status):''}</h3>
+    ${isOrder?`<p class="muted" style="margin-top:.2rem">🔧 הומרה להזמנת עבודה מס׳ <b dir="ltr">${esc(q.order_number)}</b></p>`:''}
+    <div class="field"><label>לקוח</label><select id="q-lead">${leadOpts}</select></div>
+    <div class="field"><label>כותרת ההצעה</label><input id="q-title" value="${esc(q?q.title:'')}" placeholder="לדוגמה: מסך LED לחזית חנות"></div>
+    <label class="muted" style="display:block;margin:.6rem 0 .3rem">פריטים</label>
+    <div id="q-items">${qItemsHtml()}</div>
+    <button class="chip" onclick="addQuoteRow()">+ הוסף שורה</button>
+    <div class="row" style="margin-top:.8rem">
+      <div class="field" style="flex:0;min-width:110px"><label>מע״מ %</label><input id="q-vat" type="number" value="${q?Number(q.vat_rate):18}" oninput="recalcQuote()"></div>
+      ${dateField('q-valid','בתוקף עד',false,validISO)}
+    </div>
+    <div class="field"><label>הערות (תנאי תשלום, אספקה...)</label><textarea id="q-notes" rows="3">${esc(q?q.notes:'')}</textarea></div>
+    <div id="q-totals" class="panel-box" style="margin:.6rem 0;text-align:center"></div>
+    <div class="row">
+      <button class="btn" onclick="saveQuote()">${id?'שמור':'צור הצעה'}</button>
+      ${id?`<button class="btn-ghost" onclick="printQuote(${id})">🖨️ הדפסה/PDF</button>
+        <button class="btn-ghost" onclick="sendQuote(${id})">✉️ שליחה</button>
+        ${!isOrder?`<button class="btn-ghost" onclick="convertQuote(${id})">🔧 להזמנת עבודה</button>`:''}
+        <button class="chip" onclick="delQuote(${id})">מחק</button>`:''}
+    </div>`;
+  $('#drawer-wrap').classList.remove('hidden');recalcQuote();
+}
+async function saveQuote(){
+  const body={lead_id:$('#q-lead').value||null,title:$('#q-title').value,items:quoteItems,vat_rate:+$('#q-vat').value,notes:$('#q-notes').value,valid_until:dateVals['q-valid']||null};
+  try{
+    if(quoteEditId)await api('/api/quotes/'+quoteEditId,{method:'PATCH',body:JSON.stringify(body)});
+    else await api('/api/quotes',{method:'POST',body:JSON.stringify(body)});
+    toast('נשמר ✓');closeDrawer();loadQuotes();
+  }catch(e){toast(e.message);}
+}
+async function sendQuote(id){
+  if(!confirm('לשלוח את הצעת המחיר במייל ללקוח?'))return;
+  try{await api('/api/quotes/'+id+'/send',{method:'POST'});toast('ההצעה נשלחה ✓');editQuote(id);}
+  catch(e){toast(e.message);}
+}
+async function convertQuote(id){
+  if(!confirm('להמיר את ההצעה להזמנת עבודה? פעולה זו תקצה מספר הזמנה ותסמן את הליד כ"נסגר בהצלחה".'))return;
+  try{const r=await api('/api/quotes/'+id+'/convert',{method:'POST'});toast('נוצרה הזמנת עבודה מס׳ '+r.quote.order_number);editQuote(id);}
+  catch(e){toast(e.message);}
+}
+function printQuote(id){window.open('/api/quotes/'+id+'/print','_blank');}
+async function delQuote(id){if(!confirm('למחוק את ההצעה?'))return;await api('/api/quotes/'+id,{method:'DELETE'});closeDrawer();loadQuotes();}
 
 /* ---------- tasks page ---------- */
 let taskScope='open';

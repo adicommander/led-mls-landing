@@ -126,6 +126,31 @@ CREATE TABLE IF NOT EXISTS email_templates (
   body TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS counters (
+  key TEXT PRIMARY KEY,
+  val INT NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS quotes (
+  id SERIAL PRIMARY KEY,
+  number TEXT UNIQUE NOT NULL,
+  lead_id INT REFERENCES leads(id) ON DELETE SET NULL,
+  created_by INT REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL DEFAULT '',
+  items JSONB NOT NULL DEFAULT '[]',
+  vat_rate NUMERIC NOT NULL DEFAULT 18,
+  subtotal NUMERIC NOT NULL DEFAULT 0,
+  vat NUMERIC NOT NULL DEFAULT 0,
+  total NUMERIC NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','sent','accepted','rejected','ordered')),
+  valid_until DATE,
+  order_number TEXT,
+  ordered_at TIMESTAMPTZ,
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_quotes_lead ON quotes(lead_id);
+CREATE INDEX IF NOT EXISTS idx_quotes_created ON quotes(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tasks_due ON tasks(due_date) WHERE NOT done;
@@ -264,4 +289,13 @@ async function log(userId, action, detail = '', leadId = null) {
   }
 }
 
-module.exports = { pool, init, log };
+// atomic per-year serial numbers, e.g. nextSerial('quote') -> "2026-0007"
+async function nextSerial(kind) {
+  const year = new Date().getFullYear();
+  const key = `${kind}-${year}`;
+  const { rows } = await pool.query(
+    `INSERT INTO counters(key,val) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET val=counters.val+1 RETURNING val`, [key]);
+  return `${year}-${String(rows[0].val).padStart(4, '0')}`;
+}
+
+module.exports = { pool, init, log, nextSerial };
