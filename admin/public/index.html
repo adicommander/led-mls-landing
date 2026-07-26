@@ -293,6 +293,24 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
 .stat.clk:hover::after{opacity:.7}
 .funnel-row.clk{cursor:pointer;border-radius:8px;transition:background .12s;padding:2px 4px;margin-inline:-4px}
 .funnel-row.clk:hover{background:#faf3ee}
+
+/* ===== mobile hamburger sidebar ===== */
+.mobile-topbar{display:none}
+#side-overlay{display:none}
+.hamburger{background:transparent;border:none;font-size:1.6rem;line-height:1;color:var(--text);padding:.2rem .5rem;cursor:pointer}
+@media(max-width:760px){
+  .shell{grid-template-columns:1fr}
+  .mobile-topbar{display:flex;align-items:center;gap:.7rem;position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--line);padding:.55rem .9rem}
+  .mobile-topbar .logo{display:block;margin:0;font-size:1.05rem}
+  aside{position:fixed;top:0;bottom:0;right:0;left:auto;width:260px;max-width:82vw;height:100vh;transform:translateX(100%);transition:transform .25s ease;z-index:70;flex-direction:column;overflow-y:auto;border:none;border-inline-start:1px solid var(--line);box-shadow:-10px 0 34px rgba(0,0,0,.14);padding:1.1rem 1rem;gap:.25rem}
+  aside.open{transform:translateX(0)}
+  aside .logo{display:block;margin-bottom:1rem}
+  aside .spacer{display:block;flex:1}
+  aside button.nav{white-space:nowrap;font-size:.98rem;padding:.7rem .9rem}
+  #side-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:65;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+  #side-overlay.show{opacity:1;pointer-events:auto}
+  main{padding:.9rem}
+}
 </style>
 </head>
 <body>
@@ -323,7 +341,12 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
 </div>
 
 <div id="view-app" class="shell hidden">
-  <aside>
+  <div class="mobile-topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="תפריט">☰</button>
+    <div class="logo">MLS <b>ישראל</b></div>
+  </div>
+  <div id="side-overlay" onclick="toggleSidebar(false)"></div>
+  <aside id="sidebar">
     <div class="logo">MLS <b>ישראל</b></div>
     <button class="nav active" data-page="dashboard">📊 דשבורד</button>
     <button class="nav" data-page="pipeline">🗂️ פייפליין</button>
@@ -505,6 +528,14 @@ function showPage(name){
   if(name==='templates')loadTemplates();
   if(name==='users')loadUsers();
   if(name==='settings')loadSettings();
+  toggleSidebar(false);
+}
+function toggleSidebar(force){
+  const a=document.getElementById('sidebar'),o=document.getElementById('side-overlay');
+  if(!a)return;
+  const open=force===undefined?!a.classList.contains('open'):force;
+  a.classList.toggle('open',open);
+  if(o)o.classList.toggle('show',open);
 }
 
 async function refreshTaskBadge(){
