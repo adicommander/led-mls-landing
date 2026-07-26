@@ -247,6 +247,52 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
 .cal-time select{width:auto;padding:.4rem .6rem}
 .cal-actions{display:flex;gap:.5rem;margin-top:.9rem}
 .cal-actions .btn{flex:1}
+
+/* ===== pipeline: fit all stages on screen (no horizontal scroll); stack on mobile ===== */
+.kanban{overflow-x:visible;gap:.5rem}
+.kan-col{flex:1 1 0;min-width:0;padding:.6rem}
+.kan-card{padding:.55rem}
+.kan-card .nm{font-size:.85rem;word-break:break-word}
+
+/* ===== full responsive pass ===== */
+@media(max-width:900px){
+  .kanban{flex-wrap:wrap}
+  .kan-col{flex:1 1 30%;min-width:150px}
+}
+@media(max-width:760px){
+  main{padding:.9rem}
+  aside{position:sticky;top:0;z-index:50;gap:.2rem;padding:.5rem .6rem}
+  aside button.nav{padding:.5rem .7rem;font-size:.9rem;white-space:nowrap}
+  h2.page-title{font-size:1.15rem;margin-bottom:.9rem}
+  .stats{grid-template-columns:1fr 1fr;gap:.6rem}
+  .stat{padding:.8rem .9rem}
+  .stat .n{font-size:1.3rem}
+  .drawer{width:96vw;max-height:92vh;padding:1.1rem;border-radius:18px}
+  .toolbar{gap:.4rem}
+  .toolbar input.search{max-width:100%;flex:1 1 100%}
+  table,thead,tbody,th,td,tr{font-size:.86rem}
+  th,td{padding:.55rem .5rem}
+  .hide-sm{display:none!important}
+  /* pipeline: stack vertically, each stage full width */
+  .kanban{flex-direction:column;flex-wrap:nowrap}
+  .kan-col{flex:none;width:100%;min-width:0}
+  .kan-col .col-sum{margin-bottom:.4rem}
+  .row{gap:.5rem}
+  .row>*{min-width:0}
+  .field{min-width:0}
+}
+@media(max-width:420px){
+  .stats{grid-template-columns:1fr}
+}
+
+/* clickable 3D dashboard tiles */
+.stat.clk{cursor:pointer;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s ease;position:relative}
+.stat.clk:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 38px rgba(0,0,0,.15)}
+.stat.clk:active{transform:translateY(-1px) scale(.99)}
+.stat.clk::after{content:'‹';position:absolute;top:.6rem;inset-inline-start:.7rem;color:var(--led);opacity:0;transition:opacity .18s;font-size:1.1rem}
+.stat.clk:hover::after{opacity:.7}
+.funnel-row.clk{cursor:pointer;border-radius:8px;transition:background .12s;padding:2px 4px;margin-inline:-4px}
+.funnel-row.clk:hover{background:#faf3ee}
 </style>
 </head>
 <body>
@@ -480,20 +526,20 @@ async function loadDashboard(){
   $('#page-dashboard').innerHTML=`
     <h2 class="page-title">דשבורד</h2>
     <div class="stats">
-      <div class="stat"><div class="n">${s.total}</div><div class="t">סה״כ לידים</div></div>
-      <div class="stat"><div class="n">${s.week}</div><div class="t">חדשים השבוע</div></div>
-      <div class="stat"><div class="n sm">${money(s.pipelineValue)}</div><div class="t">שווי פייפליין פתוח</div></div>
-      <div class="stat"><div class="n sm">${money(s.forecast)}</div><div class="t">תחזית משוקללת</div></div>
-      <div class="stat"><div class="n sm">${money(s.wonValue)}</div><div class="t">נסגר בהצלחה (₪)</div></div>
-      <div class="stat"><div class="n">${s.winRate}%</div><div class="t">אחוז זכייה</div></div>
-      <div class="stat"><div class="n">${s.quotesOpen||0}</div><div class="t">הצעות מחיר פתוחות</div></div>
-      <div class="stat"><div class="n sm">${s.ordersCount||0} · ${money(s.ordersValue)}</div><div class="t">הזמנות עבודה</div></div>
+      <div class="stat clk" onclick="goLeads('')"><div class="n">${s.total}</div><div class="t">סה״כ לידים</div></div>
+      <div class="stat clk" onclick="goLeads('')"><div class="n">${s.week}</div><div class="t">חדשים השבוע</div></div>
+      <div class="stat clk" onclick="showPage('pipeline')"><div class="n sm">${money(s.pipelineValue)}</div><div class="t">שווי פייפליין פתוח</div></div>
+      <div class="stat clk" onclick="showPage('pipeline')"><div class="n sm">${money(s.forecast)}</div><div class="t">תחזית משוקללת</div></div>
+      <div class="stat clk" onclick="goLeads('won')"><div class="n sm">${money(s.wonValue)}</div><div class="t">נסגר בהצלחה (₪)</div></div>
+      <div class="stat clk" onclick="goLeads('won')"><div class="n">${s.winRate}%</div><div class="t">אחוז זכייה</div></div>
+      <div class="stat clk" onclick="goQuotes('')"><div class="n">${s.quotesOpen||0}</div><div class="t">הצעות מחיר פתוחות</div></div>
+      <div class="stat clk" onclick="goQuotes('ordered')"><div class="n sm">${s.ordersCount||0} · ${money(s.ordersValue)}</div><div class="t">הזמנות עבודה</div></div>
     </div>
     <div class="grid2">
       <div class="panel-box">
-        <h3>משפך פייפליין</h3>
+        <h3>משפך פייפליין <span class="muted" style="font-weight:400;font-size:.8rem">· לחצו לסינון</span></h3>
         ${STAGES.map(k=>{const n=s.byStatus[k]||0;return `
-          <div class="funnel-row"><span class="lbl">${STAGE_HE[k]}</span>
+          <div class="funnel-row clk" onclick="goLeads('${k}')"><span class="lbl">${STAGE_HE[k]}</span>
           <div class="funnel-bar"><i style="width:${n/maxFunnel*100}%"></i></div>
           <span class="v">${n}</span></div>`;}).join('')}
       </div>
@@ -502,14 +548,17 @@ async function loadDashboard(){
         <svg class="spark" viewBox="0 0 100 60" preserveAspectRatio="none">
           <polyline fill="none" stroke="#ff8a1a" stroke-width="1.5" points="${pts}"/>
         </svg>
-        <div style="display:flex;gap:1.4rem;margin-top:1rem">
-          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:${s.tasksOverdue?'#D93A3A':'var(--led2)'}">${s.tasksOverdue}</div><div class="t muted">משימות באיחור</div></div>
-          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:var(--led2)">${s.tasksToday}</div><div class="t muted">משימות להיום</div></div>
+        <div style="display:flex;gap:1rem;margin-top:1rem">
+          <div class="stat clk" style="flex:1" onclick="goTasks('overdue')"><div class="n" style="font-size:1.3rem;color:${s.tasksOverdue?'#D93A3A':'var(--led2)'}">${s.tasksOverdue}</div><div class="t">משימות באיחור</div></div>
+          <div class="stat clk" style="flex:1" onclick="goTasks('today')"><div class="n" style="font-size:1.3rem;color:var(--led2)">${s.tasksToday}</div><div class="t">משימות להיום</div></div>
         </div>
       </div>
     </div>`;
   refreshTaskBadge();
 }
+function goLeads(st){leadFilter.status=st;leadFilter.q='';showPage('leads');}
+function goQuotes(st){quoteFilter.status=st;showPage('quotes');}
+function goTasks(sc){taskScope=sc;showPage('tasks');}
 
 /* ---------- pipeline (kanban) ---------- */
 async function loadPipeline(){
@@ -557,7 +606,7 @@ async function loadLeads(){
     </div>
     <div style="overflow-x:auto">
     <table>
-      <thead><tr><th style="width:28px"></th><th>שם</th><th>טלפון</th><th>אימייל</th><th>עיר</th><th>שלב</th><th>התעניינות</th><th>מטפל</th><th>התקבל</th></tr></thead>
+      <thead><tr><th style="width:28px"></th><th>שם</th><th>טלפון</th><th class="hide-sm">אימייל</th><th class="hide-sm">עיר</th><th>שלב</th><th class="hide-sm">התעניינות</th><th class="hide-sm">מטפל</th><th class="hide-sm">התקבל</th></tr></thead>
       <tbody id="leads-body"></tbody>
     </table>
     </div>
@@ -567,12 +616,12 @@ async function loadLeads(){
       <td onclick="event.stopPropagation()"><input type="checkbox" class="checkbox" onchange="toggleSel(${l.id},this.checked)"></td>
       <td onclick="openLead(${l.id})">${esc(l.name)}</td>
       <td onclick="openLead(${l.id})" dir="ltr">${esc(l.phone)}</td>
-      <td onclick="openLead(${l.id})" dir="ltr">${esc(l.email)||'—'}</td>
-      <td onclick="openLead(${l.id})">${esc(l.city)||'—'}</td>
+      <td class="hide-sm" onclick="openLead(${l.id})" dir="ltr">${esc(l.email)||'—'}</td>
+      <td class="hide-sm" onclick="openLead(${l.id})">${esc(l.city)||'—'}</td>
       <td onclick="openLead(${l.id})">${stChip(l.status)}</td>
-      <td onclick="openLead(${l.id})">${(l.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')||'—'}</td>
-      <td onclick="openLead(${l.id})">${esc(l.assigned_name||'—')}</td>
-      <td onclick="openLead(${l.id})">${fmtDate(l.created_at)}</td>
+      <td class="hide-sm" onclick="openLead(${l.id})">${(l.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')||'—'}</td>
+      <td class="hide-sm" onclick="openLead(${l.id})">${esc(l.assigned_name||'—')}</td>
+      <td class="hide-sm" onclick="openLead(${l.id})">${fmtDate(l.created_at)}</td>
     </tr>`).join('')||'<tr><td colspan="9" class="muted">אין לידים</td></tr>';
   let qT;$('#q').oninput=e=>{clearTimeout(qT);qT=setTimeout(()=>{leadFilter.q=e.target.value;loadLeads();},350);};
 }
@@ -1053,34 +1102,55 @@ async function loadUsers(){
   USERS=(await api('/api/users')).users;
   $('#page-users').innerHTML=`
     <h2 class="page-title">משתמשים</h2>
-    <div class="toolbar">
-      <input id="u-email" placeholder="email@example.com" style="max-width:200px" dir="ltr">
-      <input id="u-first" placeholder="שם פרטי" style="max-width:120px">
-      <input id="u-last" placeholder="שם משפחה" style="max-width:120px">
-      <input id="u-phone" placeholder="טלפון" style="max-width:130px" dir="ltr">
-      <select id="u-role" style="max-width:110px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
-      <button class="btn btn-sm" onclick="addUser()">הוסף</button>
-    </div>
+    <div class="toolbar"><button class="btn btn-sm" onclick="editUser()">+ הוסף משתמש</button></div>
     <table>
       <thead><tr><th>אימייל</th><th>שם</th><th>טלפון</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
-      <tbody>${USERS.map(u=>`<tr>
+      <tbody>${USERS.map(u=>`<tr onclick="editUser(${u.id})">
         <td dir="ltr">${esc(u.email)}</td><td>${esc(u.name)}</td><td dir="ltr">${esc(u.phone)||'—'}</td>
         <td>${u.role==='admin'?'מנהל':'נציג'}</td><td>${u.is_active?'✓':'✗'}</td>
-        <td style="white-space:nowrap">
-          <button class="chip" onclick="toggleUser(${u.id},${!u.is_active})">${u.is_active?'השבת':'הפעל'}</button>
-          <button class="chip" onclick="resetUser(${u.id})">איפוס סיסמה</button>
-          <button class="chip" onclick="delUser(${u.id})">מחק</button>
+        <td style="white-space:nowrap" onclick="event.stopPropagation()">
+          <button class="chip" onclick="editUser(${u.id})">עריכה</button>
+          <button class="chip" style="color:#C43333;border-color:rgba(217,58,58,.4)" onclick="delUser(${u.id})">מחק</button>
         </td></tr>`).join('')}</tbody>
     </table>`;
 }
-async function addUser(){
+function editUser(id){
+  const u=id?USERS.find(x=>x.id===id):{email:'',first_name:'',last_name:'',phone:'',role:'agent',is_active:true};
+  if(!u)return;
+  const isSelf=id&&ME&&id===ME.id;
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>${id?'עריכת משתמש':'משתמש חדש'}</h3>
+    <div class="row">
+      <div class="field"><label>שם פרטי</label><input id="u-first" value="${esc(u.first_name)}"></div>
+      <div class="field"><label>שם משפחה</label><input id="u-last" value="${esc(u.last_name)}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>אימייל</label><input id="u-email" type="email" dir="ltr" value="${esc(u.email)}"></div>
+      <div class="field"><label>טלפון</label><input id="u-phone" dir="ltr" value="${esc(u.phone)}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>תפקיד</label><select id="u-role"><option value="agent"${u.role==='agent'?' selected':''}>נציג</option><option value="admin"${u.role==='admin'?' selected':''}>מנהל</option></select></div>
+      ${id?`<div class="field"><label>סטטוס</label><select id="u-active"${isSelf?' disabled':''}><option value="1"${u.is_active?' selected':''}>פעיל</option><option value="0"${!u.is_active?' selected':''}>מושבת</option></select></div>`:''}
+    </div>
+    <div class="field"><label>${id?'שינוי סיסמה (השאר ריק כדי לא לשנות)':'סיסמה (השאר ריק לסיסמה אקראית שתישלח במייל)'}</label><input id="u-pass" type="text" dir="ltr" placeholder="8+ תווים" autocomplete="new-password"></div>
+    <div class="row" style="margin-top:.6rem">
+      <button class="btn" onclick="saveUser(${id||0})">שמור</button>
+      ${id?`<button class="btn-ghost" onclick="resetUser(${id})">🔑 אפס סיסמה ושלח במייל</button>`:''}
+    </div>`;
+  $('#drawer-wrap').classList.remove('hidden');
+}
+async function saveUser(id){
+  const body={email:$('#u-email').value,first_name:$('#u-first').value,last_name:$('#u-last').value,phone:$('#u-phone').value,role:$('#u-role').value};
+  const pass=$('#u-pass').value.trim();if(pass)body.password=pass;
+  if(id&&$('#u-active'))body.is_active=$('#u-active').value==='1';
   try{
-    const d=await api('/api/users',{method:'POST',body:JSON.stringify({email:$('#u-email').value,first_name:$('#u-first').value,last_name:$('#u-last').value,phone:$('#u-phone').value,role:$('#u-role').value})});
-    toast('משתמש נוצר. סיסמה זמנית: '+d.tempPassword);loadUsers();
+    if(id){await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify(body)});toast(pass?'נשמר · הסיסמה עודכנה ✓':'נשמר ✓');}
+    else{const d=await api('/api/users',{method:'POST',body:JSON.stringify(body)});toast(d.tempPassword?('המשתמש נוצר. סיסמה זמנית: '+d.tempPassword):'המשתמש נוצר ✓');}
+    closeDrawer();loadUsers();
   }catch(e){toast(e.message);}
 }
-async function toggleUser(id,a){try{await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({is_active:a})});loadUsers();}catch(e){toast(e.message);}}
-async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית: '+d.tempPassword);}catch(e){toast(e.message);}}
+async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית נשלחה במייל: '+d.tempPassword);}catch(e){toast(e.message);}}
 async function delUser(id){if(!confirm('למחוק את המשתמש?'))return;try{await api('/api/users/'+id,{method:'DELETE'});loadUsers();}catch(e){toast(e.message);}}
 
 /* ---------- settings ---------- */

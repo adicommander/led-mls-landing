@@ -157,19 +157,23 @@ app.post('/api/users', auth, adminOnly, async (req, res) => {
   const name = `${firstName} ${lastName}`.trim();
   const role = req.body.role === 'admin' ? 'admin' : 'agent';
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'כתובת מייל לא תקינה' });
-  const temp = crypto.randomBytes(9).toString('base64url');
-  const hash = await bcrypt.hash(temp, 12);
+  // admin may choose a password; otherwise a random temp is generated + emailed
+  const chosen = String(req.body.password || '');
+  if (chosen && chosen.length < 8) return res.status(400).json({ error: 'סיסמה חייבת להיות באורך 8 תווים לפחות' });
+  const pw = chosen || crypto.randomBytes(9).toString('base64url');
+  const mustChange = chosen ? false : true;
+  const hash = await bcrypt.hash(pw, 12);
   try {
     const { rows } = await pool.query(
-      `INSERT INTO users (email, name, first_name, last_name, phone, password_hash, role, must_change_password) VALUES ($1,$2,$3,$4,$5,$6,$7,true) RETURNING *`,
-      [email, name, firstName, lastName, phone, hash, role]);
+      `INSERT INTO users (email, name, first_name, last_name, phone, password_hash, role, must_change_password) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [email, name, firstName, lastName, phone, hash, role, mustChange]);
     await mail.send({
       to: email,
       subject: 'הוזמנת למערכת הניהול של MLS ישראל',
-      text: `שלום ${name},\nנוצר עבורך משתמש במערכת הניהול: https://led-mls.co.il/admin\nשם משתמש: ${email}\nסיסמה זמנית: ${temp}\nתתבקש להחליף אותה בכניסה הראשונה.`,
+      text: `שלום ${name},\nנוצר עבורך משתמש במערכת הניהול: https://led-mls.co.il/admin\nשם משתמש: ${email}\nסיסמה: ${pw}\n${mustChange ? 'תתבקש להחליף אותה בכניסה הראשונה.' : ''}`,
     });
     await log(req.user.id, 'user.created', email);
-    res.json({ user: publicUser(rows[0]), tempPassword: temp });
+    res.json({ user: publicUser(rows[0]), tempPassword: chosen ? null : pw });
   } catch (e) {
     if (String(e.message).includes('duplicate')) return res.status(409).json({ error: 'משתמש עם המייל הזה כבר קיים' });
     throw e;
@@ -180,6 +184,8 @@ app.patch('/api/users/:id', auth, adminOnly, async (req, res) => {
   const id = Number(req.params.id);
   const target = (await pool.query('SELECT * FROM users WHERE id=$1', [id])).rows[0];
   if (!target) return res.status(404).json({ error: 'not found' });
+  const email = req.body.email !== undefined ? String(req.body.email).toLowerCase().trim() : target.email;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'כתובת מייל לא תקינה' });
   const firstName = req.body.first_name !== undefined ? String(req.body.first_name).trim() : target.first_name;
   const lastName = req.body.last_name !== undefined ? String(req.body.last_name).trim() : target.last_name;
   const phone = req.body.phone !== undefined ? String(req.body.phone).trim() : target.phone;
@@ -190,18 +196,31 @@ app.patch('/api/users/:id', auth, adminOnly, async (req, res) => {
     return res.status(400).json({ error: 'לא ניתן להשבית או להוריד הרשאות לעצמך' });
   }
   let resetInfo = {};
-  if (req.body.reset_password) {
+  // explicit admin-chosen password
+  if (req.body.password) {
+    const p = String(req.body.password);
+    if (p.length < 8) return res.status(400).json({ error: 'סיסמה חייבת להיות באורך 8 תווים לפחות' });
+    const hash = await bcrypt.hash(p, 12);
+    await pool.query('UPDATE users SET password_hash=$1, must_change_password=false WHERE id=$2', [hash, id]);
+    await log(req.user.id, 'user.password_set', target.email);
+  } else if (req.body.reset_password) {
+    // random reset + email
     const temp = crypto.randomBytes(9).toString('base64url');
     const hash = await bcrypt.hash(temp, 12);
     await pool.query('UPDATE users SET password_hash=$1, must_change_password=true WHERE id=$2', [hash, id]);
-    await mail.send({ to: target.email, subject: 'איפוס סיסמה — מערכת הניהול MLS ישראל', text: `סיסמה זמנית חדשה: ${temp}` });
+    await mail.send({ to: email, subject: 'איפוס סיסמה — מערכת הניהול MLS ישראל', text: `סיסמה זמנית חדשה: ${temp}` });
     resetInfo = { tempPassword: temp };
   }
-  const { rows } = await pool.query(
-    'UPDATE users SET name=$1, first_name=$2, last_name=$3, phone=$4, role=$5, is_active=$6 WHERE id=$7 RETURNING *',
-    [name, firstName, lastName, phone, role, active, id]);
-  await log(req.user.id, 'user.updated', target.email);
-  res.json({ user: publicUser(rows[0]), ...resetInfo });
+  try {
+    const { rows } = await pool.query(
+      'UPDATE users SET email=$1, name=$2, first_name=$3, last_name=$4, phone=$5, role=$6, is_active=$7 WHERE id=$8 RETURNING *',
+      [email, name, firstName, lastName, phone, role, active, id]);
+    await log(req.user.id, 'user.updated', email);
+    res.json({ user: publicUser(rows[0]), ...resetInfo });
+  } catch (e) {
+    if (String(e.message).includes('duplicate')) return res.status(409).json({ error: 'משתמש עם המייל הזה כבר קיים' });
+    throw e;
+  }
 });
 
 app.delete('/api/users/:id', auth, adminOnly, async (req, res) => {
