@@ -13,7 +13,10 @@ const transporter = smtpConfigured
     })
   : null;
 
-const FROM = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@led-mls.co.il';
+// Two sender identities: system mail (2FA, invites, reminders) from info@,
+// sales mail (quotes, customer emails, lead alerts) from sales@.
+const FROM_SYSTEM = process.env.EMAIL_FROM_SYSTEM || process.env.SMTP_FROM || 'MLS ישראל <info@led-mls.co.il>';
+const FROM_SALES = process.env.EMAIL_FROM_SALES || 'MLS ישראל — מכירות <sales@led-mls.co.il>';
 const OS_FROM_NAME = process.env.EMAIL_FROM_NAME || 'MLS ישראל';
 const OS_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@mail.led-mls.co.il';
 
@@ -42,7 +45,8 @@ async function sendViaOneSignal({ to, subject, text, html }) {
 // Returns {sent:boolean}. Prefers OneSignal (verified mail.led-mls.co.il domain),
 // falls back to SMTP, and finally logs to stdout so 2FA codes stay reachable
 // through the platform runtime logs.
-async function send({ to, subject, text, html }) {
+async function send({ to, subject, text, html, from }) {
+  const fromAddr = from || FROM_SYSTEM;
   if (osConfigured) {
     try {
       return await sendViaOneSignal({ to, subject, text, html });
@@ -52,7 +56,7 @@ async function send({ to, subject, text, html }) {
   }
   if (transporter) {
     try {
-      await transporter.sendMail({ from: FROM, to, subject, text, html });
+      await transporter.sendMail({ from: fromAddr, to, subject, text, html });
       return { sent: true };
     } catch (e) {
       console.error('SMTP send failed:', e.message);
@@ -75,4 +79,4 @@ function codeEmail(code) {
   };
 }
 
-module.exports = { send, codeEmail, configured };
+module.exports = { send, codeEmail, configured, FROM_SALES, FROM_SYSTEM };

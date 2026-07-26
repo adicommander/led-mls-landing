@@ -237,6 +237,7 @@ app.post('/api/leads', leadLimiter, async (req, res) => {
   if (notify) {
     await mail.send({
       to: notify,
+      from: mail.FROM_SALES,
       subject: `ליד חדש מהאתר: ${name}`,
       text: `שם: ${name}\nטלפון: ${phone}\nמייל: ${email}\nעיר: ${city}\nמעוניין ב: ${tags}\nעמוד: ${page}\n\n${message}\n\nלניהול: https://led-mls.co.il/admin`,
     });
@@ -330,7 +331,7 @@ app.post('/api/leads/:id/email', auth, async (req, res) => {
   if (!subject || !body) return res.status(400).json({ error: 'נדרשים נושא ותוכן' });
   const filled = fillTemplate(body, lead);
   const html = isHtml(filled) ? filled : undefined;
-  const result = await mail.send({ to: lead.email, subject, text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
+  const result = await mail.send({ to: lead.email, from: mail.FROM_SALES, subject, text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
   if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal/SMTP מוגדר' });
   await pool.query(
     'INSERT INTO lead_messages (lead_id, user_id, direction, channel, subject, body, delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)',
@@ -482,7 +483,7 @@ app.post('/api/leads/bulk-email', auth, async (req, res) => {
   for (const lead of leads) {
     const filled = fillTemplate(body, lead);
     const html = isHtml(filled) ? filled : undefined;
-    const r = await mail.send({ to: lead.email, subject: fillTemplate(subject, lead), text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
+    const r = await mail.send({ to: lead.email, from: mail.FROM_SALES, subject: fillTemplate(subject, lead), text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
     if (r.sent) {
       sent++;
       await pool.query('INSERT INTO lead_messages (lead_id, user_id, direction, channel, subject, body, delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)',
@@ -645,7 +646,7 @@ app.post('/api/quotes/:id/send', auth, async (req, res) => {
   const q = (await pool.query('SELECT q.*, l.name AS lead_name, l.email AS lead_email, l.phone AS lead_phone FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1', [id])).rows[0];
   if (!q) return res.status(404).json({ error: 'not found' });
   if (!q.lead_email) return res.status(400).json({ error: 'ללקוח אין כתובת מייל' });
-  const result = await mail.send({ to: q.lead_email, subject: `הצעת מחיר מס׳ ${q.number} — MLS ישראל`, text: `הצעת מחיר מס׳ ${q.number}. סה״כ לתשלום: ${nis(q.total)}.`, html: quoteDocHtml(q, false) });
+  const result = await mail.send({ to: q.lead_email, from: mail.FROM_SALES, subject: `הצעת מחיר מס׳ ${q.number} — MLS ישראל`, text: `הצעת מחיר מס׳ ${q.number}. סה״כ לתשלום: ${nis(q.total)}.`, html: quoteDocHtml(q, false) });
   if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal מוגדר' });
   await pool.query(`UPDATE quotes SET status=CASE WHEN status='draft' THEN 'sent' ELSE status END, sent_at=now() WHERE id=$1`, [id]);
   if (q.lead_id) {
