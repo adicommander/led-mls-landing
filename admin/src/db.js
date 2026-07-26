@@ -151,6 +151,23 @@ CREATE TABLE IF NOT EXISTS quotes (
 );
 CREATE INDEX IF NOT EXISTS idx_quotes_lead ON quotes(lead_id);
 CREATE INDEX IF NOT EXISTS idx_quotes_created ON quotes(created_at DESC);
+CREATE TABLE IF NOT EXISTS departments (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS catalog_items (
+  id SERIAL PRIMARY KEY,
+  department_id INT REFERENCES departments(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  sku TEXT NOT NULL DEFAULT '',
+  unit TEXT NOT NULL DEFAULT '',
+  cost_price NUMERIC NOT NULL DEFAULT 0,
+  sale_price NUMERIC NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_catalog_dept ON catalog_items(department_id);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tasks_due ON tasks(due_date) WHERE NOT done;

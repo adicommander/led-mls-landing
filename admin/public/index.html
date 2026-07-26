@@ -275,6 +275,7 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
     <button class="nav" data-page="pipeline">🗂️ פייפליין</button>
     <button class="nav" data-page="leads">📋 לידים</button>
     <button class="nav" data-page="quotes">🧾 הצעות מחיר</button>
+    <button class="nav" data-page="catalog">🏷️ מחירון</button>
     <button class="nav" data-page="tasks">✅ משימות <span id="tasks-badge" class="badge-count hidden">0</span></button>
     <button class="nav" data-page="templates">✉️ תבניות</button>
     <button class="nav" data-page="users" id="nav-users">👥 משתמשים</button>
@@ -287,6 +288,7 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
     <div id="page-pipeline" class="hidden"></div>
     <div id="page-leads" class="hidden"></div>
     <div id="page-quotes" class="hidden"></div>
+    <div id="page-catalog" class="hidden"></div>
     <div id="page-tasks" class="hidden"></div>
     <div id="page-templates" class="hidden"></div>
     <div id="page-users" class="hidden"></div>
@@ -439,11 +441,12 @@ document.querySelectorAll('aside button.nav[data-page]').forEach(btn=>{
 });
 function showPage(name){
   document.querySelectorAll('aside button.nav[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
-  ['dashboard','pipeline','leads','quotes','tasks','templates','users','settings'].forEach(p=>$('#page-'+p).classList.toggle('hidden',p!==name));
+  ['dashboard','pipeline','leads','quotes','catalog','tasks','templates','users','settings'].forEach(p=>$('#page-'+p).classList.toggle('hidden',p!==name));
   if(name==='dashboard')loadDashboard();
   if(name==='pipeline')loadPipeline();
   if(name==='leads')loadLeads();
   if(name==='quotes')loadQuotes();
+  if(name==='catalog')loadCatalog();
   if(name==='tasks')loadTasks();
   if(name==='templates')loadTemplates();
   if(name==='users')loadUsers();
@@ -706,18 +709,22 @@ function qItemsHtml(){
   </div>`).join('');
 }
 function renderQuoteItems(){$('#q-items').innerHTML=qItemsHtml();recalcQuote();}
-function addQuoteRow(){quoteItems.push({desc:'',qty:1,price:0});renderQuoteItems();}
+function addQuoteRow(){quoteItems.push({desc:'',qty:1,price:0,cost:0});renderQuoteItems();}
+function insertCatItem(id){if(!id)return;const it=CATALOG.find(x=>x.id===+id);if(!it)return;quoteItems.push({desc:it.name,qty:1,price:+it.sale_price||0,cost:+it.cost_price||0});renderQuoteItems();}
 function recalcQuote(){
   const sub=quoteItems.reduce((s,it)=>s+(+it.qty||0)*(+it.price||0),0);
   const vr=+((document.getElementById('q-vat')||{}).value||0);
   const vat=sub*vr/100;const el=$('#q-totals');
-  if(el)el.innerHTML=`סכום ביניים: <b>${money(sub)}</b> &nbsp;·&nbsp; מע״מ ${vr}%: <b>${money(vat)}</b> &nbsp;·&nbsp; <span style="color:var(--led2)">סה״כ: <b>${money(sub+vat)}</b></span>`;
+  const profit=quoteItems.reduce((s,it)=>s+((+it.price||0)-(+it.cost||0))*(+it.qty||0),0);
+  const hasCost=quoteItems.some(it=>+it.cost>0);
+  if(el)el.innerHTML=`סכום ביניים: <b>${money(sub)}</b> &nbsp;·&nbsp; מע״מ ${vr}%: <b>${money(vat)}</b> &nbsp;·&nbsp; <span style="color:var(--led2)">סה״כ: <b>${money(sub+vat)}</b></span>${hasCost?` &nbsp;·&nbsp; <span style="color:var(--ok)">רווח פנימי: <b>${money(profit)}</b></span>`:''}`;
 }
 async function editQuote(id,leadId){
   quoteEditId=id||null;
   let q=null;
   const leads=(await api('/api/leads')).leads;
-  if(id){q=(await api('/api/quotes/'+id)).quote;quoteItems=(q.items||[]).map(it=>({desc:it.desc||'',qty:+it.qty||0,price:+it.price||0}));if(!quoteItems.length)quoteItems=[{desc:'',qty:1,price:0}];}
+  try{CATALOG=(await api('/api/catalog')).items;}catch(e){CATALOG=[];}
+  if(id){q=(await api('/api/quotes/'+id)).quote;quoteItems=(q.items||[]).map(it=>({desc:it.desc||'',qty:+it.qty||0,price:+it.price||0,cost:+it.cost||0}));if(!quoteItems.length)quoteItems=[{desc:'',qty:1,price:0}];}
   else quoteItems=[{desc:'',qty:1,price:0}];
   const curLead=q?q.lead_id:(leadId||null);
   const leadOpts='<option value="">— בחר לקוח —</option>'+leads.map(l=>`<option value="${l.id}"${l.id===curLead?' selected':''}>${esc(l.name)}${l.phone?' · '+esc(l.phone):''}</option>`).join('');
@@ -729,9 +736,10 @@ async function editQuote(id,leadId){
     ${isOrder?`<p class="muted" style="margin-top:.2rem">🔧 הומרה להזמנת עבודה מס׳ <b dir="ltr">${esc(q.order_number)}</b></p>`:''}
     <div class="field"><label>לקוח</label><select id="q-lead">${leadOpts}</select></div>
     <div class="field"><label>כותרת ההצעה</label><input id="q-title" value="${esc(q?q.title:'')}" placeholder="לדוגמה: מסך LED לחזית חנות"></div>
+    ${CATALOG.length?`<div class="field"><label>הוסף פריט מהמחירון</label><select id="q-catalog" onchange="insertCatItem(this.value);this.value=''"><option value="">— בחר פריט מהמחירון —</option>${CATALOG.map(it=>`<option value="${it.id}">${esc((it.department_name?it.department_name+' · ':'')+it.name)} — ${money(it.sale_price)}</option>`).join('')}</select></div>`:''}
     <label class="muted" style="display:block;margin:.6rem 0 .3rem">פריטים</label>
     <div id="q-items">${qItemsHtml()}</div>
-    <button class="chip" onclick="addQuoteRow()">+ הוסף שורה</button>
+    <button class="chip" onclick="addQuoteRow()">+ הוסף שורה ריקה</button>
     <div class="row" style="margin-top:.8rem">
       <div class="field" style="flex:0;min-width:110px"><label>מע״מ %</label><input id="q-vat" type="number" value="${q?Number(q.vat_rate):18}" oninput="recalcQuote()"></div>
       ${dateField('q-valid','בתוקף עד',false,validISO)}
@@ -767,6 +775,81 @@ async function convertQuote(id){
 }
 function printQuote(id){window.open('/api/quotes/'+id+'/print','_blank');}
 async function delQuote(id){if(!confirm('למחוק את ההצעה?'))return;await api('/api/quotes/'+id,{method:'DELETE'});closeDrawer();loadQuotes();}
+
+/* ---------- price catalog (departments + items, cost vs sale) ---------- */
+let CATALOG=[],DEPTS=[];
+const margin=(cost,sale)=>{const s=+sale||0,c=+cost||0;return s>0?Math.round((s-c)/s*100):0;};
+async function loadCatalog(){
+  DEPTS=(await api('/api/departments')).departments;
+  CATALOG=(await api('/api/catalog')).items;
+  const deptOpts='<option value="">— ללא מחלקה —</option>'+DEPTS.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('');
+  const groups={};CATALOG.forEach(it=>{const k=it.department_name||'ללא מחלקה';(groups[k]=groups[k]||[]).push(it);});
+  const groupHtml=Object.keys(groups).length?Object.entries(groups).map(([dep,items])=>`
+    <div class="panel-box">
+      <h3>${esc(dep)}</h3>
+      <table><thead><tr><th>פריט</th><th>יח׳</th><th>עלות קנייה</th><th>מחיר מכירה</th><th>רווח</th><th>רווחיות</th><th></th></tr></thead>
+      <tbody>${items.map(it=>{const prof=(+it.sale_price||0)-(+it.cost_price||0);return `<tr>
+        <td>${esc(it.name)}${it.sku?` <span class="muted">(${esc(it.sku)})</span>`:''}</td>
+        <td>${esc(it.unit||'—')}</td><td>${money(it.cost_price)}</td><td>${money(it.sale_price)}</td>
+        <td style="color:${prof>=0?'var(--ok)':'var(--bad)'};font-weight:600">${money(prof)}</td>
+        <td>${margin(it.cost_price,it.sale_price)}%</td>
+        <td style="white-space:nowrap"><button class="chip" onclick="editCatItem(${it.id})">עריכה</button> <button class="chip" onclick="delCatItem(${it.id})">מחק</button></td>
+      </tr>`;}).join('')}</tbody></table>
+    </div>`).join(''):'<p class="muted">אין פריטים עדיין</p>';
+  $('#page-catalog').innerHTML=`
+    <h2 class="page-title">מחירון</h2>
+    <div class="panel-box">
+      <h3>הוספת פריט</h3>
+      <div class="row">
+        <div class="field" style="flex:2"><label>שם הפריט</label><input id="ci-name" placeholder="לדוגמה: מסך חוץ P4"></div>
+        <div class="field"><label>מחלקה</label><select id="ci-dept">${deptOpts}</select></div>
+        <div class="field" style="flex:0;min-width:90px"><label>יחידה</label><input id="ci-unit" placeholder="מ״ר / יח׳"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>עלות קנייה (₪)</label><input id="ci-cost" type="number" min="0" value="0"></div>
+        <div class="field"><label>מחיר מכירה (₪)</label><input id="ci-sale" type="number" min="0" value="0"></div>
+        <div class="field" style="flex:0;min-width:90px"><label>מק״ט</label><input id="ci-sku"></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn btn-sm" onclick="addCatItem()">הוסף פריט</button></div>
+      </div>
+    </div>
+    <div class="panel-box">
+      <h3>מחלקות</h3>
+      <div class="row"><input id="dep-name" placeholder="שם מחלקה חדשה" style="flex:2"><button class="btn btn-sm" style="flex:0" onclick="addDept()">הוסף</button></div>
+      <div style="margin-top:.7rem;display:flex;flex-wrap:wrap;gap:.4rem">${DEPTS.map(d=>`<span class="tag" style="padding:.3rem .6rem">${esc(d.name)} <button class="chip" style="padding:0 .35rem" onclick="delDept(${d.id})">✕</button></span>`).join('')||'<span class="muted">אין מחלקות</span>'}</div>
+    </div>
+    ${groupHtml}`;
+}
+async function addDept(){const name=$('#dep-name').value.trim();if(!name)return;await api('/api/departments',{method:'POST',body:JSON.stringify({name})});loadCatalog();}
+async function delDept(id){if(!confirm('למחוק מחלקה? הפריטים יישארו ללא מחלקה.'))return;await api('/api/departments/'+id,{method:'DELETE'});loadCatalog();}
+async function addCatItem(){
+  const name=$('#ci-name').value.trim();if(!name){toast('נדרש שם פריט');return;}
+  await api('/api/catalog',{method:'POST',body:JSON.stringify({name,department_id:$('#ci-dept').value||null,unit:$('#ci-unit').value,sku:$('#ci-sku').value,cost_price:+$('#ci-cost').value,sale_price:+$('#ci-sale').value})});
+  loadCatalog();
+}
+function editCatItem(id){
+  const it=CATALOG.find(x=>x.id===id);if(!it)return;
+  const deptOpts='<option value="">— ללא מחלקה —</option>'+DEPTS.map(d=>`<option value="${d.id}"${d.id===it.department_id?' selected':''}>${esc(d.name)}</option>`).join('');
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>עריכת פריט</h3>
+    <div class="field"><label>שם</label><input id="ec-name" value="${esc(it.name)}"></div>
+    <div class="row">
+      <div class="field"><label>מחלקה</label><select id="ec-dept">${deptOpts}</select></div>
+      <div class="field" style="flex:0;min-width:90px"><label>יחידה</label><input id="ec-unit" value="${esc(it.unit)}"></div>
+      <div class="field" style="flex:0;min-width:90px"><label>מק״ט</label><input id="ec-sku" value="${esc(it.sku)}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>עלות קנייה (₪)</label><input id="ec-cost" type="number" min="0" value="${it.cost_price}"></div>
+      <div class="field"><label>מחיר מכירה (₪)</label><input id="ec-sale" type="number" min="0" value="${it.sale_price}"></div>
+    </div>
+    <button class="btn" onclick="saveCatItem(${id})">שמור</button>`;
+  $('#drawer-wrap').classList.remove('hidden');
+}
+async function saveCatItem(id){
+  await api('/api/catalog/'+id,{method:'PATCH',body:JSON.stringify({name:$('#ec-name').value,department_id:$('#ec-dept').value||null,unit:$('#ec-unit').value,sku:$('#ec-sku').value,cost_price:+$('#ec-cost').value,sale_price:+$('#ec-sale').value})});
+  toast('נשמר ✓');closeDrawer();loadCatalog();
+}
+async function delCatItem(id){if(!confirm('למחוק את הפריט?'))return;await api('/api/catalog/'+id,{method:'DELETE'});loadCatalog();}
 
 /* ---------- tasks page ---------- */
 let taskScope='open';

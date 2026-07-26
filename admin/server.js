@@ -500,8 +500,9 @@ function quoteTotals(items, vatRate) {
   return { subtotal, vat, total: subtotal + vat };
 }
 function cleanItems(items) {
+  // `cost` is kept for internal margin analysis only — quoteDocHtml never renders it to the client
   return (Array.isArray(items) ? items : []).slice(0, 50)
-    .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0 }))
+    .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0, cost: Number(it.cost) || 0 }))
     .filter(it => it.desc || it.qty || it.price);
 }
 
@@ -652,6 +653,70 @@ app.get('/api/quotes/:id/print', auth, async (req, res) => {
   if (!q) return res.status(404).send('not found');
   res.set('Content-Type', 'text/html; charset=utf-8');
   res.send(quoteDocHtml(q, true));
+});
+
+/* ---------- price catalog: departments + items ---------- */
+
+app.get('/api/departments', auth, async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM departments ORDER BY name');
+  res.json({ departments: rows });
+});
+app.post('/api/departments', auth, async (req, res) => {
+  const name = String(req.body.name || '').trim().slice(0, 120);
+  if (!name) return res.status(400).json({ error: 'נדרש שם מחלקה' });
+  const { rows } = await pool.query('INSERT INTO departments (name) VALUES ($1) RETURNING *', [name]);
+  res.json({ department: rows[0] });
+});
+app.patch('/api/departments/:id', auth, async (req, res) => {
+  const name = String(req.body.name || '').trim().slice(0, 120);
+  const { rows } = await pool.query('UPDATE departments SET name=$1 WHERE id=$2 RETURNING *', [name, Number(req.params.id)]);
+  if (!rows[0]) return res.status(404).json({ error: 'not found' });
+  res.json({ department: rows[0] });
+});
+app.delete('/api/departments/:id', auth, async (req, res) => {
+  await pool.query('DELETE FROM departments WHERE id=$1', [Number(req.params.id)]);
+  res.json({ ok: true });
+});
+
+app.get('/api/catalog', auth, async (req, res) => {
+  const params = []; let where = '';
+  if (req.query.department_id) { params.push(Number(req.query.department_id)); where = 'WHERE c.department_id=$1'; }
+  const { rows } = await pool.query(
+    `SELECT c.*, d.name AS department_name FROM catalog_items c LEFT JOIN departments d ON d.id=c.department_id ${where} ORDER BY d.name NULLS LAST, c.name`, params);
+  res.json({ items: rows });
+});
+app.post('/api/catalog', auth, async (req, res) => {
+  const name = String(req.body.name || '').trim().slice(0, 200);
+  if (!name) return res.status(400).json({ error: 'נדרש שם פריט' });
+  const dept = req.body.department_id ? Number(req.body.department_id) : null;
+  const sku = String(req.body.sku || '').slice(0, 60);
+  const unit = String(req.body.unit || '').slice(0, 40);
+  const cost = Math.max(0, Number(req.body.cost_price) || 0);
+  const sale = Math.max(0, Number(req.body.sale_price) || 0);
+  const { rows } = await pool.query(
+    'INSERT INTO catalog_items (department_id, name, sku, unit, cost_price, sale_price) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+    [dept, name, sku, unit, cost, sale]);
+  res.json({ item: rows[0] });
+});
+app.patch('/api/catalog/:id', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const c = (await pool.query('SELECT * FROM catalog_items WHERE id=$1', [id])).rows[0];
+  if (!c) return res.status(404).json({ error: 'not found' });
+  const name = req.body.name !== undefined ? String(req.body.name).trim().slice(0, 200) : c.name;
+  const dept = req.body.department_id !== undefined ? (req.body.department_id ? Number(req.body.department_id) : null) : c.department_id;
+  const sku = req.body.sku !== undefined ? String(req.body.sku).slice(0, 60) : c.sku;
+  const unit = req.body.unit !== undefined ? String(req.body.unit).slice(0, 40) : c.unit;
+  const cost = req.body.cost_price !== undefined ? Math.max(0, Number(req.body.cost_price) || 0) : c.cost_price;
+  const sale = req.body.sale_price !== undefined ? Math.max(0, Number(req.body.sale_price) || 0) : c.sale_price;
+  const active = req.body.is_active !== undefined ? !!req.body.is_active : c.is_active;
+  const { rows } = await pool.query(
+    'UPDATE catalog_items SET department_id=$1, name=$2, sku=$3, unit=$4, cost_price=$5, sale_price=$6, is_active=$7 WHERE id=$8 RETURNING *',
+    [dept, name, sku, unit, cost, sale, active, id]);
+  res.json({ item: rows[0] });
+});
+app.delete('/api/catalog/:id', auth, async (req, res) => {
+  await pool.query('DELETE FROM catalog_items WHERE id=$1', [Number(req.params.id)]);
+  res.json({ ok: true });
 });
 
 /* ---------- dashboard stats + ui ---------- */
