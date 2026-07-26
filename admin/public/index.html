@@ -540,29 +540,32 @@ async function loadLeads(){
   const p=new URLSearchParams();if(leadFilter.status)p.set('status',leadFilter.status);if(leadFilter.q)p.set('q',leadFilter.q);
   const {leads}=await api('/api/leads?'+p);
   $('#page-leads').innerHTML=`
-    <h2 class="page-title">לידים</h2>
+    <h2 class="page-title">בסיס נתוני לקוחות <span class="muted" style="font-size:1rem">(${leads.length})</span></h2>
     <div class="toolbar">
-      <input class="search" id="q" placeholder="חיפוש שם / טלפון / תגית..." value="${esc(leadFilter.q)}">
+      <input class="search" id="q" placeholder="חיפוש שם / טלפון / מייל / עיר / תגית..." value="${esc(leadFilter.q)}">
       <button class="chip ${!leadFilter.status?'active':''}" onclick="setLeadStatus('')">הכול</button>
       ${STAGES.map(st=>`<button class="chip ${leadFilter.status===st?'active':''}" onclick="setLeadStatus('${st}')">${STAGE_HE[st]}</button>`).join('')}
       <a class="btn-ghost btn-sm" href="/api/leads/export.csv${leadFilter.status?'?status='+leadFilter.status:''}" style="text-decoration:none;margin-inline-start:auto">⬇ ייצוא CSV</a>
     </div>
+    <div style="overflow-x:auto">
     <table>
-      <thead><tr><th style="width:28px"></th><th>שם</th><th>טלפון</th><th>שלב</th><th>שווי</th><th>תגיות</th><th>מטפל</th><th>התקבל</th></tr></thead>
+      <thead><tr><th style="width:28px"></th><th>שם</th><th>טלפון</th><th>אימייל</th><th>עיר</th><th>שלב</th><th>התעניינות</th><th>מטפל</th><th>התקבל</th></tr></thead>
       <tbody id="leads-body"></tbody>
     </table>
+    </div>
     <div id="bulkbar"></div>`;
   $('#leads-body').innerHTML=leads.map(l=>`
     <tr>
       <td onclick="event.stopPropagation()"><input type="checkbox" class="checkbox" onchange="toggleSel(${l.id},this.checked)"></td>
       <td onclick="openLead(${l.id})">${esc(l.name)}</td>
       <td onclick="openLead(${l.id})" dir="ltr">${esc(l.phone)}</td>
+      <td onclick="openLead(${l.id})" dir="ltr">${esc(l.email)||'—'}</td>
+      <td onclick="openLead(${l.id})">${esc(l.city)||'—'}</td>
       <td onclick="openLead(${l.id})">${stChip(l.status)}</td>
-      <td onclick="openLead(${l.id})">${l.value>0?money(l.value):'—'}</td>
-      <td onclick="openLead(${l.id})">${(l.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')}</td>
+      <td onclick="openLead(${l.id})">${(l.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')||'—'}</td>
       <td onclick="openLead(${l.id})">${esc(l.assigned_name||'—')}</td>
       <td onclick="openLead(${l.id})">${fmtDate(l.created_at)}</td>
-    </tr>`).join('')||'<tr><td colspan="8" class="muted">אין לידים</td></tr>';
+    </tr>`).join('')||'<tr><td colspan="9" class="muted">אין לידים</td></tr>';
   let qT;$('#q').oninput=e=>{clearTimeout(qT);qT=setTimeout(()=>{leadFilter.q=e.target.value;loadLeads();},350);};
 }
 function setLeadStatus(s){leadFilter.status=s;loadLeads();}
@@ -573,6 +576,7 @@ function renderBulk(){
   bb.innerHTML=`<div class="bulkbar"><b>${selected.size}</b> נבחרו
     <select id="bulk-tpl" style="max-width:220px"><option value="">בחר תבנית מייל...</option>${TEMPLATES.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
     <button class="btn btn-sm" onclick="bulkSend()">שלח דיוור</button>
+    <button class="chip" style="color:#C43333;border-color:rgba(217,58,58,.4)" onclick="bulkDelete()">🗑 מחק נבחרים</button>
     <button class="btn-ghost btn-sm" onclick="selected.clear();loadLeads()">בטל</button></div>`;
 }
 async function bulkSend(){
@@ -584,6 +588,19 @@ async function bulkSend(){
     toast(`נשלחו ${r.sent} · נכשלו ${r.failed} · דולגו ${r.skipped} (ללא מייל)`);
     selected.clear();loadLeads();
   }catch(e){toast(e.message);}
+}
+async function bulkDelete(){
+  if(!confirm(`למחוק לצמיתות ${selected.size} לידים? פעולה זו אינה הפיכה.`))return;
+  try{
+    const r=await api('/api/leads/bulk-delete',{method:'POST',body:JSON.stringify({lead_ids:[...selected]})});
+    toast(`${r.deleted} לידים נמחקו`);selected.clear();loadLeads();refreshTaskBadge();
+  }catch(e){toast(e.message);}
+}
+async function delLead(id){
+  if(!confirm('למחוק את הליד לצמיתות? כל ההערות, המשימות והתכתובת שלו יימחקו גם. פעולה זו אינה הפיכה.'))return;
+  try{await api('/api/leads/'+id,{method:'DELETE'});toast('הליד נמחק');closeDrawer();
+    const cur=document.querySelector('aside .nav.active').dataset.page;showPage(cur==='leads'?'leads':cur);}
+  catch(e){toast(e.message);}
 }
 
 /* ---------- lead popup ---------- */
@@ -620,6 +637,7 @@ async function openLead(id){
         <div class="field"><label>תגיות / התעניינות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
       </div>
       <div class="row"><button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button><button class="btn-ghost" onclick="editQuote(null,${l.id})">🧾 צור הצעת מחיר</button></div>
+      <div style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.8rem"><button class="chip" style="color:#C43333;border-color:rgba(217,58,58,.4)" onclick="delLead(${l.id})">🗑 מחק ליד לצמיתות</button></div>
     </div>
     <div id="d-timeline" class="tab-pane hidden">
       <div class="row" style="margin-bottom:.6rem"><input id="d-note" placeholder="הוסף הערה..."><button class="btn btn-sm" style="flex:0" onclick="addNote(${l.id})">שמור</button></div>

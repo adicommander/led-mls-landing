@@ -311,6 +311,23 @@ app.patch('/api/leads/:id', auth, async (req, res) => {
   res.json({ lead: rows[0] });
 });
 
+app.delete('/api/leads/:id', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const lead = (await pool.query('SELECT name FROM leads WHERE id=$1', [id])).rows[0];
+  if (!lead) return res.status(404).json({ error: 'not found' });
+  await pool.query('DELETE FROM leads WHERE id=$1', [id]);
+  await log(req.user.id, 'lead.deleted', `ליד נמחק: ${lead.name}`);
+  res.json({ ok: true });
+});
+
+app.post('/api/leads/bulk-delete', auth, async (req, res) => {
+  const ids = Array.isArray(req.body.lead_ids) ? req.body.lead_ids.map(Number).filter(Boolean) : [];
+  if (!ids.length) return res.status(400).json({ error: 'לא נבחרו לידים' });
+  const r = await pool.query('DELETE FROM leads WHERE id = ANY($1)', [ids]);
+  await log(req.user.id, 'lead.deleted', `${r.rowCount} לידים נמחקו`);
+  res.json({ ok: true, deleted: r.rowCount });
+});
+
 app.post('/api/leads/:id/notes', auth, async (req, res) => {
   const id = Number(req.params.id);
   const body = String(req.body.body || '').trim();
