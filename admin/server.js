@@ -493,16 +493,24 @@ app.post('/api/leads/bulk-email', auth, async (req, res) => {
 const QUOTE_STATUSES = ['draft', 'sent', 'accepted', 'rejected', 'ordered'];
 const nis = (n) => '₪' + Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 });
 
-function quoteTotals(items, vatRate) {
+const clampPct = (n) => Math.min(100, Math.max(0, Number(n) || 0));
+// subtotal = sum of line nets (after per-line discount); discount = global discount amount
+function quoteTotals(items, vatRate, discType, discVal) {
   const list = Array.isArray(items) ? items : [];
-  const subtotal = list.reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.price) || 0), 0);
-  const vat = subtotal * (Number(vatRate) || 0) / 100;
-  return { subtotal, vat, total: subtotal + vat };
+  const subtotal = list.reduce((s, it) => {
+    const line = (Number(it.qty) || 0) * (Number(it.price) || 0);
+    return s + line * (1 - clampPct(it.disc) / 100);
+  }, 0);
+  let discount = discType === 'percent' ? subtotal * clampPct(discVal) / 100 : Math.max(0, Number(discVal) || 0);
+  discount = Math.min(discount, subtotal);
+  const afterDisc = subtotal - discount;
+  const vat = afterDisc * (Number(vatRate) || 0) / 100;
+  return { subtotal, discount, vat, total: afterDisc + vat };
 }
 function cleanItems(items) {
   // `cost` is kept for internal margin analysis only — quoteDocHtml never renders it to the client
   return (Array.isArray(items) ? items : []).slice(0, 50)
-    .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0, cost: Number(it.cost) || 0 }))
+    .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0, cost: Number(it.cost) || 0, disc: clampPct(it.disc) }))
     .filter(it => it.desc || it.qty || it.price);
 }
 
@@ -511,13 +519,17 @@ function quoteDocHtml(q, forPrint) {
   const isOrder = q.status === 'ordered' && q.order_number;
   const docTitle = isOrder ? `הזמנת עבודה מס׳ ${q.order_number}` : `הצעת מחיר מס׳ ${q.number}`;
   const items = Array.isArray(q.items) ? q.items : [];
+  const anyDisc = items.some(it => (Number(it.disc) || 0) > 0);
   const rows = items.map(it => {
     const line = (Number(it.qty) || 0) * (Number(it.price) || 0);
+    const disc = Number(it.disc) || 0;
+    const net = line * (1 - disc / 100);
     return `<tr>
       <td style="padding:12px 14px;border-top:1px solid #eee">${(it.desc || '').replace(/</g, '&lt;')}</td>
       <td style="padding:12px 14px;border-top:1px solid #eee;text-align:center">${it.qty || 0}</td>
       <td style="padding:12px 14px;border-top:1px solid #eee">${nis(it.price)}</td>
-      <td style="padding:12px 14px;border-top:1px solid #eee;font-weight:600">${nis(line)}</td></tr>`;
+      ${anyDisc ? `<td style="padding:12px 14px;border-top:1px solid #eee;text-align:center">${disc > 0 ? disc + '%' : '—'}</td>` : ''}
+      <td style="padding:12px 14px;border-top:1px solid #eee;font-weight:600">${nis(net)}</td></tr>`;
   }).join('');
   const dt = (d) => d ? new Date(d).toLocaleDateString('he-IL') : '';
   return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -549,10 +561,11 @@ function quoteDocHtml(q, forPrint) {
     <h1>${(q.title || docTitle).replace(/</g, '&lt;')}</h1>
     <div class="meta">תאריך: ${dt(q.created_at)}${q.valid_until && !isOrder ? ` · בתוקף עד: ${dt(q.valid_until)}` : ''}${isOrder ? ` · אושרה: ${dt(q.ordered_at)} · הצעה מקורית מס׳ ${q.number}` : ''}</div>
     <div class="party"><b>לכבוד:</b> ${(q.lead_name || '').replace(/</g, '&lt;')}${q.lead_phone ? ' · ' + q.lead_phone : ''}${q.lead_email ? ' · ' + q.lead_email : ''}</div>
-    <table><thead><tr><th>פריט</th><th style="text-align:center">כמות</th><th>מחיר יח׳</th><th>סה״כ</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="4" style="padding:14px;color:#999">אין פריטים</td></tr>'}</tbody></table>
+    <table><thead><tr><th>פריט</th><th style="text-align:center">כמות</th><th>מחיר יח׳</th>${anyDisc ? '<th style="text-align:center">הנחה</th>' : ''}<th>סה״כ</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="${anyDisc ? 5 : 4}" style="padding:14px;color:#999">אין פריטים</td></tr>`}</tbody></table>
     <div class="totals">
-      <div><span>סכום ביניים</span><span>${nis(q.subtotal)}</span></div>
+      <div><span>סכום ביניים (לפני מע״מ)</span><span>${nis(q.subtotal)}</span></div>
+      ${Number(q.discount) > 0 ? `<div style="color:#217A3B"><span>הנחה${q.discount_type === 'percent' ? ` (${Number(q.discount_value)}%)` : ''}</span><span>-${nis(q.discount)}</span></div>` : ''}
       <div><span>מע״מ (${Number(q.vat_rate)}%)</span><span>${nis(q.vat)}</span></div>
       <div class="grand"><span>סה״כ לתשלום</span><span>${nis(q.total)}</span></div>
     </div>
@@ -586,12 +599,14 @@ app.post('/api/quotes', auth, async (req, res) => {
   const vatRate = req.body.vat_rate !== undefined ? (Number(req.body.vat_rate) || 0) : 18;
   const notes = String(req.body.notes || '').slice(0, 2000);
   const valid = req.body.valid_until || null;
-  const { subtotal, vat, total } = quoteTotals(items, vatRate);
+  const discType = req.body.discount_type === 'percent' ? 'percent' : 'amount';
+  const discVal = Math.max(0, Number(req.body.discount_value) || 0);
+  const { subtotal, discount, vat, total } = quoteTotals(items, vatRate, discType, discVal);
   const number = await nextSerial('quote');
   const { rows } = await pool.query(
-    `INSERT INTO quotes (number, lead_id, created_by, title, items, vat_rate, subtotal, vat, total, notes, valid_until)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-    [number, leadId, req.user.id, title, JSON.stringify(items), vatRate, subtotal, vat, total, notes, valid]);
+    `INSERT INTO quotes (number, lead_id, created_by, title, items, vat_rate, discount_type, discount_value, discount, subtotal, vat, total, notes, valid_until)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+    [number, leadId, req.user.id, title, JSON.stringify(items), vatRate, discType, discVal, discount, subtotal, vat, total, notes, valid]);
   if (leadId) await log(req.user.id, 'quote.created', `הצעת מחיר נוצרה (מס׳ ${number})`, leadId);
   res.json({ quote: rows[0] });
 });
@@ -606,10 +621,12 @@ app.patch('/api/quotes/:id', auth, async (req, res) => {
   const notes = req.body.notes !== undefined ? String(req.body.notes).slice(0, 2000) : q.notes;
   const valid = req.body.valid_until !== undefined ? (req.body.valid_until || null) : q.valid_until;
   const status = QUOTE_STATUSES.includes(req.body.status) ? req.body.status : q.status;
-  const { subtotal, vat, total } = quoteTotals(items, vatRate);
+  const discType = req.body.discount_type !== undefined ? (req.body.discount_type === 'percent' ? 'percent' : 'amount') : q.discount_type;
+  const discVal = req.body.discount_value !== undefined ? Math.max(0, Number(req.body.discount_value) || 0) : Number(q.discount_value);
+  const { subtotal, discount, vat, total } = quoteTotals(items, vatRate, discType, discVal);
   const { rows } = await pool.query(
-    `UPDATE quotes SET title=$1, items=$2, vat_rate=$3, subtotal=$4, vat=$5, total=$6, notes=$7, valid_until=$8, status=$9 WHERE id=$10 RETURNING *`,
-    [title, JSON.stringify(items), vatRate, subtotal, vat, total, notes, valid, status, id]);
+    `UPDATE quotes SET title=$1, items=$2, vat_rate=$3, discount_type=$4, discount_value=$5, discount=$6, subtotal=$7, vat=$8, total=$9, notes=$10, valid_until=$11, status=$12 WHERE id=$13 RETURNING *`,
+    [title, JSON.stringify(items), vatRate, discType, discVal, discount, subtotal, vat, total, notes, valid, status, id]);
   res.json({ quote: rows[0] });
 });
 

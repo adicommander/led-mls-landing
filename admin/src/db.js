@@ -138,6 +138,9 @@ CREATE TABLE IF NOT EXISTS quotes (
   title TEXT NOT NULL DEFAULT '',
   items JSONB NOT NULL DEFAULT '[]',
   vat_rate NUMERIC NOT NULL DEFAULT 18,
+  discount_type TEXT NOT NULL DEFAULT 'amount',
+  discount_value NUMERIC NOT NULL DEFAULT 0,
+  discount NUMERIC NOT NULL DEFAULT 0,
   subtotal NUMERIC NOT NULL DEFAULT 0,
   vat NUMERIC NOT NULL DEFAULT 0,
   total NUMERIC NOT NULL DEFAULT 0,
@@ -204,6 +207,9 @@ async function init() {
   await pool.query(`UPDATE tasks SET status = CASE WHEN done THEN 'done' ELSE 'open' END WHERE status IS NULL OR status=''`);
   await pool.query(`ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_status_check`);
   await pool.query(`ALTER TABLE tasks ADD CONSTRAINT tasks_status_check CHECK (status IN ('open','in_progress','follow_up','done'))`);
+  await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS discount_type TEXT NOT NULL DEFAULT 'amount'`);
+  await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS discount_value NUMERIC NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS discount NUMERIC NOT NULL DEFAULT 0`);
   await seedTemplates();
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
   if (rows[0].n === 0) {
