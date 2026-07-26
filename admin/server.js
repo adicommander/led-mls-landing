@@ -248,6 +248,31 @@ app.post('/api/leads', leadLimiter, async (req, res) => {
     ? req.body.interests.map(x => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 10) : [];
   const tags = interests.join(', ');
   if (!name || (!phone && !email)) return res.status(400).json({ error: 'missing fields' });
+
+  // nesting: if a lead with the same phone or email already exists, fold this
+  // repeat inquiry into that customer instead of creating a duplicate row
+  const existing = (phone || email) ? (await pool.query(
+    `SELECT * FROM leads WHERE ($1 <> '' AND phone = $1) OR ($2 <> '' AND lower(email) = lower($2)) ORDER BY created_at ASC LIMIT 1`,
+    [phone, email])).rows[0] : null;
+  if (existing) {
+    const noteBody = [`📩 פנייה חוזרת מהאתר${city ? ` · עיר: ${city}` : ''}${tags ? ` · מעוניין ב: ${tags}` : ''}${page ? ` · עמוד: ${page}` : ''}`, message].filter(Boolean).join('\n');
+    await pool.query('INSERT INTO lead_notes (lead_id, user_id, body) VALUES ($1, NULL, $2)', [existing.id, noteBody]);
+    const mergedTags = Array.from(new Set(
+      String(existing.tags || '').split(',').map(s => s.trim()).filter(Boolean).concat(interests))).join(', ');
+    await pool.query(
+      `UPDATE leads SET inquiries = inquiries + 1, tags = $1,
+         city = CASE WHEN city = '' THEN $2 ELSE city END,
+         email = CASE WHEN email = '' THEN $3 ELSE email END WHERE id = $4`,
+      [mergedTags, city, email, existing.id]);
+    await log(null, 'lead.repeat', 'פנייה חוזרת מאותו לקוח', existing.id);
+    const notify2 = process.env.LEADS_NOTIFY_EMAIL;
+    if (notify2) {
+      await mail.send({ to: notify2, from: mail.FROM_SALES, subject: `פנייה חוזרת מלקוח קיים: ${existing.name}`,
+        text: `הלקוח ${existing.name} (${phone || email}) פנה שוב מהאתר.\nעיר: ${city}\nמעוניין ב: ${tags}\n\n${message}\n\nלכרטיס: https://led-mls.co.il/admin` });
+    }
+    return res.json({ ok: true, id: existing.id, nested: true });
+  }
+
   const { rows } = await pool.query(
     'INSERT INTO leads (name, phone, email, message, page, city, tags) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id',
     [name, phone, email, message, page, city, tags]);

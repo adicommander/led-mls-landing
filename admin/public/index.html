@@ -645,7 +645,7 @@ async function loadLeads(){
   $('#leads-body').innerHTML=leads.map(l=>`
     <tr>
       <td onclick="event.stopPropagation()"><input type="checkbox" class="checkbox" onchange="toggleSel(${l.id},this.checked)"></td>
-      <td onclick="openLead(${l.id})">${esc(l.name)}</td>
+      <td onclick="openLead(${l.id})">${esc(l.name)}${l.inquiries>1?` <span class="tag" style="background:rgba(255,106,26,.14);color:var(--led2)" title="פניות חוזרות מאותו לקוח">🔁 ${l.inquiries}</span>`:''}</td>
       <td onclick="openLead(${l.id})" dir="ltr">${esc(l.phone)}</td>
       <td class="hide-sm" onclick="openLead(${l.id})" dir="ltr">${esc(l.email)||'—'}</td>
       <td class="hide-sm" onclick="openLead(${l.id})">${esc(l.city)||'—'}</td>
@@ -693,6 +693,7 @@ async function delLead(id){
 
 /* ---------- lead popup ---------- */
 async function openLead(id){
+  eCodeMode=false;
   const d=await api('/api/leads/'+id);const l=d.lead;
   const wa=l.phone?('https://wa.me/'+l.phone.replace(/\D/g,'').replace(/^0/,'972')):null;
   const timeline=[
@@ -703,7 +704,7 @@ async function openLead(id){
   $('#drawer').innerHTML=`
     <button class="close" onclick="closeDrawer()">✕</button>
     <h3>${esc(l.name)} <span class="muted">#${l.id}</span></h3>
-    <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${l.city?' · 📍 '+esc(l.city):''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
+    <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${l.city?' · 📍 '+esc(l.city):''}${l.inquiries>1?` · 🔁 ${l.inquiries} פניות`:''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
     <div class="tabs">
       <button class="active" onclick="leadTab(event,'d-details')">פרטים</button>
       <button onclick="leadTab(event,'d-timeline')">ציר זמן</button>
@@ -748,10 +749,13 @@ async function openLead(id){
     </div>
     <div id="d-email" class="tab-pane hidden">
       ${l.email?`
-      <div class="field"><label>תבנית</label><select id="e-tpl" onchange="applyTpl()"><option value="">— ללא —</option>${TEMPLATES.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>תבנית</label><select id="e-tpl" onchange="applyTpl()"><option value="">— ללא / חדש —</option>${TEMPLATES.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
       <div class="field"><label>נושא</label><input id="e-subj"></div>
-      <div class="field"><label>תוכן</label><textarea id="e-body" rows="6"></textarea></div>
-      <button class="btn" onclick="sendEmail(${l.id})">שלח מייל ללקוח ✉</button>`
+      <label class="muted" style="display:block;margin:.4rem 0 .3rem">תוכן המייל</label>
+      ${rteToolbar('toggleEmailCode()','e-code-toggle')}
+      <div id="e-visual" contenteditable="true" dir="rtl" class="wysi-area" onfocus="rteTarget=this"></div>
+      <textarea id="e-code" class="hidden" rows="10" dir="ltr" style="font-family:monospace;font-size:.8rem"></textarea>
+      <button class="btn" style="margin-top:.8rem" onclick="sendEmail(${l.id})">שלח מייל ללקוח ✉</button>`
       :'<p class="muted">ללקוח אין כתובת מייל — אפשר ליצור קשר בוואטסאפ מלמעלה</p>'}
     </div>`;
   $('#drawer-wrap').classList.remove('hidden');
@@ -783,12 +787,26 @@ async function addLeadTask(id){
   await api('/api/tasks',{method:'POST',body:JSON.stringify({title,lead_id:id,user_id:$('#t-assignee').value||null,due_date:dateVals['ltd-due']||null,remind_at:dateVals['ltd-remind']||null})});
   openLead(id);refreshTaskBadge();
 }
+let eCodeMode=false;
 function applyTpl(){
   const t=TEMPLATES.find(x=>x.id===Number($('#e-tpl').value));
-  if(t){$('#e-subj').value=t.subject;$('#e-body').value=t.body;}
+  if(!t)return;
+  $('#e-subj').value=t.subject;
+  eCodeMode=false;
+  $('#e-code').classList.add('hidden');$('#e-visual').classList.remove('hidden');
+  $('#e-visual').innerHTML=t.body||'';$('#e-code').value=t.body||'';
+  const b=$('#e-code-toggle');if(b)b.innerHTML='&lt;/&gt; קוד HTML';
+}
+function toggleEmailCode(){
+  const vis=$('#e-visual'),code=$('#e-code');
+  eCodeMode=!eCodeMode;
+  if(eCodeMode){code.value=vis.innerHTML;vis.classList.add('hidden');code.classList.remove('hidden');$('#e-code-toggle').innerHTML='👁 תצוגה חזותית';}
+  else{vis.innerHTML=code.value;code.classList.add('hidden');vis.classList.remove('hidden');$('#e-code-toggle').innerHTML='&lt;/&gt; קוד HTML';}
 }
 async function sendEmail(id){
-  try{await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#e-subj').value,body:$('#e-body').value})});toast('המייל נשלח ✓');openLead(id);}
+  const body = eCodeMode ? $('#e-code').value : $('#e-visual').innerHTML;
+  if(!$('#e-subj').value.trim()||!body.replace(/<[^>]*>/g,'').trim()){toast('נדרשים נושא ותוכן');return;}
+  try{await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#e-subj').value,body})});toast('המייל נשלח ✓');openLead(id);}
   catch(e){toast(e.message);}
 }
 
@@ -1080,30 +1098,35 @@ function editTemplate(id){
     <div class="field"><label>שם התבנית</label><input id="tp-name" value="${esc(t.name)}"></div>
     <div class="field"><label>נושא</label><input id="tp-subject" value="${esc(t.subject)}"></div>
     <p class="muted" style="margin:.2rem 0 .5rem">עריכה חזותית — מה שרואים זה מה שיישלח. משתנים: <code>{{first_name}}</code> <code>{{name}}</code> <code>{{phone}}</code>.</p>
-    <div class="wysi-toolbar">
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('bold')" title="מודגש"><b>B</b></button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('italic')" title="נטוי"><i>I</i></button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('underline')" title="קו תחתון"><u>U</u></button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rteBlock('H2')" title="כותרת">כותרת</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('insertUnorderedList')" title="רשימה">• רשימה</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyRight')" title="יישור לימין">↦</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyCenter')" title="מרכוז">↔</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rteColor()" title="צבע טקסט">🎨</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rteLink()" title="הוסף קישור">🔗</button>
-      <button type="button" onmousedown="event.preventDefault()" onclick="rte('removeFormat')" title="נקה עיצוב">🧹</button>
-      <button type="button" onclick="toggleCode()" id="code-toggle" style="margin-inline-start:auto">&lt;/&gt; קוד HTML</button>
-    </div>
-    <div id="tp-visual" contenteditable="true" dir="rtl" class="wysi-area"></div>
+    ${rteToolbar('toggleCode()','code-toggle')}
+    <div id="tp-visual" contenteditable="true" dir="rtl" class="wysi-area" onfocus="rteTarget=this"></div>
     <textarea id="tp-code" class="hidden" rows="14" dir="ltr" style="font-family:monospace;font-size:.8rem"></textarea>
     <button class="btn" style="margin-top:1rem" onclick="saveTemplate(${id||0})">שמור</button>`;
   $('#tp-visual').innerHTML=t.body||'';
   $('#tp-code').value=t.body||'';
   $('#drawer-wrap').classList.remove('hidden');
 }
-function rte(cmd){document.execCommand(cmd,false,null);$('#tp-visual').focus();}
-function rteBlock(tag){document.execCommand('formatBlock',false,tag);$('#tp-visual').focus();}
-function rteColor(){const c=prompt('צבע (למשל #ff6600):','#ff6600');if(c){document.execCommand('foreColor',false,c);$('#tp-visual').focus();}}
-function rteLink(){const u=prompt('כתובת הקישור:','https://led-mls.co.il');if(u){document.execCommand('createLink',false,u);$('#tp-visual').focus();}}
+let rteTarget=null;
+function rteFocus(){const el=rteTarget||document.getElementById('tp-visual')||document.getElementById('e-visual');if(el&&el.focus)el.focus();}
+function rte(cmd){document.execCommand(cmd,false,null);rteFocus();}
+function rteBlock(tag){document.execCommand('formatBlock',false,tag);rteFocus();}
+function rteColor(){const c=prompt('צבע (למשל #ff6600):','#ff6600');if(c){document.execCommand('foreColor',false,c);rteFocus();}}
+function rteLink(){const u=prompt('כתובת הקישור:','https://led-mls.co.il');if(u){document.execCommand('createLink',false,u);rteFocus();}}
+function rteToolbar(codeToggleFn, toggleId){
+  return `<div class="wysi-toolbar">
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('bold')" title="מודגש"><b>B</b></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('italic')" title="נטוי"><i>I</i></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('underline')" title="קו תחתון"><u>U</u></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteBlock('H2')" title="כותרת">כותרת</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('insertUnorderedList')" title="רשימה">• רשימה</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyRight')" title="יישור לימין">↦</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyCenter')" title="מרכוז">↔</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteColor()" title="צבע טקסט">🎨</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteLink()" title="הוסף קישור">🔗</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rte('removeFormat')" title="נקה עיצוב">🧹</button>
+    <button type="button" id="${toggleId}" onclick="${codeToggleFn}" style="margin-inline-start:auto">&lt;/&gt; קוד HTML</button>
+  </div>`;
+}
 function toggleCode(){
   const vis=$('#tp-visual'),code=$('#tp-code');
   tpCodeMode=!tpCodeMode;
