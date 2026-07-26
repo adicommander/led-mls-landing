@@ -4,102 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>MLS ישראל — מערכת ניהול</title>
+<title>MLS ישראל — מערכת CRM</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0603'/><circle cx='50' cy='50' r='22' fill='%23ff6600'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0d0805;--panel:#160e07;--card:#1d130a;--line:rgba(255,170,80,.14);
+  --bg:#0d0805;--panel:#160e07;--card:#1d130a;--card2:#241709;--line:rgba(255,170,80,.14);
   --led:#ff6600;--led2:#ff9900;--text:#f2ece2;--dim:#a3927c;
-  --ok:#5dbb63;--bad:#e05252;
+  --ok:#5dbb63;--bad:#e05252;--blue:#5aa2ff;--purple:#b98bff;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;min-height:100vh}
 button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-size:.95rem}
-input,textarea,select{font-family:inherit;font-size:.95rem;color:var(--text);background:#241709;border:1px solid var(--line);border-radius:10px;padding:.65rem .9rem;width:100%}
+input,textarea,select{font-family:inherit;font-size:.95rem;color:var(--text);background:#241709;border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;width:100%}
 input:focus,textarea:focus,select:focus{outline:2px solid rgba(255,153,0,.4)}
-.btn{background:linear-gradient(90deg,var(--led),var(--led2));color:#1a0d00;font-weight:600;padding:.7rem 1.4rem}
+.btn{background:linear-gradient(90deg,var(--led),var(--led2));color:#1a0d00;font-weight:600;padding:.65rem 1.3rem}
 .btn:disabled{opacity:.5;cursor:wait}
-.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);padding:.6rem 1.1rem}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text);padding:.55rem 1rem}
+.btn-sm{padding:.4rem .8rem;font-size:.85rem}
 .hidden{display:none!important}
 .muted{color:var(--dim);font-size:.85rem}
 a{color:var(--led2)}
 
-/* auth screens */
-.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
-  background:radial-gradient(60% 50% at 50% 30%,rgba(255,102,0,.09),transparent 70%)}
+/* auth */
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:radial-gradient(60% 50% at 50% 30%,rgba(255,102,0,.09),transparent 70%)}
 .auth .card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:2.2rem;box-shadow:0 30px 80px rgba(0,0,0,.5)}
 .auth h1{font-size:1.5rem;margin-bottom:.4rem}
 .auth h1 b{color:var(--led)}
-.auth p{margin-bottom:1.4rem}
 .auth label{display:block;font-size:.85rem;color:var(--dim);margin:1rem 0 .35rem}
 .auth .btn{width:100%;margin-top:1.4rem}
 .err{background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.4);color:#ff9d9d;border-radius:10px;padding:.6rem .9rem;font-size:.88rem;margin-top:1rem}
 .code-input{letter-spacing:.6em;text-align:center;font-size:1.6rem;direction:ltr}
 
 /* shell */
-.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
-aside{background:var(--panel);border-inline-end:1px solid var(--line);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.4rem}
-aside .logo{font-weight:700;font-size:1.15rem;margin-bottom:1.2rem}
+.shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh}
+aside{background:var(--panel);border-inline-end:1px solid var(--line);padding:1.3rem .9rem;display:flex;flex-direction:column;gap:.25rem;position:sticky;top:0;height:100vh;overflow-y:auto}
+aside .logo{font-weight:700;font-size:1.1rem;margin-bottom:1.1rem;padding:0 .4rem}
 aside .logo b{color:var(--led)}
-aside button{background:transparent;color:var(--dim);text-align:start;padding:.7rem 1rem;border-radius:10px;font-size:.95rem}
-aside button.active,aside button:hover{background:rgba(255,102,0,.12);color:var(--text)}
+aside button.nav{background:transparent;color:var(--dim);text-align:start;padding:.65rem .9rem;border-radius:10px;font-size:.95rem;display:flex;gap:.6rem;align-items:center}
+aside button.nav.active,aside button.nav:hover{background:rgba(255,102,0,.12);color:var(--text)}
+aside .badge-count{margin-inline-start:auto;background:var(--bad);color:#fff;border-radius:99px;font-size:.7rem;padding:.05rem .45rem;font-weight:700}
 aside .spacer{flex:1}
-main{padding:2rem;max-width:1200px}
-h2{font-size:1.3rem;margin-bottom:1.2rem}
+main{padding:1.6rem;max-width:1300px}
+h2.page-title{font-size:1.35rem;margin-bottom:1.2rem}
 
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.9rem;margin-bottom:1.6rem}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem}
-.stat .n{font-size:1.7rem;font-weight:700;color:var(--led2)}
-.stat .t{font-size:.82rem;color:var(--dim)}
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.9rem;margin-bottom:1.4rem}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem}
+.stat .n{font-size:1.6rem;font-weight:700;color:var(--led2)}
+.stat .n.sm{font-size:1.25rem}
+.stat .t{font-size:.8rem;color:var(--dim);margin-top:.15rem}
+.panel-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.2rem;margin-bottom:1.4rem}
+.panel-box h3{font-size:1rem;margin-bottom:1rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
 
-/* toolbar + table */
+/* funnel bars */
+.funnel-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem}
+.funnel-row .lbl{width:90px;font-size:.85rem;color:var(--dim);flex-shrink:0}
+.funnel-bar{flex:1;background:#2a1a0c;border-radius:6px;height:22px;overflow:hidden}
+.funnel-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--led),var(--led2));border-radius:6px}
+.funnel-row .v{width:34px;text-align:start;font-size:.85rem;font-weight:600}
+
+/* sparkline */
+.spark{width:100%;height:60px;display:block}
+
+/* toolbar / chips / table */
 .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
-.toolbar input{max-width:260px}
-.chip{border:1px solid var(--line);background:transparent;color:var(--dim);border-radius:999px;padding:.45rem 1rem;font-size:.85rem}
+.toolbar input.search{max-width:240px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--dim);border-radius:999px;padding:.4rem .9rem;font-size:.83rem}
 .chip.active{background:rgba(255,102,0,.16);color:var(--led2);border-color:rgba(255,153,0,.5)}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-th,td{padding:.75rem .9rem;text-align:start;font-size:.9rem;border-bottom:1px solid var(--line)}
-th{color:var(--dim);font-weight:500;font-size:.8rem;background:var(--panel)}
+th,td{padding:.7rem .8rem;text-align:start;font-size:.9rem;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-weight:500;font-size:.78rem;background:var(--panel)}
 tbody tr{cursor:pointer}
 tbody tr:hover{background:rgba(255,102,0,.06)}
-.status{display:inline-block;border-radius:999px;padding:.2rem .7rem;font-size:.78rem}
-.status.new{background:rgba(255,153,0,.15);color:var(--led2)}
-.status.in_progress{background:rgba(90,162,255,.15);color:#7db4ff}
-.status.won{background:rgba(93,187,99,.15);color:var(--ok)}
-.status.lost{background:rgba(224,82,82,.13);color:#ff9d9d}
+.status{display:inline-block;border-radius:999px;padding:.18rem .65rem;font-size:.76rem;white-space:nowrap}
+.st-new{background:rgba(255,153,0,.15);color:var(--led2)}
+.st-contacted{background:rgba(90,162,255,.15);color:var(--blue)}
+.st-quoted{background:rgba(185,139,255,.16);color:var(--purple)}
+.st-negotiation{background:rgba(255,200,80,.15);color:#ffc850}
+.st-won{background:rgba(93,187,99,.16);color:var(--ok)}
+.st-lost{background:rgba(224,82,82,.13);color:#ff9d9d}
+.tag{display:inline-block;background:rgba(255,170,80,.12);color:var(--dim);border-radius:6px;padding:.05rem .4rem;font-size:.72rem;margin-inline-end:.2rem}
+
+/* kanban */
+.kanban{display:flex;gap:.8rem;overflow-x:auto;padding-bottom:1rem}
+.kan-col{flex:0 0 250px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:.7rem;min-height:200px}
+.kan-col.dragover{outline:2px dashed var(--led);outline-offset:-4px}
+.kan-col h4{font-size:.85rem;margin-bottom:.2rem;display:flex;justify-content:space-between;align-items:center}
+.kan-col .col-sum{font-size:.72rem;color:var(--dim);margin-bottom:.7rem}
+.kan-card{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:.65rem;margin-bottom:.55rem;cursor:grab}
+.kan-card:active{cursor:grabbing}
+.kan-card .nm{font-weight:600;font-size:.9rem}
+.kan-card .meta{font-size:.76rem;color:var(--dim);margin-top:.25rem;display:flex;justify-content:space-between;gap:.4rem}
+.kan-card .val{color:var(--led2);font-weight:600}
 
 /* centered popup */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9;backdrop-filter:blur(3px)}
-.drawer{position:fixed;top:50%;inset-inline-start:50%;transform:translate(50%,-50%);width:min(620px,94vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px rgba(0,0,0,.6);z-index:10;padding:1.8rem;overflow-y:auto;animation:pop .22s cubic-bezier(.2,.9,.3,1.2) both}
+.drawer{position:fixed;top:50%;inset-inline-start:50%;transform:translate(50%,-50%);width:min(680px,95vw);max-height:90vh;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 100px rgba(0,0,0,.6);z-index:10;padding:1.6rem;overflow-y:auto;animation:pop .22s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes pop{from{opacity:0;transform:translate(50%,-50%) scale(.94)}to{opacity:1;transform:translate(50%,-50%) scale(1)}}
-.drawer h3{margin-bottom:.2rem}
 .drawer .close{position:absolute;top:1rem;inset-inline-end:1rem;background:transparent;color:var(--dim);font-size:1.4rem}
-.kv{margin:.9rem 0;display:grid;grid-template-columns:auto 1fr;gap:.3rem .8rem;font-size:.9rem}
-.kv b{color:var(--dim);font-weight:400}
-.msgbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.8rem;margin:.5rem 0;font-size:.88rem;white-space:pre-wrap}
+.tabs{display:flex;gap:.3rem;border-bottom:1px solid var(--line);margin:.4rem 0 1rem}
+.tabs button{background:transparent;color:var(--dim);padding:.5rem .9rem;border-radius:0;font-size:.9rem;border-bottom:2px solid transparent}
+.tabs button.active{color:var(--led2);border-bottom-color:var(--led)}
+.field{margin:.7rem 0}
+.field label{display:block;font-size:.8rem;color:var(--dim);margin-bottom:.3rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+.msgbox{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.7rem;margin:.5rem 0;font-size:.88rem;white-space:pre-wrap}
 .msgbox .muted{display:block;margin-bottom:.3rem}
-.row{display:flex;gap:.6rem;margin:.7rem 0}
-.section{border-top:1px solid var(--line);margin-top:1.2rem;padding-top:1rem}
-.toast{position:fixed;bottom:1.4rem;inset-inline-start:50%;transform:translateX(50%);background:#241709;border:1px solid var(--line);color:var(--text);padding:.8rem 1.4rem;border-radius:12px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-.wa{background:#1faa53;color:#fff;font-weight:600;padding:.6rem 1.1rem;border-radius:10px;text-decoration:none;font-size:.9rem;display:inline-block}
-@media(max-width:760px){.shell{grid-template-columns:1fr}aside{flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line)}aside .logo{margin:0}main{padding:1rem}}
+.tl-item{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.tl-item .dot{width:8px;height:8px;border-radius:50%;background:var(--led);margin-top:.4rem;flex-shrink:0}
+.wa{background:#1faa53;color:#fff;font-weight:600;padding:.5rem 1rem;border-radius:10px;text-decoration:none;font-size:.88rem;display:inline-block}
+.toast{position:fixed;bottom:1.4rem;inset-inline-start:50%;transform:translateX(50%);background:#241709;border:1px solid var(--line);color:var(--text);padding:.8rem 1.4rem;border-radius:12px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw}
+.bulkbar{position:sticky;bottom:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.7rem 1rem;margin-top:.8rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.task-item{display:flex;gap:.7rem;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;margin-bottom:.5rem}
+.task-item.done{opacity:.5}
+.task-item .tt{flex:1}
+.task-item.overdue{border-color:rgba(224,82,82,.5)}
+.checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--led)}
+@media(max-width:760px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line)}aside .logo{display:none}aside .spacer{display:none}main{padding:1rem}}
 </style>
 </head>
 <body>
 
 <div id="view-auth" class="auth">
   <div class="card">
-    <h1>MLS <b>ישראל</b> · ניהול</h1>
+    <h1>MLS <b>ישראל</b> · CRM</h1>
     <div id="step-login">
-      <p class="muted">כניסה למערכת ניהול הלידים</p>
+      <p class="muted">כניסה למערכת</p>
       <label>אימייל</label><input id="login-email" type="email" autocomplete="username" dir="ltr">
       <label>סיסמה</label><input id="login-pass" type="password" autocomplete="current-password" dir="ltr">
       <button class="btn" id="btn-login">כניסה</button>
     </div>
     <div id="step-code" class="hidden">
-      <p class="muted">שלחנו קוד בן 6 ספרות למייל שלך. <span id="mail-warn" class="hidden" style="color:#ff9d9d">(שליחת המייל נכשלה — הקוד זמין ביומן השרת)</span></p>
+      <p class="muted">שלחנו קוד בן 6 ספרות למייל. <span id="mail-warn" class="hidden" style="color:#ff9d9d">(שליחת המייל נכשלה — הקוד ביומן השרת)</span></p>
       <label>קוד אימות</label><input id="login-code" class="code-input" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
       <button class="btn" id="btn-verify">אימות</button>
       <button class="btn-ghost" style="width:100%;margin-top:.6rem" id="btn-back">חזרה</button>
@@ -117,53 +157,24 @@ tbody tr:hover{background:rgba(255,102,0,.06)}
 <div id="view-app" class="shell hidden">
   <aside>
     <div class="logo">MLS <b>ישראל</b></div>
-    <button data-page="leads" class="active">📋 לידים</button>
-    <button data-page="users" id="nav-users">👥 משתמשים</button>
-    <button data-page="settings">⚙️ הגדרות</button>
+    <button class="nav active" data-page="dashboard">📊 דשבורד</button>
+    <button class="nav" data-page="pipeline">🗂️ פייפליין</button>
+    <button class="nav" data-page="leads">📋 לידים</button>
+    <button class="nav" data-page="tasks">✅ משימות <span id="tasks-badge" class="badge-count hidden">0</span></button>
+    <button class="nav" data-page="templates">✉️ תבניות</button>
+    <button class="nav" data-page="users" id="nav-users">👥 משתמשים</button>
+    <button class="nav" data-page="settings">⚙️ הגדרות</button>
     <div class="spacer"></div>
-    <button id="btn-logout">יציאה ↩</button>
+    <button class="nav" id="btn-logout">↩ יציאה</button>
   </aside>
   <main>
-    <div id="page-leads">
-      <h2>לידים</h2>
-      <div class="stats" id="stats"></div>
-      <div class="toolbar">
-        <input id="q" placeholder="חיפוש שם / טלפון / הודעה...">
-        <button class="chip active" data-status="">הכול</button>
-        <button class="chip" data-status="new">חדש</button>
-        <button class="chip" data-status="in_progress">בטיפול</button>
-        <button class="chip" data-status="won">נסגר בהצלחה</button>
-        <button class="chip" data-status="lost">לא רלוונטי</button>
-      </div>
-      <table>
-        <thead><tr><th>#</th><th>שם</th><th>טלפון</th><th>הודעה</th><th>סטטוס</th><th>מטפל</th><th>התקבל</th></tr></thead>
-        <tbody id="leads-body"></tbody>
-      </table>
-    </div>
-    <div id="page-users" class="hidden">
-      <h2>משתמשים</h2>
-      <div class="toolbar">
-        <input id="u-email" placeholder="email@example.com" style="max-width:210px" dir="ltr">
-        <input id="u-first" placeholder="שם פרטי" style="max-width:130px">
-        <input id="u-last" placeholder="שם משפחה" style="max-width:130px">
-        <input id="u-phone" placeholder="טלפון נייד" style="max-width:140px" dir="ltr">
-        <select id="u-role" style="max-width:120px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
-        <button class="btn" id="btn-adduser">הוסף משתמש</button>
-      </div>
-      <table>
-        <thead><tr><th>#</th><th>אימייל</th><th>שם פרטי</th><th>שם משפחה</th><th>טלפון</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
-        <tbody id="users-body"></tbody>
-      </table>
-    </div>
-    <div id="page-settings" class="hidden">
-      <h2>הגדרות</h2>
-      <div class="card" style="max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem">
-        <h3 style="margin-bottom:.8rem">החלפת סיסמה</h3>
-        <label class="muted">סיסמה נוכחית</label><input id="s-current" type="password" dir="ltr" style="margin:.3rem 0 .8rem">
-        <label class="muted">סיסמה חדשה (10+ תווים)</label><input id="s-next" type="password" dir="ltr" style="margin:.3rem 0 .8rem">
-        <button class="btn" id="btn-changepass">עדכן סיסמה</button>
-      </div>
-    </div>
+    <div id="page-dashboard"></div>
+    <div id="page-pipeline" class="hidden"></div>
+    <div id="page-leads" class="hidden"></div>
+    <div id="page-tasks" class="hidden"></div>
+    <div id="page-templates" class="hidden"></div>
+    <div id="page-users" class="hidden"></div>
+    <div id="page-settings" class="hidden"></div>
   </main>
 </div>
 
@@ -174,7 +185,10 @@ tbody tr:hover{background:rgba(255,102,0,.06)}
 
 <script>
 const $=s=>document.querySelector(s);
-let PRE='', ME=null, FILTER={status:'',q:''};
+let ME=null, PRE='', USERS=[], TEMPLATES=[], leadFilter={status:'',q:''}, selected=new Set();
+
+const STAGES=['new','contacted','quoted','negotiation','won','lost'];
+const STAGE_HE={new:'חדש',contacted:'יצירת קשר',quoted:'הצעת מחיר',negotiation:'משא ומתן',won:'נסגר בהצלחה',lost:'לא רלוונטי'};
 
 async function api(path,opts={}){
   const r=await fetch(path,{headers:{'Content-Type':'application/json'},credentials:'same-origin',...opts});
@@ -182,207 +196,424 @@ async function api(path,opts={}){
   if(!r.ok) throw new Error(d.error||('שגיאה '+r.status));
   return d;
 }
-function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
-function authErr(msg){const e=$('#auth-err');e.textContent=msg;e.classList.remove('hidden');}
-function fmtDate(s){return new Date(s).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'});}
-const STATUS_HE={new:'חדש',in_progress:'בטיפול',won:'נסגר בהצלחה',lost:'לא רלוונטי'};
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+function authErr(m){const e=$('#auth-err');e.textContent=m;e.classList.remove('hidden');}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=s=>s?new Date(s).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'2-digit'}):'';
+const fmtDT=s=>s?new Date(s).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'}):'';
+const money=n=>'₪'+Number(n||0).toLocaleString('he-IL');
+const stChip=s=>`<span class="status st-${s}">${STAGE_HE[s]||s}</span>`;
 
-/* ---- auth flow ---- */
+/* ---------- auth ---------- */
 $('#btn-login').onclick=async()=>{
-  $('#auth-err').classList.add('hidden');
-  const b=$('#btn-login');b.disabled=true;
+  $('#auth-err').classList.add('hidden');const b=$('#btn-login');b.disabled=true;
   try{
     const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:$('#login-email').value,password:$('#login-pass').value})});
-    if(d.ok){ // 2FA disabled — straight in
-      ME=d.user;
-      if(ME.must_change_password){$('#step-login').classList.add('hidden');$('#step-newpass').classList.remove('hidden');}
-      else enterApp();
-      return;
-    }
-    PRE=d.pre;
-    $('#step-login').classList.add('hidden');$('#step-code').classList.remove('hidden');
-    if(!d.emailSent)$('#mail-warn').classList.remove('hidden');
-    $('#login-code').focus();
+    if(d.ok){ME=d.user;afterLogin();return;}
+    PRE=d.pre;$('#step-login').classList.add('hidden');$('#step-code').classList.remove('hidden');
+    if(!d.emailSent)$('#mail-warn').classList.remove('hidden');$('#login-code').focus();
   }catch(e){authErr(e.message);}finally{b.disabled=false;}
 };
 $('#btn-verify').onclick=async()=>{
-  $('#auth-err').classList.add('hidden');
-  const b=$('#btn-verify');b.disabled=true;
+  $('#auth-err').classList.add('hidden');const b=$('#btn-verify');b.disabled=true;
   try{
     const d=await api('/api/auth/verify',{method:'POST',body:JSON.stringify({pre:PRE,code:$('#login-code').value})});
-    ME=d.user;
-    if(ME.must_change_password){$('#step-code').classList.add('hidden');$('#step-newpass').classList.remove('hidden');}
-    else enterApp();
+    ME=d.user;afterLogin();
   }catch(e){authErr(e.message);}finally{b.disabled=false;}
 };
 $('#btn-back').onclick=()=>{$('#step-code').classList.add('hidden');$('#step-login').classList.remove('hidden');};
 $('#btn-newpass').onclick=async()=>{
   $('#auth-err').classList.add('hidden');
-  try{
-    await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#np-current').value,next:$('#np-next').value})});
-    toast('הסיסמה עודכנה');enterApp();
-  }catch(e){authErr(e.message);}
+  try{await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#np-current').value,next:$('#np-next').value})});toast('הסיסמה עודכנה');enterApp();}
+  catch(e){authErr(e.message);}
 };
 $('#btn-logout').onclick=async()=>{await api('/api/auth/logout',{method:'POST'});location.reload();};
-
-function enterApp(){
+function afterLogin(){
+  if(ME.must_change_password){$('#step-login').classList.add('hidden');$('#step-code').classList.add('hidden');$('#step-newpass').classList.remove('hidden');}
+  else enterApp();
+}
+async function enterApp(){
   $('#view-auth').classList.add('hidden');$('#view-app').classList.remove('hidden');
   if(ME.role!=='admin')$('#nav-users').classList.add('hidden');
-  loadLeads();loadStats();
+  try{USERS=(await api('/api/users')).users;}catch(e){USERS=[ME];}
+  try{TEMPLATES=(await api('/api/templates')).templates;}catch(e){TEMPLATES=[];}
+  showPage('dashboard');refreshTaskBadge();
 }
 
-/* ---- nav ---- */
-document.querySelectorAll('aside button[data-page]').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('aside button[data-page]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    ['leads','users','settings'].forEach(p=>$('#page-'+p).classList.add('hidden'));
-    $('#page-'+btn.dataset.page).classList.remove('hidden');
-    if(btn.dataset.page==='users')loadUsers();
-    if(btn.dataset.page==='leads'){loadLeads();loadStats();}
-  };
+/* ---------- router ---------- */
+document.querySelectorAll('aside button.nav[data-page]').forEach(btn=>{
+  btn.onclick=()=>showPage(btn.dataset.page);
 });
-
-/* ---- leads ---- */
-async function loadStats(){
-  const d=await api('/api/stats');
-  $('#stats').innerHTML=`
-    <div class="stat"><div class="n">${d.total}</div><div class="t">סה״כ לידים</div></div>
-    <div class="stat"><div class="n">${d.week}</div><div class="t">בשבוע האחרון</div></div>
-    <div class="stat"><div class="n">${d.byStatus.new||0}</div><div class="t">ממתינים לטיפול</div></div>
-    <div class="stat"><div class="n">${d.byStatus.won||0}</div><div class="t">נסגרו בהצלחה</div></div>`;
+function showPage(name){
+  document.querySelectorAll('aside button.nav[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  ['dashboard','pipeline','leads','tasks','templates','users','settings'].forEach(p=>$('#page-'+p).classList.toggle('hidden',p!==name));
+  if(name==='dashboard')loadDashboard();
+  if(name==='pipeline')loadPipeline();
+  if(name==='leads')loadLeads();
+  if(name==='tasks')loadTasks();
+  if(name==='templates')loadTemplates();
+  if(name==='users')loadUsers();
+  if(name==='settings')loadSettings();
 }
+
+async function refreshTaskBadge(){
+  try{
+    const s=await api('/api/stats');
+    const n=(s.tasksToday||0)+(s.tasksOverdue||0);
+    const b=$('#tasks-badge');b.textContent=n;b.classList.toggle('hidden',!n);
+  }catch(e){}
+}
+
+/* ---------- dashboard ---------- */
+async function loadDashboard(){
+  const s=await api('/api/stats');
+  const maxFunnel=Math.max(1,...STAGES.map(k=>s.byStatus[k]||0));
+  const trendMax=Math.max(1,...(s.trend||[]).map(t=>t.n));
+  const pts=(s.trend||[]).map((t,i,a)=>{
+    const x=a.length>1?i/(a.length-1)*100:0;const y=60-(t.n/trendMax)*52-4;return `${x},${y}`;
+  }).join(' ');
+  $('#page-dashboard').innerHTML=`
+    <h2 class="page-title">דשבורד</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">${s.total}</div><div class="t">סה״כ לידים</div></div>
+      <div class="stat"><div class="n">${s.week}</div><div class="t">חדשים השבוע</div></div>
+      <div class="stat"><div class="n sm">${money(s.pipelineValue)}</div><div class="t">שווי פייפליין פתוח</div></div>
+      <div class="stat"><div class="n sm">${money(s.forecast)}</div><div class="t">תחזית משוקללת</div></div>
+      <div class="stat"><div class="n sm">${money(s.wonValue)}</div><div class="t">נסגר בהצלחה (₪)</div></div>
+      <div class="stat"><div class="n">${s.winRate}%</div><div class="t">אחוז זכייה</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel-box">
+        <h3>משפך פייפליין</h3>
+        ${STAGES.map(k=>{const n=s.byStatus[k]||0;return `
+          <div class="funnel-row"><span class="lbl">${STAGE_HE[k]}</span>
+          <div class="funnel-bar"><i style="width:${n/maxFunnel*100}%"></i></div>
+          <span class="v">${n}</span></div>`;}).join('')}
+      </div>
+      <div class="panel-box">
+        <h3>לידים חדשים — 14 ימים אחרונים</h3>
+        <svg class="spark" viewBox="0 0 100 60" preserveAspectRatio="none">
+          <polyline fill="none" stroke="#ff8a1a" stroke-width="1.5" points="${pts}"/>
+        </svg>
+        <div style="display:flex;gap:1.4rem;margin-top:1rem">
+          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:${s.tasksOverdue?'#ff9d9d':'var(--led2)'}">${s.tasksOverdue}</div><div class="t muted">משימות באיחור</div></div>
+          <div><div class="n" style="font-size:1.3rem;font-weight:700;color:var(--led2)">${s.tasksToday}</div><div class="t muted">משימות להיום</div></div>
+        </div>
+      </div>
+    </div>`;
+  refreshTaskBadge();
+}
+
+/* ---------- pipeline (kanban) ---------- */
+async function loadPipeline(){
+  const {leads}=await api('/api/leads');
+  const cols=STAGES.map(st=>{
+    const items=leads.filter(l=>l.status===st);
+    const sum=items.reduce((a,l)=>a+Number(l.value||0),0);
+    return `<div class="kan-col" data-stage="${st}" ondragover="kanOver(event)" ondragleave="kanLeave(event)" ondrop="kanDrop(event)">
+      <h4>${STAGE_HE[st]} <span class="muted">${items.length}</span></h4>
+      <div class="col-sum">${money(sum)}</div>
+      ${items.map(l=>`
+        <div class="kan-card" draggable="true" data-id="${l.id}" ondragstart="kanStart(event)" onclick="openLead(${l.id})">
+          <div class="nm">${esc(l.name)}</div>
+          <div class="meta"><span>${esc(l.assigned_name||'—')}</span>${l.value>0?`<span class="val">${money(l.value)}</span>`:''}</div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+  $('#page-pipeline').innerHTML=`<h2 class="page-title">פייפליין</h2><div class="kanban">${cols}</div>`;
+}
+let dragId=null;
+function kanStart(e){dragId=e.currentTarget.dataset.id;e.dataTransfer.effectAllowed='move';}
+function kanOver(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
+function kanLeave(e){e.currentTarget.classList.remove('dragover');}
+async function kanDrop(e){
+  e.preventDefault();e.currentTarget.classList.remove('dragover');
+  const stage=e.currentTarget.dataset.stage;
+  if(!dragId)return;
+  try{await api('/api/leads/'+dragId,{method:'PATCH',body:JSON.stringify({status:stage})});loadPipeline();refreshTaskBadge();}
+  catch(err){toast(err.message);}
+  dragId=null;
+}
+
+/* ---------- leads ---------- */
 async function loadLeads(){
-  const p=new URLSearchParams();if(FILTER.status)p.set('status',FILTER.status);if(FILTER.q)p.set('q',FILTER.q);
-  const d=await api('/api/leads?'+p);
-  $('#leads-body').innerHTML=d.leads.map(l=>`
-    <tr onclick="openLead(${l.id})">
-      <td>${l.id}</td><td>${esc(l.name)}</td><td dir="ltr">${esc(l.phone)}</td>
-      <td>${esc((l.message||'').slice(0,48))}${(l.message||'').length>48?'…':''}</td>
-      <td><span class="status ${l.status}">${STATUS_HE[l.status]}</span></td>
-      <td>${esc(l.assigned_name||'—')}</td><td>${fmtDate(l.created_at)}</td>
-    </tr>`).join('')||'<tr><td colspan="7" class="muted">אין לידים עדיין</td></tr>';
+  selected.clear();
+  const p=new URLSearchParams();if(leadFilter.status)p.set('status',leadFilter.status);if(leadFilter.q)p.set('q',leadFilter.q);
+  const {leads}=await api('/api/leads?'+p);
+  $('#page-leads').innerHTML=`
+    <h2 class="page-title">לידים</h2>
+    <div class="toolbar">
+      <input class="search" id="q" placeholder="חיפוש שם / טלפון / תגית..." value="${esc(leadFilter.q)}">
+      <button class="chip ${!leadFilter.status?'active':''}" onclick="setLeadStatus('')">הכול</button>
+      ${STAGES.map(st=>`<button class="chip ${leadFilter.status===st?'active':''}" onclick="setLeadStatus('${st}')">${STAGE_HE[st]}</button>`).join('')}
+      <a class="btn-ghost btn-sm" href="/api/leads/export.csv${leadFilter.status?'?status='+leadFilter.status:''}" style="text-decoration:none;margin-inline-start:auto">⬇ ייצוא CSV</a>
+    </div>
+    <table>
+      <thead><tr><th style="width:28px"></th><th>שם</th><th>טלפון</th><th>שלב</th><th>שווי</th><th>תגיות</th><th>מטפל</th><th>התקבל</th></tr></thead>
+      <tbody id="leads-body"></tbody>
+    </table>
+    <div id="bulkbar"></div>`;
+  $('#leads-body').innerHTML=leads.map(l=>`
+    <tr>
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="checkbox" onchange="toggleSel(${l.id},this.checked)"></td>
+      <td onclick="openLead(${l.id})">${esc(l.name)}</td>
+      <td onclick="openLead(${l.id})" dir="ltr">${esc(l.phone)}</td>
+      <td onclick="openLead(${l.id})">${stChip(l.status)}</td>
+      <td onclick="openLead(${l.id})">${l.value>0?money(l.value):'—'}</td>
+      <td onclick="openLead(${l.id})">${(l.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')}</td>
+      <td onclick="openLead(${l.id})">${esc(l.assigned_name||'—')}</td>
+      <td onclick="openLead(${l.id})">${fmtDate(l.created_at)}</td>
+    </tr>`).join('')||'<tr><td colspan="8" class="muted">אין לידים</td></tr>';
+  let qT;$('#q').oninput=e=>{clearTimeout(qT);qT=setTimeout(()=>{leadFilter.q=e.target.value;loadLeads();},350);};
 }
-document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-  c.classList.add('active');FILTER.status=c.dataset.status;loadLeads();
-});
-let qT;$('#q').oninput=e=>{clearTimeout(qT);qT=setTimeout(()=>{FILTER.q=e.target.value;loadLeads();},350);};
+function setLeadStatus(s){leadFilter.status=s;loadLeads();}
+function toggleSel(id,on){on?selected.add(id):selected.delete(id);renderBulk();}
+function renderBulk(){
+  const bb=$('#bulkbar');if(!bb)return;
+  if(!selected.size){bb.innerHTML='';return;}
+  bb.innerHTML=`<div class="bulkbar"><b>${selected.size}</b> נבחרו
+    <select id="bulk-tpl" style="max-width:220px"><option value="">בחר תבנית מייל...</option>${TEMPLATES.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
+    <button class="btn btn-sm" onclick="bulkSend()">שלח דיוור</button>
+    <button class="btn-ghost btn-sm" onclick="selected.clear();loadLeads()">בטל</button></div>`;
+}
+async function bulkSend(){
+  const tpl=$('#bulk-tpl').value;
+  if(!tpl){toast('בחר תבנית');return;}
+  if(!confirm(`לשלוח מייל ל-${selected.size} לידים?`))return;
+  try{
+    const r=await api('/api/leads/bulk-email',{method:'POST',body:JSON.stringify({lead_ids:[...selected],template_id:Number(tpl)})});
+    toast(`נשלחו ${r.sent} · נכשלו ${r.failed} · דולגו ${r.skipped} (ללא מייל)`);
+    selected.clear();loadLeads();
+  }catch(e){toast(e.message);}
+}
 
+/* ---------- lead popup ---------- */
 async function openLead(id){
-  const d=await api('/api/leads/'+id);
-  const l=d.lead;
+  const d=await api('/api/leads/'+id);const l=d.lead;
   const wa=l.phone?('https://wa.me/'+l.phone.replace(/\D/g,'').replace(/^0/,'972')):null;
+  const timeline=[
+    ...d.notes.map(n=>({t:n.created_at,who:n.user_name,txt:'📝 '+n.body})),
+    ...d.messages.map(m=>({t:m.created_at,who:m.user_name,txt:(m.direction==='out'?'✉️ נשלח: ':'📥 התקבל: ')+m.subject})),
+    ...d.activity.map(a=>({t:a.created_at,who:a.user_name,txt:'• '+a.detail})),
+  ].sort((a,b)=>new Date(b.t)-new Date(a.t));
   $('#drawer').innerHTML=`
     <button class="close" onclick="closeDrawer()">✕</button>
     <h3>${esc(l.name)} <span class="muted">#${l.id}</span></h3>
-    <div class="kv">
-      <b>טלפון</b><span dir="ltr">${esc(l.phone)||'—'}</span>
-      <b>מייל</b><span dir="ltr">${esc(l.email)||'—'}</span>
-      <b>התקבל</b><span>${fmtDate(l.created_at)} ${l.page?('· '+esc(l.page)):''}</span>
+    <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
+    <div class="tabs">
+      <button class="active" onclick="leadTab(event,'d-details')">פרטים</button>
+      <button onclick="leadTab(event,'d-timeline')">ציר זמן</button>
+      <button onclick="leadTab(event,'d-tasks')">משימות</button>
+      <button onclick="leadTab(event,'d-email')">מייל</button>
     </div>
-    <div class="msgbox">${esc(l.message)||'(ללא הודעה)'}</div>
-    <div class="row">
-      <select id="d-status">${Object.entries(STATUS_HE).map(([k,v])=>`<option value="${k}"${k===l.status?' selected':''}>${v}</option>`).join('')}</select>
-      ${wa?`<a class="wa" href="${wa}" target="_blank" rel="noopener">וואטסאפ 💬</a>`:''}
+    <div id="d-details" class="tab-pane">
+      <div class="msgbox">${esc(l.message)||'(ללא הודעת פנייה)'}</div>
+      <div class="row">
+        <div class="field"><label>שלב</label><select id="f-status">${STAGES.map(s=>`<option value="${s}"${s===l.status?' selected':''}>${STAGE_HE[s]}</option>`).join('')}</select></div>
+        <div class="field"><label>מטפל</label><select id="f-assigned"><option value="">— לא משויך —</option>${USERS.map(u=>`<option value="${u.id}"${u.id===l.assigned_to?' selected':''}>${esc(u.name||u.email)}</option>`).join('')}</select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>שווי עסקה (₪)</label><input id="f-value" type="number" min="0" value="${l.value||0}"></div>
+        <div class="field"><label>צפי סגירה</label><input id="f-close" type="date" value="${l.expected_close?l.expected_close.slice(0,10):''}"></div>
+      </div>
+      <div class="field"><label>תגיות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
+      <button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button>
     </div>
-    <div class="section">
-      <h4>הערות פנימיות</h4>
-      <div id="d-notes">${d.notes.map(n=>`<div class="msgbox"><span class="muted">${esc(n.user_name||'')} · ${fmtDate(n.created_at)}</span>${esc(n.body)}</div>`).join('')||'<p class="muted">אין הערות</p>'}</div>
-      <div class="row"><input id="d-note" placeholder="הוסף הערה..."><button class="btn" onclick="addNote(${l.id})">שמור</button></div>
+    <div id="d-timeline" class="tab-pane hidden">
+      <div class="row" style="margin-bottom:.6rem"><input id="d-note" placeholder="הוסף הערה..."><button class="btn btn-sm" style="flex:0" onclick="addNote(${l.id})">שמור</button></div>
+      ${timeline.length?timeline.map(t=>`<div class="tl-item"><span class="dot"></span><div><div>${esc(t.txt)}</div><span class="muted">${esc(t.who||'')} · ${fmtDT(t.t)}</span></div></div>`).join(''):'<p class="muted">אין פעילות עדיין</p>'}
     </div>
-    <div class="section">
-      <h4>תכתובת עם הלקוח</h4>
-      <div>${d.messages.map(m=>`<div class="msgbox"><span class="muted">${m.direction==='out'?'נשלח':'התקבל'} · ${esc(m.user_name||'')} · ${fmtDate(m.created_at)}</span><b>${esc(m.subject)}</b>\n${esc(m.body)}</div>`).join('')||'<p class="muted">אין תכתובת</p>'}</div>
+    <div id="d-tasks" class="tab-pane hidden">
+      <div class="row" style="margin-bottom:.7rem">
+        <input id="t-title" placeholder="משימה חדשה (למשל: להתקשר בחזרה)">
+        <input id="t-due" type="date" style="flex:0;min-width:150px">
+        <button class="btn btn-sm" style="flex:0" onclick="addLeadTask(${l.id})">הוסף</button>
+      </div>
+      <div id="lead-tasks">${renderLeadTasks(d.tasks)}</div>
+    </div>
+    <div id="d-email" class="tab-pane hidden">
       ${l.email?`
-      <input id="d-subj" placeholder="נושא" style="margin:.5rem 0">
-      <textarea id="d-body" rows="4" placeholder="תוכן ההודעה ללקוח..."></textarea>
-      <div class="row"><button class="btn" onclick="sendEmail(${l.id})">שלח מייל ללקוח ✉</button></div>`
-      :'<p class="muted">ללקוח אין כתובת מייל — אפשר ליצור קשר בוואטסאפ</p>'}
+      <div class="field"><label>תבנית</label><select id="e-tpl" onchange="applyTpl()"><option value="">— ללא —</option>${TEMPLATES.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>נושא</label><input id="e-subj"></div>
+      <div class="field"><label>תוכן</label><textarea id="e-body" rows="6"></textarea></div>
+      <button class="btn" onclick="sendEmail(${l.id})">שלח מייל ללקוח ✉</button>`
+      :'<p class="muted">ללקוח אין כתובת מייל — אפשר ליצור קשר בוואטסאפ מלמעלה</p>'}
     </div>`;
-  $('#d-status').onchange=async e=>{await api('/api/leads/'+l.id,{method:'PATCH',body:JSON.stringify({status:e.target.value})});toast('סטטוס עודכן');loadLeads();loadStats();};
   $('#drawer-wrap').classList.remove('hidden');
+}
+function leadTab(e,id){
+  document.querySelectorAll('#drawer .tabs button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  document.querySelectorAll('#drawer .tab-pane').forEach(p=>p.classList.add('hidden'));
+  $('#'+id).classList.remove('hidden');
 }
 function closeDrawer(){$('#drawer-wrap').classList.add('hidden');}
-async function addNote(id){
-  const v=$('#d-note').value.trim();if(!v)return;
-  await api('/api/leads/'+id+'/notes',{method:'POST',body:JSON.stringify({body:v})});
-  openLead(id);
+async function saveLead(id){
+  try{
+    await api('/api/leads/'+id,{method:'PATCH',body:JSON.stringify({
+      status:$('#f-status').value,assigned_to:$('#f-assigned').value||null,
+      value:$('#f-value').value,expected_close:$('#f-close').value||null,tags:$('#f-tags').value})});
+    toast('נשמר ✓');closeDrawer();
+    const cur=document.querySelector('aside .nav.active').dataset.page;showPage(cur);
+  }catch(e){toast(e.message);}
+}
+async function addNote(id){const v=$('#d-note').value.trim();if(!v)return;await api('/api/leads/'+id+'/notes',{method:'POST',body:JSON.stringify({body:v})});openLead(id);}
+function renderLeadTasks(tasks){
+  if(!tasks.length)return '<p class="muted">אין משימות לליד זה</p>';
+  return tasks.map(t=>{
+    const overdue=!t.done&&t.due_date&&new Date(t.due_date)<new Date();
+    return `<div class="task-item ${t.done?'done':''} ${overdue?'overdue':''}">
+      <input type="checkbox" class="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id},this.checked,${t.lead_id})">
+      <div class="tt">${esc(t.title)}<div class="muted">${t.due_date?fmtDate(t.due_date):''}</div></div>
+      <button class="chip" onclick="delTask(${t.id},${t.lead_id})">מחק</button></div>`;
+  }).join('');
+}
+async function addLeadTask(id){
+  const title=$('#t-title').value.trim();if(!title)return;
+  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,lead_id:id,due_date:$('#t-due').value||null})});
+  openLead(id);refreshTaskBadge();
+}
+function applyTpl(){
+  const t=TEMPLATES.find(x=>x.id===Number($('#e-tpl').value));
+  if(t){$('#e-subj').value=t.subject;$('#e-body').value=t.body;}
 }
 async function sendEmail(id){
-  try{
-    await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#d-subj').value,body:$('#d-body').value})});
-    toast('המייל נשלח ללקוח ✓');openLead(id);
-  }catch(e){toast(e.message);}
+  try{await api('/api/leads/'+id+'/email',{method:'POST',body:JSON.stringify({subject:$('#e-subj').value,body:$('#e-body').value})});toast('המייל נשלח ✓');openLead(id);}
+  catch(e){toast(e.message);}
 }
 
-/* ---- users ---- */
-let USERS=[];
-async function loadUsers(){
-  const d=await api('/api/users');
-  USERS=d.users;
-  $('#users-body').innerHTML=d.users.map(u=>`
-    <tr>
-      <td>${u.id}</td><td dir="ltr">${esc(u.email)}</td><td>${esc(u.first_name)}</td><td>${esc(u.last_name)}</td>
-      <td dir="ltr">${esc(u.phone)||'—'}</td>
-      <td>${u.role==='admin'?'מנהל':'נציג'}</td>
-      <td>${u.is_active?'✓':'✗'}</td>
-      <td style="white-space:nowrap">
-        <button class="chip" onclick="editUser(${u.id})">עריכה</button>
-        <button class="chip" onclick="toggleUser(${u.id},${!u.is_active})">${u.is_active?'השבת':'הפעל'}</button>
-        <button class="chip" onclick="resetUser(${u.id})">איפוס סיסמה</button>
-        <button class="chip" onclick="delUser(${u.id})">מחק</button>
-      </td>
-    </tr>`).join('');
+/* ---------- tasks page ---------- */
+let taskScope='open';
+async function loadTasks(){
+  const {tasks}=await api('/api/tasks?scope='+taskScope);
+  $('#page-tasks').innerHTML=`
+    <h2 class="page-title">משימות</h2>
+    <div class="toolbar">
+      ${[['open','פתוחות'],['today','להיום'],['overdue','באיחור'],['upcoming','עתידיות'],['all','הכול']].map(([k,v])=>`<button class="chip ${taskScope===k?'active':''}" onclick="setTaskScope('${k}')">${v}</button>`).join('')}
+    </div>
+    <div class="panel-box">
+      <div class="row">
+        <input id="nt-title" placeholder="משימה חדשה...">
+        <input id="nt-due" type="date" style="flex:0;min-width:150px">
+        <button class="btn btn-sm" style="flex:0" onclick="addTask()">הוסף</button>
+      </div>
+    </div>
+    <div id="tasks-list">${tasks.map(t=>{
+      const overdue=!t.done&&t.due_date&&new Date(t.due_date)<new Date();
+      return `<div class="task-item ${t.done?'done':''} ${overdue?'overdue':''}">
+        <input type="checkbox" class="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id},this.checked)">
+        <div class="tt">${esc(t.title)}<div class="muted">${t.lead_name?'🔗 '+esc(t.lead_name)+' · ':''}${t.due_date?fmtDate(t.due_date):'ללא תאריך'} · ${esc(t.user_name||'')}</div></div>
+        <button class="chip" onclick="delTask(${t.id})">מחק</button></div>`;
+    }).join('')||'<p class="muted">אין משימות</p>'}</div>`;
 }
-$('#btn-adduser').onclick=async()=>{
-  try{
-    const d=await api('/api/users',{method:'POST',body:JSON.stringify({
-      email:$('#u-email').value,first_name:$('#u-first').value,last_name:$('#u-last').value,
-      phone:$('#u-phone').value,role:$('#u-role').value})});
-    toast('משתמש נוצר. סיסמה זמנית: '+d.tempPassword);
-    ['u-email','u-first','u-last','u-phone'].forEach(i=>$('#'+i).value='');
-    loadUsers();
-  }catch(e){toast(e.message);}
-};
-function editUser(id){
-  const u=USERS.find(x=>x.id===id);if(!u)return;
+function setTaskScope(s){taskScope=s;loadTasks();}
+async function addTask(){
+  const title=$('#nt-title').value.trim();if(!title)return;
+  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,due_date:$('#nt-due').value||null})});
+  loadTasks();refreshTaskBadge();
+}
+async function toggleTask(id,done,leadId){
+  await api('/api/tasks/'+id,{method:'PATCH',body:JSON.stringify({done})});
+  refreshTaskBadge();
+  if(leadId!==undefined&&leadId!==null)openLead(leadId);else loadTasks();
+}
+async function delTask(id,leadId){
+  await api('/api/tasks/'+id,{method:'DELETE'});refreshTaskBadge();
+  if(leadId!==undefined&&leadId!==null)openLead(leadId);else loadTasks();
+}
+
+/* ---------- templates ---------- */
+async function loadTemplates(){
+  TEMPLATES=(await api('/api/templates')).templates;
+  $('#page-templates').innerHTML=`
+    <h2 class="page-title">תבניות מייל</h2>
+    <p class="muted" style="margin-bottom:1rem">אפשר להשתמש במשתנים: <code>{{name}}</code> <code>{{first_name}}</code> <code>{{phone}}</code> — יוחלפו אוטומטית לכל לקוח.</p>
+    <button class="btn btn-sm" style="margin-bottom:1rem" onclick="editTemplate()">+ תבנית חדשה</button>
+    <div>${TEMPLATES.map(t=>`
+      <div class="panel-box" style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>${esc(t.name)}</b><div class="muted">${esc(t.subject)}</div></div>
+          <div><button class="chip" onclick="editTemplate(${t.id})">עריכה</button> <button class="chip" onclick="delTemplate(${t.id})">מחק</button></div>
+        </div>
+      </div>`).join('')||'<p class="muted">אין תבניות עדיין</p>'}</div>`;
+}
+function editTemplate(id){
+  const t=TEMPLATES.find(x=>x.id===id)||{name:'',subject:'',body:''};
   $('#drawer').innerHTML=`
     <button class="close" onclick="closeDrawer()">✕</button>
-    <h3>עריכת משתמש <span class="muted" dir="ltr">${esc(u.email)}</span></h3>
-    <label class="muted" style="display:block;margin:.9rem 0 .3rem">שם פרטי</label><input id="e-first" value="${esc(u.first_name)}">
-    <label class="muted" style="display:block;margin:.9rem 0 .3rem">שם משפחה</label><input id="e-last" value="${esc(u.last_name)}">
-    <label class="muted" style="display:block;margin:.9rem 0 .3rem">טלפון נייד</label><input id="e-phone" dir="ltr" value="${esc(u.phone)}">
-    <label class="muted" style="display:block;margin:.9rem 0 .3rem">תפקיד</label>
-    <select id="e-role"><option value="agent"${u.role==='agent'?' selected':''}>נציג</option><option value="admin"${u.role==='admin'?' selected':''}>מנהל</option></select>
-    <div class="row" style="margin-top:1.4rem">
-      <button class="btn" onclick="saveUser(${u.id})">שמור</button>
-      <button class="btn-ghost" onclick="closeDrawer()">ביטול</button>
-    </div>`;
+    <h3>${id?'עריכת תבנית':'תבנית חדשה'}</h3>
+    <div class="field"><label>שם התבנית</label><input id="tp-name" value="${esc(t.name)}"></div>
+    <div class="field"><label>נושא</label><input id="tp-subject" value="${esc(t.subject)}"></div>
+    <div class="field"><label>תוכן</label><textarea id="tp-body" rows="8">${esc(t.body)}</textarea></div>
+    <button class="btn" onclick="saveTemplate(${id||0})">שמור</button>`;
   $('#drawer-wrap').classList.remove('hidden');
 }
-async function saveUser(id){
+async function saveTemplate(id){
+  const body={name:$('#tp-name').value,subject:$('#tp-subject').value,body:$('#tp-body').value};
   try{
-    await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({
-      first_name:$('#e-first').value,last_name:$('#e-last').value,
-      phone:$('#e-phone').value,role:$('#e-role').value})});
-    toast('נשמר ✓');closeDrawer();loadUsers();
+    if(id)await api('/api/templates/'+id,{method:'PATCH',body:JSON.stringify(body)});
+    else await api('/api/templates',{method:'POST',body:JSON.stringify(body)});
+    toast('נשמר ✓');closeDrawer();loadTemplates();
   }catch(e){toast(e.message);}
 }
-async function toggleUser(id,active){try{await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({is_active:active})});loadUsers();}catch(e){toast(e.message);}}
-async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית: '+d.tempPassword);}catch(e){toast(e.message);}}
-async function delUser(id){if(!confirm('למחוק את המשתמש לצמיתות?'))return;try{await api('/api/users/'+id,{method:'DELETE'});loadUsers();}catch(e){toast(e.message);}}
+async function delTemplate(id){if(!confirm('למחוק את התבנית?'))return;await api('/api/templates/'+id,{method:'DELETE'});loadTemplates();}
 
-/* ---- settings ---- */
-$('#btn-changepass').onclick=async()=>{
+/* ---------- users ---------- */
+async function loadUsers(){
+  USERS=(await api('/api/users')).users;
+  $('#page-users').innerHTML=`
+    <h2 class="page-title">משתמשים</h2>
+    <div class="toolbar">
+      <input id="u-email" placeholder="email@example.com" style="max-width:200px" dir="ltr">
+      <input id="u-first" placeholder="שם פרטי" style="max-width:120px">
+      <input id="u-last" placeholder="שם משפחה" style="max-width:120px">
+      <input id="u-phone" placeholder="טלפון" style="max-width:130px" dir="ltr">
+      <select id="u-role" style="max-width:110px"><option value="agent">נציג</option><option value="admin">מנהל</option></select>
+      <button class="btn btn-sm" onclick="addUser()">הוסף</button>
+    </div>
+    <table>
+      <thead><tr><th>אימייל</th><th>שם</th><th>טלפון</th><th>תפקיד</th><th>פעיל</th><th>פעולות</th></tr></thead>
+      <tbody>${USERS.map(u=>`<tr>
+        <td dir="ltr">${esc(u.email)}</td><td>${esc(u.name)}</td><td dir="ltr">${esc(u.phone)||'—'}</td>
+        <td>${u.role==='admin'?'מנהל':'נציג'}</td><td>${u.is_active?'✓':'✗'}</td>
+        <td style="white-space:nowrap">
+          <button class="chip" onclick="toggleUser(${u.id},${!u.is_active})">${u.is_active?'השבת':'הפעל'}</button>
+          <button class="chip" onclick="resetUser(${u.id})">איפוס סיסמה</button>
+          <button class="chip" onclick="delUser(${u.id})">מחק</button>
+        </td></tr>`).join('')}</tbody>
+    </table>`;
+}
+async function addUser(){
   try{
-    await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#s-current').value,next:$('#s-next').value})});
-    toast('הסיסמה עודכנה ✓');$('#s-current').value='';$('#s-next').value='';
+    const d=await api('/api/users',{method:'POST',body:JSON.stringify({email:$('#u-email').value,first_name:$('#u-first').value,last_name:$('#u-last').value,phone:$('#u-phone').value,role:$('#u-role').value})});
+    toast('משתמש נוצר. סיסמה זמנית: '+d.tempPassword);loadUsers();
   }catch(e){toast(e.message);}
-};
+}
+async function toggleUser(id,a){try{await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({is_active:a})});loadUsers();}catch(e){toast(e.message);}}
+async function resetUser(id){try{const d=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({reset_password:true})});toast('סיסמה זמנית: '+d.tempPassword);}catch(e){toast(e.message);}}
+async function delUser(id){if(!confirm('למחוק את המשתמש?'))return;try{await api('/api/users/'+id,{method:'DELETE'});loadUsers();}catch(e){toast(e.message);}}
 
-/* ---- boot: resume session if cookie valid ---- */
+/* ---------- settings ---------- */
+function loadSettings(){
+  $('#page-settings').innerHTML=`
+    <h2 class="page-title">הגדרות</h2>
+    <div class="panel-box" style="max-width:420px">
+      <h3>החלפת סיסמה</h3>
+      <div class="field"><label>סיסמה נוכחית</label><input id="s-current" type="password" dir="ltr"></div>
+      <div class="field"><label>סיסמה חדשה (10+ תווים)</label><input id="s-next" type="password" dir="ltr"></div>
+      <button class="btn" onclick="changePass()">עדכן סיסמה</button>
+    </div>
+    <div class="panel-box" style="max-width:420px">
+      <h3>מחובר כ</h3>
+      <p>${esc(ME.name||ME.email)} · ${ME.role==='admin'?'מנהל':'נציג'}</p>
+    </div>`;
+}
+async function changePass(){
+  try{await api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:$('#s-current').value,next:$('#s-next').value})});toast('הסיסמה עודכנה ✓');$('#s-current').value='';$('#s-next').value='';}
+  catch(e){toast(e.message);}
+}
+
+/* ---------- boot ---------- */
 api('/api/auth/me').then(d=>{ME=d.user;enterApp();}).catch(()=>{});
 </script>
 </body>
