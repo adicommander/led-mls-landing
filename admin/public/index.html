@@ -211,6 +211,14 @@ aside button.nav.active,aside button.nav:hover{background:rgba(255,106,26,.1);co
 .checkbox{accent-color:var(--led)}
 code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;font-size:.85em}
 
+/* WYSIWYG template editor */
+.wysi-toolbar{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem}
+.wysi-toolbar button{background:#fff;border:1px solid #D9D9E0;border-radius:8px;padding:.35rem .6rem;font-size:.85rem;color:var(--text);min-width:34px}
+.wysi-toolbar button:hover{background:#F0F0F3;border-color:var(--led)}
+.wysi-area{min-height:280px;max-height:52vh;overflow:auto;border:1px solid #D9D9E0;border-radius:12px;padding:16px;background:#fff;direction:rtl;text-align:right;color:#1d1d1f}
+.wysi-area:focus{outline:2px solid rgba(255,106,26,.3)}
+.wysi-area img{max-width:100%}
+
 /* date field button */
 .datebtn{background:#fff;border:1px solid #D9D9E0;border-radius:12px;color:var(--text);padding:.6rem .8rem;text-align:start;width:100%;font-size:.95rem}
 .datebtn.set{border-color:var(--led);color:var(--led2);font-weight:600}
@@ -727,13 +735,22 @@ async function loadQuotes(){
       <td>${money(q.total)}</td><td>${stChipQuote(q.status)}</td><td>${fmtDate(q.created_at)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">אין הצעות מחיר עדיין</td></tr>'}</tbody></table>`;
 }
 function setQuoteFilter(s){quoteFilter.status=s;loadQuotes();}
+function qItemsHead(){
+  return `<div class="row" style="gap:.4rem;margin-bottom:.3rem;font-size:.72rem;color:var(--dim);font-weight:600">
+    <div style="flex:3;min-width:130px">תיאור הפריט</div>
+    <div style="flex:0;min-width:58px;text-align:center">כמות</div>
+    <div style="flex:0;min-width:88px;text-align:center">מחיר יח׳<br>(לפני מע״מ)</div>
+    <div style="flex:0;min-width:60px;text-align:center">הנחה %</div>
+    <div style="flex:0;width:34px"></div>
+  </div>`;
+}
 function qItemsHtml(){
   return quoteItems.map((it,i)=>`<div class="row" style="gap:.4rem;margin-bottom:.4rem">
-    <input style="flex:3;min-width:130px" placeholder="תיאור הפריט" value="${esc(it.desc)}" oninput="quoteItems[${i}].desc=this.value">
-    <input style="flex:0;min-width:58px" type="number" min="0" placeholder="כמות" value="${it.qty}" oninput="quoteItems[${i}].qty=+this.value;recalcQuote()">
-    <input style="flex:0;min-width:88px" type="number" min="0" placeholder="מחיר יח׳" value="${it.price}" oninput="quoteItems[${i}].price=+this.value;recalcQuote()">
-    <input style="flex:0;min-width:60px" type="number" min="0" max="100" placeholder="הנחה%" value="${it.disc||0}" oninput="quoteItems[${i}].disc=+this.value;recalcQuote()" title="הנחה לשורה (%)">
-    <button class="chip" style="flex:0" onclick="quoteItems.splice(${i},1);renderQuoteItems()">✕</button>
+    <input style="flex:3;min-width:130px" placeholder="תיאור הפריט" value="${esc(it.desc)}" oninput="quoteItems[${i}].desc=this.value" title="תיאור הפריט">
+    <input style="flex:0;min-width:58px" type="number" min="0" placeholder="כמות" value="${it.qty}" oninput="quoteItems[${i}].qty=+this.value;recalcQuote()" title="כמות">
+    <input style="flex:0;min-width:88px" type="number" min="0" placeholder="מחיר" value="${it.price}" oninput="quoteItems[${i}].price=+this.value;recalcQuote()" title="מחיר ליחידה (לפני מע״מ)">
+    <input style="flex:0;min-width:60px" type="number" min="0" max="100" placeholder="%" value="${it.disc||0}" oninput="quoteItems[${i}].disc=+this.value;recalcQuote()" title="הנחה לשורה באחוזים">
+    <button class="chip" style="flex:0;color:#C43333;border-color:rgba(217,58,58,.4)" onclick="quoteItems.splice(${i},1);renderQuoteItems()" title="מחק שורה">🗑</button>
   </div>`).join('');
 }
 function renderQuoteItems(){$('#q-items').innerHTML=qItemsHtml();recalcQuote();}
@@ -774,6 +791,7 @@ async function editQuote(id,leadId){
     <div class="field"><label>כותרת ההצעה</label><input id="q-title" value="${esc(q?q.title:'')}" placeholder="לדוגמה: מסך LED לחזית חנות"></div>
     ${CATALOG.length?`<div class="field"><label>הוסף פריט מהמחירון</label><select id="q-catalog" onchange="insertCatItem(this.value);this.value=''"><option value="">— בחר פריט מהמחירון —</option>${CATALOG.map(it=>`<option value="${it.id}">${esc((it.department_name?it.department_name+' · ':'')+it.name)} — ${money(it.sale_price)}</option>`).join('')}</select></div>`:''}
     <label class="muted" style="display:block;margin:.6rem 0 .3rem">פריטים</label>
+    ${qItemsHead()}
     <div id="q-items">${qItemsHtml()}</div>
     <button class="chip" onclick="addQuoteRow()">+ הוסף שורה ריקה</button>
     <div class="row" style="margin-top:.8rem">
@@ -968,22 +986,52 @@ async function loadTemplates(){
         </div>
       </div>`).join('')||'<p class="muted">אין תבניות עדיין</p>'}</div>`;
 }
+let tpCodeMode=false;
 function editTemplate(id){
   const t=TEMPLATES.find(x=>x.id===id)||{name:'',subject:'',body:''};
+  tpCodeMode=false;
   $('#drawer').innerHTML=`
     <button class="close" onclick="closeDrawer()">✕</button>
     <h3>${id?'עריכת תבנית':'תבנית חדשה'}</h3>
     <div class="field"><label>שם התבנית</label><input id="tp-name" value="${esc(t.name)}"></div>
     <div class="field"><label>נושא</label><input id="tp-subject" value="${esc(t.subject)}"></div>
-    <div class="field"><label>תוכן</label><textarea id="tp-body" rows="8">${esc(t.body)}</textarea></div>
-    <button class="btn" onclick="saveTemplate(${id||0})">שמור</button>`;
+    <p class="muted" style="margin:.2rem 0 .5rem">עריכה חזותית — מה שרואים זה מה שיישלח. משתנים: <code>{{first_name}}</code> <code>{{name}}</code> <code>{{phone}}</code>.</p>
+    <div class="wysi-toolbar">
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('bold')" title="מודגש"><b>B</b></button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('italic')" title="נטוי"><i>I</i></button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('underline')" title="קו תחתון"><u>U</u></button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rteBlock('H2')" title="כותרת">כותרת</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('insertUnorderedList')" title="רשימה">• רשימה</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyRight')" title="יישור לימין">↦</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('justifyCenter')" title="מרכוז">↔</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rteColor()" title="צבע טקסט">🎨</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rteLink()" title="הוסף קישור">🔗</button>
+      <button type="button" onmousedown="event.preventDefault()" onclick="rte('removeFormat')" title="נקה עיצוב">🧹</button>
+      <button type="button" onclick="toggleCode()" id="code-toggle" style="margin-inline-start:auto">&lt;/&gt; קוד HTML</button>
+    </div>
+    <div id="tp-visual" contenteditable="true" dir="rtl" class="wysi-area"></div>
+    <textarea id="tp-code" class="hidden" rows="14" dir="ltr" style="font-family:monospace;font-size:.8rem"></textarea>
+    <button class="btn" style="margin-top:1rem" onclick="saveTemplate(${id||0})">שמור</button>`;
+  $('#tp-visual').innerHTML=t.body||'';
+  $('#tp-code').value=t.body||'';
   $('#drawer-wrap').classList.remove('hidden');
 }
+function rte(cmd){document.execCommand(cmd,false,null);$('#tp-visual').focus();}
+function rteBlock(tag){document.execCommand('formatBlock',false,tag);$('#tp-visual').focus();}
+function rteColor(){const c=prompt('צבע (למשל #ff6600):','#ff6600');if(c){document.execCommand('foreColor',false,c);$('#tp-visual').focus();}}
+function rteLink(){const u=prompt('כתובת הקישור:','https://led-mls.co.il');if(u){document.execCommand('createLink',false,u);$('#tp-visual').focus();}}
+function toggleCode(){
+  const vis=$('#tp-visual'),code=$('#tp-code');
+  tpCodeMode=!tpCodeMode;
+  if(tpCodeMode){code.value=vis.innerHTML;vis.classList.add('hidden');code.classList.remove('hidden');$('#code-toggle').innerHTML='👁 תצוגה חזותית';}
+  else{vis.innerHTML=code.value;code.classList.add('hidden');vis.classList.remove('hidden');$('#code-toggle').innerHTML='&lt;/&gt; קוד HTML';}
+}
 async function saveTemplate(id){
-  const body={name:$('#tp-name').value,subject:$('#tp-subject').value,body:$('#tp-body').value};
+  const bodyHtml = tpCodeMode ? $('#tp-code').value : $('#tp-visual').innerHTML;
+  const data={name:$('#tp-name').value,subject:$('#tp-subject').value,body:bodyHtml};
   try{
-    if(id)await api('/api/templates/'+id,{method:'PATCH',body:JSON.stringify(body)});
-    else await api('/api/templates',{method:'POST',body:JSON.stringify(body)});
+    if(id)await api('/api/templates/'+id,{method:'PATCH',body:JSON.stringify(data)});
+    else await api('/api/templates',{method:'POST',body:JSON.stringify(data)});
     toast('נשמר ✓');closeDrawer();loadTemplates();
   }catch(e){toast(e.message);}
 }
