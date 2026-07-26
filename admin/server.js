@@ -323,7 +323,9 @@ app.post('/api/leads/:id/email', auth, async (req, res) => {
   const subject = String(req.body.subject || '').trim().slice(0, 200);
   const body = String(req.body.body || '').trim().slice(0, 8000);
   if (!subject || !body) return res.status(400).json({ error: 'נדרשים נושא ותוכן' });
-  const result = await mail.send({ to: lead.email, subject, text: fillTemplate(body, lead) });
+  const filled = fillTemplate(body, lead);
+  const html = isHtml(filled) ? filled : undefined;
+  const result = await mail.send({ to: lead.email, subject, text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
   if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal/SMTP מוגדר' });
   await pool.query(
     'INSERT INTO lead_messages (lead_id, user_id, direction, channel, subject, body, delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)',
@@ -334,6 +336,8 @@ app.post('/api/leads/:id/email', auth, async (req, res) => {
 
 /* ---------- tasks ---------- */
 
+const TASK_STATUSES = ['open', 'in_progress', 'follow_up', 'done'];
+
 app.get('/api/tasks', auth, async (req, res) => {
   const scope = req.query.scope; // today | overdue | upcoming | open | all
   let cond = 'WHERE NOT t.done';
@@ -342,8 +346,11 @@ app.get('/api/tasks', auth, async (req, res) => {
   else if (scope === 'upcoming') cond = `WHERE NOT t.done AND t.due_date >= now()`;
   else if (scope === 'all') cond = '';
   const { rows } = await pool.query(
-    `SELECT t.*, l.name AS lead_name, u.name AS user_name
-     FROM tasks t LEFT JOIN leads l ON l.id=t.lead_id LEFT JOIN users u ON u.id=t.user_id
+    `SELECT t.*, l.name AS lead_name, u.name AS user_name, cu.name AS creator_name
+     FROM tasks t
+     LEFT JOIN leads l ON l.id=t.lead_id
+     LEFT JOIN users u ON u.id=t.user_id
+     LEFT JOIN users cu ON cu.id=t.created_by
      ${cond} ORDER BY t.done, t.due_date NULLS LAST LIMIT 500`);
   res.json({ tasks: rows });
 });
@@ -353,10 +360,12 @@ app.post('/api/tasks', auth, async (req, res) => {
   if (!title) return res.status(400).json({ error: 'נדרשת כותרת למשימה' });
   const leadId = req.body.lead_id ? Number(req.body.lead_id) : null;
   const due = req.body.due_date || null;
+  const remind = req.body.remind_at || null;
+  const status = TASK_STATUSES.includes(req.body.status) ? req.body.status : 'open';
   const assignee = req.body.user_id ? Number(req.body.user_id) : req.user.id;
   const { rows } = await pool.query(
-    'INSERT INTO tasks (lead_id, user_id, title, due_date) VALUES ($1,$2,$3,$4) RETURNING *',
-    [leadId, assignee, title, due]);
+    'INSERT INTO tasks (lead_id, user_id, created_by, title, status, due_date, remind_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+    [leadId, assignee, req.user.id, title, status, due, remind]);
   if (leadId) await log(req.user.id, 'task.created', title, leadId);
   res.json({ task: rows[0] });
 });
@@ -365,12 +374,21 @@ app.patch('/api/tasks/:id', auth, async (req, res) => {
   const id = Number(req.params.id);
   const t = (await pool.query('SELECT * FROM tasks WHERE id=$1', [id])).rows[0];
   if (!t) return res.status(404).json({ error: 'not found' });
-  const done = req.body.done !== undefined ? !!req.body.done : t.done;
+  // legacy toggle {done:true} still works; status is the source of truth
+  let status = TASK_STATUSES.includes(req.body.status) ? req.body.status
+    : (req.body.done !== undefined ? (req.body.done ? 'done' : 'open') : t.status);
+  const done = status === 'done';
   const title = req.body.title !== undefined ? String(req.body.title).trim().slice(0, 300) : t.title;
   const due = req.body.due_date !== undefined ? (req.body.due_date || null) : t.due_date;
+  const assignee = req.body.user_id !== undefined ? (req.body.user_id ? Number(req.body.user_id) : null) : t.user_id;
+  const remind = req.body.remind_at !== undefined ? (req.body.remind_at || null) : t.remind_at;
+  // a new/changed reminder time re-arms the reminder
+  const reminded = (String(remind) !== String(t.remind_at)) ? false : t.reminded;
   const { rows } = await pool.query(
-    'UPDATE tasks SET done=$1, done_at=CASE WHEN $1 AND NOT done THEN now() WHEN NOT $1 THEN NULL ELSE done_at END, title=$2, due_date=$3 WHERE id=$4 RETURNING *',
-    [done, title, due, id]);
+    `UPDATE tasks SET status=$1, done=$2, done_at=CASE WHEN $2 AND NOT done THEN now() WHEN NOT $2 THEN NULL ELSE done_at END,
+       title=$3, due_date=$4, user_id=$5, remind_at=$6, reminded=$7 WHERE id=$8 RETURNING *`,
+    [status, done, title, due, assignee, remind, reminded, id]);
+  if (assignee !== t.user_id && t.lead_id) await log(req.user.id, 'task.reassigned', title, t.lead_id);
   res.json({ task: rows[0] });
 });
 
@@ -379,7 +397,29 @@ app.delete('/api/tasks/:id', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
+// reminder poller — every minute, email the assignee for any task whose remind_at has passed
+async function processReminders() {
+  try {
+    const { rows } = await pool.query(
+      `SELECT t.*, u.email AS assignee_email, u.name AS assignee_name, l.name AS lead_name
+       FROM tasks t LEFT JOIN users u ON u.id=t.user_id LEFT JOIN leads l ON l.id=t.lead_id
+       WHERE t.remind_at IS NOT NULL AND NOT t.reminded AND NOT t.done AND t.remind_at <= now() LIMIT 50`);
+    for (const t of rows) {
+      if (t.assignee_email) {
+        await mail.send({
+          to: t.assignee_email,
+          subject: `תזכורת משימה: ${t.title}`,
+          text: `שלום ${t.assignee_name || ''},\nתזכורת למשימה: ${t.title}${t.lead_name ? `\nלקוח: ${t.lead_name}` : ''}${t.due_date ? `\nיעד: ${new Date(t.due_date).toLocaleString('he-IL')}` : ''}\n\nלמערכת: https://led-mls.co.il/admin`,
+        });
+      }
+      await pool.query('UPDATE tasks SET reminded=true WHERE id=$1', [t.id]);
+    }
+  } catch (e) { console.error('reminder poller failed:', e.message); }
+}
+
 /* ---------- email templates + bulk ---------- */
+
+const isHtml = (s) => /<[a-z][\s\S]*>/i.test(String(s || ''));
 
 // {{name}} {{first_name}} — filled from a lead record
 function fillTemplate(text, lead) {
@@ -435,7 +475,9 @@ app.post('/api/leads/bulk-email', auth, async (req, res) => {
   const { rows: leads } = await pool.query('SELECT * FROM leads WHERE id = ANY($1) AND email <> \'\'', [ids]);
   let sent = 0, failed = 0, skipped = ids.length - leads.length;
   for (const lead of leads) {
-    const r = await mail.send({ to: lead.email, subject: fillTemplate(subject, lead), text: fillTemplate(body, lead) });
+    const filled = fillTemplate(body, lead);
+    const html = isHtml(filled) ? filled : undefined;
+    const r = await mail.send({ to: lead.email, subject: fillTemplate(subject, lead), text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
     if (r.sent) {
       sent++;
       await pool.query('INSERT INTO lead_messages (lead_id, user_id, direction, channel, subject, body, delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)',
@@ -485,4 +527,5 @@ app.use((err, req, res, next) => {
 
 init().then(() => {
   app.listen(PORT, () => console.log(`MLS admin API listening on :${PORT} (smtp configured: ${mail.configured})`));
+  setInterval(processReminders, 60 * 1000); // task reminders
 }).catch((e) => { console.error('DB init failed:', e); process.exit(1); });

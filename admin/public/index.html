@@ -210,6 +210,35 @@ aside button.nav.active,aside button.nav:hover{background:rgba(255,106,26,.1);co
 .badge-count{background:var(--bad)}
 .checkbox{accent-color:var(--led)}
 code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;font-size:.85em}
+
+/* date field button */
+.datebtn{background:#fff;border:1px solid #D9D9E0;border-radius:12px;color:var(--text);padding:.6rem .8rem;text-align:start;width:100%;font-size:.95rem}
+.datebtn.set{border-color:var(--led);color:var(--led2);font-weight:600}
+
+/* hebrew calendar popup */
+#cal-wrap .overlay{background:rgba(0,0,0,.3);backdrop-filter:blur(6px)}
+.calbox{position:fixed;top:50%;inset-inline-start:50%;transform:translate(50%,-50%);width:min(360px,94vw);background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 90px rgba(0,0,0,.2);z-index:11;padding:1.2rem;animation:pop .2s cubic-bezier(.2,.9,.3,1.2) both}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.cal-head b{font-size:1.05rem}
+.cal-nav{background:#F0F0F3;border-radius:10px;width:34px;height:34px;font-size:1.1rem;color:var(--text)}
+.cal-nav:hover{background:#E6E6EB}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:.75rem;color:var(--dim);padding:.3rem 0;font-weight:600}
+.cal-cell{aspect-ratio:1;border-radius:10px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.9rem;color:var(--text);position:relative;padding:0}
+.cal-cell:hover{background:#F4F4F6}
+.cal-cell.other{color:#c9c9cf}
+.cal-cell.today{outline:2px solid var(--led);outline-offset:-2px}
+.cal-cell.selected{background:var(--led);color:#fff}
+.cal-cell.shabbat{color:#2F6FE0}
+.cal-cell .heb{font-size:.58rem;color:var(--dim);line-height:1}
+.cal-cell.selected .heb{color:#ffe}
+.cal-cell.holiday::after{content:'';position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--led)}
+.cal-cell.selected.holiday::after{background:#fff}
+.cal-holiday-name{text-align:center;font-size:.8rem;color:var(--led2);min-height:1.1rem;margin-top:.5rem;font-weight:600}
+.cal-time{display:flex;gap:.4rem;align-items:center;justify-content:center;margin-top:.7rem}
+.cal-time select{width:auto;padding:.4rem .6rem}
+.cal-actions{display:flex;gap:.5rem;margin-top:.9rem}
+.cal-actions .btn{flex:1}
 </style>
 </head>
 <body>
@@ -268,12 +297,89 @@ code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;fo
   <div class="drawer" id="drawer"></div>
 </div>
 
+<div id="cal-wrap" class="hidden">
+  <div class="overlay" onclick="closeCal()"></div>
+  <div class="calbox" id="calbox"></div>
+</div>
+
 <script>
 const $=s=>document.querySelector(s);
 let ME=null, PRE='', USERS=[], TEMPLATES=[], leadFilter={status:'',q:''}, selected=new Set();
 
 const STAGES=['new','contacted','quoted','negotiation','won','lost'];
 const STAGE_HE={new:'חדש',contacted:'יצירת קשר',quoted:'הצעת מחיר',negotiation:'משא ומתן',won:'נסגר בהצלחה',lost:'לא רלוונטי'};
+const TASK_ST={open:'פתוח',in_progress:'בטיפול',follow_up:'להמשך טיפול',done:'טופל'};
+const TASK_ST_CLASS={open:'st-new',in_progress:'st-contacted',follow_up:'st-negotiation',done:'st-won'};
+function userOpts(sel){return '<option value="">— לא משויך —</option>'+USERS.map(u=>`<option value="${u.id}"${u.id===sel?' selected':''}>${esc(u.name||u.email)}</option>`).join('');}
+
+/* ===== Hebrew calendar with Israeli holidays (computed via Hebrew calendar) ===== */
+let dateVals={};
+let calState={id:null,withTime:false,view:null,sel:null,hh:9,mm:0,onPick:null};
+const HEB_MD=new Intl.DateTimeFormat('en-u-ca-hebrew',{month:'long',day:'numeric'});
+const HEB_DNUM=new Intl.DateTimeFormat('he-u-ca-hebrew-nu-hebr',{day:'numeric'});
+const GREG_MY=new Intl.DateTimeFormat('he-IL',{month:'long',year:'numeric'});
+const DOW=['א','ב','ג','ד','ה','ו','ש'];
+const HOLIDAYS={
+  'Tishri 1':'ראש השנה','Tishri 2':'ראש השנה','Tishri 10':'יום כיפור',
+  'Tishri 15':'סוכות','Tishri 21':'הושענא רבה','Tishri 22':'שמחת תורה',
+  'Kislev 25':'חנוכה','Tevet 10':'צום עשרה בטבת','Shevat 15':'ט״ו בשבט',
+  'Adar 14':'פורים','Adar II 14':'פורים','Adar 13':'תענית אסתר','Adar II 13':'תענית אסתר',
+  'Nisan 15':'פסח','Nisan 21':'שביעי של פסח','Nisan 27':'יום השואה',
+  'Iyar 4':'יום הזיכרון','Iyar 5':'יום העצמאות','Iyar 18':'ל״ג בעומר','Iyar 28':'יום ירושלים',
+  'Sivan 6':'שבועות','Tammuz 17':'צום י״ז בתמוז','Tamuz 17':'צום י״ז בתמוז','Av 9':'תשעה באב','Av 15':'ט״ו באב'
+};
+function hebHoliday(d){
+  const p=HEB_MD.formatToParts(d);
+  const m=p.find(x=>x.type==='month').value, day=p.find(x=>x.type==='day').value;
+  return HOLIDAYS[m+' '+day]||null;
+}
+function dateField(id,label,withTime,initISO){
+  dateVals[id]=initISO||'';
+  return `<div class="field"><label>${label}</label><button type="button" class="datebtn ${initISO?'set':''}" id="btn-${id}" onclick="openCal('${id}',${withTime?'true':'false'})">${initISO?fmtFieldVal(initISO,withTime):'בחר תאריך'+(withTime?' ושעה':'')}</button></div>`;
+}
+function fmtFieldVal(iso,withTime){const d=new Date(iso);return d.toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'2-digit'})+(withTime?(' · '+d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})):'');}
+function openCal(id,withTime,onPick){
+  calState.id=id;calState.withTime=withTime;calState.onPick=onPick||null;
+  const cur=(dateVals[id]&&!onPick)?new Date(dateVals[id]):new Date();
+  calState.view=new Date(cur.getFullYear(),cur.getMonth(),1);
+  calState.sel=(dateVals[id]&&!onPick)?new Date(dateVals[id]):null;
+  calState.hh=calState.sel?calState.sel.getHours():9;calState.mm=calState.sel?(Math.round(calState.sel.getMinutes()/15)*15)%60:0;
+  renderCal();$('#cal-wrap').classList.remove('hidden');
+}
+function closeCal(){$('#cal-wrap').classList.add('hidden');}
+function calMove(delta){calState.view.setMonth(calState.view.getMonth()+delta);renderCal();}
+function renderCal(){
+  const v=calState.view,y=v.getFullYear(),m=v.getMonth();
+  const startDow=new Date(y,m,1).getDay(),daysIn=new Date(y,m+1,0).getDate(),t0=new Date().toDateString();
+  let cells='',selName='';
+  for(let i=0;i<startDow;i++)cells+='<button class="cal-cell other" disabled></button>';
+  for(let d=1;d<=daysIn;d++){
+    const date=new Date(y,m,d),hol=hebHoliday(date),isSat=date.getDay()===6;
+    const isToday=date.toDateString()===t0,isSel=calState.sel&&date.toDateString()===calState.sel.toDateString();
+    if(isSel)selName=hol||'';
+    cells+=`<button class="cal-cell${isSat?' shabbat':''}${isToday?' today':''}${isSel?' selected':''}${hol?' holiday':''}" title="${hol?esc(hol):''}" onclick="calPick(${y},${m},${d})"><span>${d}</span><span class="heb">${HEB_DNUM.format(date)}</span></button>`;
+  }
+  const timeHtml=calState.withTime?`<div class="cal-time">שעה:
+    <select id="cal-hh" onchange="calState.hh=+this.value">${Array.from({length:24},(_,h)=>`<option value="${h}"${h===calState.hh?' selected':''}>${String(h).padStart(2,'0')}</option>`).join('')}</select>:
+    <select id="cal-mm" onchange="calState.mm=+this.value">${[0,15,30,45].map(mn=>`<option value="${mn}"${mn===calState.mm?' selected':''}>${String(mn).padStart(2,'0')}</option>`).join('')}</select></div>`:'';
+  $('#calbox').innerHTML=`
+    <div class="cal-head"><button class="cal-nav" onclick="calMove(-1)">›</button><b>${GREG_MY.format(v)}</b><button class="cal-nav" onclick="calMove(1)">‹</button></div>
+    <div class="cal-grid">${DOW.map(x=>`<div class="cal-dow">${x}</div>`).join('')}${cells}</div>
+    <div class="cal-holiday-name">${selName?('🎉 '+esc(selName)):''}</div>${timeHtml}
+    <div class="cal-actions"><button class="btn" onclick="calConfirm()">בחר</button><button class="btn-ghost" onclick="calClear()">נקה</button></div>`;
+}
+function calPick(y,m,d){calState.sel=new Date(y,m,d);renderCal();}
+function calClear(){const id=calState.id;dateVals[id]='';const b=$('#btn-'+id);if(b){b.textContent='בחר תאריך'+(calState.withTime?' ושעה':'');b.classList.remove('set');}if(calState.onPick)calState.onPick('');closeCal();}
+function calConfirm(){
+  if(!calState.sel){toast('בחר תאריך');return;}
+  const d=calState.sel;let iso;
+  if(calState.withTime){d.setHours(calState.hh,calState.mm,0,0);iso=d.toISOString();}
+  else iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  dateVals[calState.id]=iso;
+  const b=$('#btn-'+calState.id);if(b){b.textContent=fmtFieldVal(iso,calState.withTime);b.classList.add('set');}
+  if(calState.onPick)calState.onPick(iso);
+  closeCal();
+}
 
 async function api(path,opts={}){
   const r=await fetch(path,{headers:{'Content-Type':'application/json'},credentials:'same-origin',...opts});
@@ -509,12 +615,14 @@ async function openLead(id){
       ${timeline.length?timeline.map(t=>`<div class="tl-item"><span class="dot"></span><div><div>${esc(t.txt)}</div><span class="muted">${esc(t.who||'')} · ${fmtDT(t.t)}</span></div></div>`).join(''):'<p class="muted">אין פעילות עדיין</p>'}
     </div>
     <div id="d-tasks" class="tab-pane hidden">
-      <div class="row" style="margin-bottom:.7rem">
-        <input id="t-title" placeholder="משימה חדשה (למשל: להתקשר בחזרה)">
-        <input id="t-due" type="date" style="flex:0;min-width:150px">
-        <button class="btn btn-sm" style="flex:0" onclick="addLeadTask(${l.id})">הוסף</button>
+      <div class="field"><input id="t-title" placeholder="משימה חדשה (למשל: להתקשר בחזרה)"></div>
+      <div class="row">
+        <div class="field"><label>שיוך ל</label><select id="t-assignee">${userOpts(l.assigned_to||ME.id)}</select></div>
+        ${dateField('ltd-due','תאריך יעד',false,'')}
+        ${dateField('ltd-remind','תזכורת',true,'')}
       </div>
-      <div id="lead-tasks">${renderLeadTasks(d.tasks)}</div>
+      <button class="btn btn-sm" onclick="addLeadTask(${l.id})">הוסף משימה</button>
+      <div id="lead-tasks" style="margin-top:1rem">${renderLeadTasks(d.tasks,l.id)}</div>
     </div>
     <div id="d-email" class="tab-pane hidden">
       ${l.email?`
@@ -543,19 +651,13 @@ async function saveLead(id){
   }catch(e){toast(e.message);}
 }
 async function addNote(id){const v=$('#d-note').value.trim();if(!v)return;await api('/api/leads/'+id+'/notes',{method:'POST',body:JSON.stringify({body:v})});openLead(id);}
-function renderLeadTasks(tasks){
+function renderLeadTasks(tasks,leadId){
   if(!tasks.length)return '<p class="muted">אין משימות לליד זה</p>';
-  return tasks.map(t=>{
-    const overdue=!t.done&&t.due_date&&new Date(t.due_date)<new Date();
-    return `<div class="task-item ${t.done?'done':''} ${overdue?'overdue':''}">
-      <input type="checkbox" class="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id},this.checked,${t.lead_id})">
-      <div class="tt">${esc(t.title)}<div class="muted">${t.due_date?fmtDate(t.due_date):''}</div></div>
-      <button class="chip" onclick="delTask(${t.id},${t.lead_id})">מחק</button></div>`;
-  }).join('');
+  return tasks.map(t=>taskRow(t,leadId)).join('');
 }
 async function addLeadTask(id){
-  const title=$('#t-title').value.trim();if(!title)return;
-  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,lead_id:id,due_date:$('#t-due').value||null})});
+  const title=$('#t-title').value.trim();if(!title){toast('נדרשת כותרת');return;}
+  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,lead_id:id,user_id:$('#t-assignee').value||null,due_date:dateVals['ltd-due']||null,remind_at:dateVals['ltd-remind']||null})});
   openLead(id);refreshTaskBadge();
 }
 function applyTpl(){
@@ -569,6 +671,20 @@ async function sendEmail(id){
 
 /* ---------- tasks page ---------- */
 let taskScope='open';
+function taskRow(t,leadId){
+  const overdue=!t.done&&t.due_date&&new Date(t.due_date)<new Date();
+  const lid=leadId!==undefined?leadId:null;
+  return `<div class="task-item ${t.done?'done':''} ${overdue?'overdue':''}">
+    <div class="tt">
+      <div style="font-weight:600">${esc(t.title)}</div>
+      <div class="muted">${t.lead_name&&lid===null?'🔗 '+esc(t.lead_name)+' · ':''}יעד: ${t.due_date?fmtDate(t.due_date):'—'} · נוצר ע״י ${esc(t.creator_name||'—')}${t.remind_at?' · ⏰ '+fmtDT(t.remind_at):''}</div>
+    </div>
+    <select style="max-width:130px" onchange="setTaskStatus(${t.id},this.value,${lid})">${Object.entries(TASK_ST).map(([k,v])=>`<option value="${k}"${t.status===k?' selected':''}>${v}</option>`).join('')}</select>
+    <select style="max-width:130px" onchange="reassignTask(${t.id},this.value,${lid})" title="שיוך">${userOpts(t.user_id)}</select>
+    <button class="chip" onclick="setTaskReminder(${t.id},${lid})">⏰</button>
+    <button class="chip" onclick="delTask(${t.id},${lid})">מחק</button>
+  </div>`;
+}
 async function loadTasks(){
   const {tasks}=await api('/api/tasks?scope='+taskScope);
   $('#page-tasks').innerHTML=`
@@ -577,34 +693,40 @@ async function loadTasks(){
       ${[['open','פתוחות'],['today','להיום'],['overdue','באיחור'],['upcoming','עתידיות'],['all','הכול']].map(([k,v])=>`<button class="chip ${taskScope===k?'active':''}" onclick="setTaskScope('${k}')">${v}</button>`).join('')}
     </div>
     <div class="panel-box">
+      <div class="field"><label>משימה חדשה</label><input id="nt-title" placeholder="לדוגמה: להתקשר בחזרה ללקוח"></div>
       <div class="row">
-        <input id="nt-title" placeholder="משימה חדשה...">
-        <input id="nt-due" type="date" style="flex:0;min-width:150px">
-        <button class="btn btn-sm" style="flex:0" onclick="addTask()">הוסף</button>
+        <div class="field"><label>שיוך ל</label><select id="nt-assignee">${userOpts(ME.id)}</select></div>
+        ${dateField('nt-due','תאריך יעד',false,'')}
+        ${dateField('nt-remind','תזכורת (תאריך ושעה)',true,'')}
       </div>
+      <button class="btn btn-sm" onclick="addTask()">הוסף משימה</button>
     </div>
-    <div id="tasks-list">${tasks.map(t=>{
-      const overdue=!t.done&&t.due_date&&new Date(t.due_date)<new Date();
-      return `<div class="task-item ${t.done?'done':''} ${overdue?'overdue':''}">
-        <input type="checkbox" class="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id},this.checked)">
-        <div class="tt">${esc(t.title)}<div class="muted">${t.lead_name?'🔗 '+esc(t.lead_name)+' · ':''}${t.due_date?fmtDate(t.due_date):'ללא תאריך'} · ${esc(t.user_name||'')}</div></div>
-        <button class="chip" onclick="delTask(${t.id})">מחק</button></div>`;
-    }).join('')||'<p class="muted">אין משימות</p>'}</div>`;
+    <div id="tasks-list">${tasks.map(t=>taskRow(t)).join('')||'<p class="muted">אין משימות</p>'}</div>`;
 }
 function setTaskScope(s){taskScope=s;loadTasks();}
 async function addTask(){
-  const title=$('#nt-title').value.trim();if(!title)return;
-  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,due_date:$('#nt-due').value||null})});
+  const title=$('#nt-title').value.trim();if(!title){toast('נדרשת כותרת');return;}
+  await api('/api/tasks',{method:'POST',body:JSON.stringify({title,user_id:$('#nt-assignee').value||null,due_date:dateVals['nt-due']||null,remind_at:dateVals['nt-remind']||null})});
   loadTasks();refreshTaskBadge();
 }
-async function toggleTask(id,done,leadId){
-  await api('/api/tasks/'+id,{method:'PATCH',body:JSON.stringify({done})});
-  refreshTaskBadge();
-  if(leadId!==undefined&&leadId!==null)openLead(leadId);else loadTasks();
+async function setTaskStatus(id,status,leadId){
+  await api('/api/tasks/'+id,{method:'PATCH',body:JSON.stringify({status})});refreshTaskBadge();
+  (leadId!==null&&leadId!==undefined)?openLead(leadId):loadTasks();
+}
+async function reassignTask(id,uid,leadId){
+  await api('/api/tasks/'+id,{method:'PATCH',body:JSON.stringify({user_id:uid||null})});toast('המשימה הועברה');
+  (leadId!==null&&leadId!==undefined)?openLead(leadId):loadTasks();
+}
+function setTaskReminder(id,leadId){
+  openCal('tmp-remind-'+id,true,async iso=>{
+    await api('/api/tasks/'+id,{method:'PATCH',body:JSON.stringify({remind_at:iso||null})});
+    toast(iso?'תזכורת נקבעה':'תזכורת בוטלה');
+    (leadId!==null&&leadId!==undefined)?openLead(leadId):loadTasks();
+  });
 }
 async function delTask(id,leadId){
   await api('/api/tasks/'+id,{method:'DELETE'});refreshTaskBadge();
-  if(leadId!==undefined&&leadId!==null)openLead(leadId);else loadTasks();
+  (leadId!==null&&leadId!==undefined)?openLead(leadId):loadTasks();
 }
 
 /* ---------- templates ---------- */
@@ -618,7 +740,7 @@ async function loadTemplates(){
       <div class="panel-box" style="margin-bottom:.8rem">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div><b>${esc(t.name)}</b><div class="muted">${esc(t.subject)}</div></div>
-          <div><button class="chip" onclick="editTemplate(${t.id})">עריכה</button> <button class="chip" onclick="delTemplate(${t.id})">מחק</button></div>
+          <div><button class="chip" onclick="previewTemplate(${t.id})">תצוגה</button> <button class="chip" onclick="editTemplate(${t.id})">עריכה</button> <button class="chip" onclick="delTemplate(${t.id})">מחק</button></div>
         </div>
       </div>`).join('')||'<p class="muted">אין תבניות עדיין</p>'}</div>`;
 }
@@ -642,6 +764,17 @@ async function saveTemplate(id){
   }catch(e){toast(e.message);}
 }
 async function delTemplate(id){if(!confirm('למחוק את התבנית?'))return;await api('/api/templates/'+id,{method:'DELETE'});loadTemplates();}
+function previewTemplate(id){
+  const t=TEMPLATES.find(x=>x.id===id);if(!t)return;
+  const demo={name:'ישראל ישראלי',email:'demo@example.com',phone:'050-0000000'};
+  const body=t.body.replace(/\{\{\s*name\s*\}\}/g,demo.name).replace(/\{\{\s*first_name\s*\}\}/g,'ישראל').replace(/\{\{\s*phone\s*\}\}/g,demo.phone).replace(/\{\{\s*email\s*\}\}/g,demo.email);
+  $('#drawer').innerHTML=`
+    <button class="close" onclick="closeDrawer()">✕</button>
+    <h3>${esc(t.name)}</h3>
+    <p class="muted" style="margin-bottom:.8rem">נושא: ${esc(t.subject)}</p>
+    <iframe style="width:100%;height:60vh;border:1px solid var(--line);border-radius:12px;background:#fff" srcdoc="${esc(body)}"></iframe>`;
+  $('#drawer-wrap').classList.remove('hidden');
+}
 
 /* ---------- users ---------- */
 async function loadUsers(){

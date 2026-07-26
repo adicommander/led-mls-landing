@@ -109,8 +109,12 @@ CREATE TABLE IF NOT EXISTS tasks (
   id SERIAL PRIMARY KEY,
   lead_id INT REFERENCES leads(id) ON DELETE CASCADE,
   user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  created_by INT REFERENCES users(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','follow_up','done')),
   due_date TIMESTAMPTZ,
+  remind_at TIMESTAMPTZ,
+  reminded BOOLEAN NOT NULL DEFAULT false,
   done BOOLEAN NOT NULL DEFAULT false,
   done_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -150,6 +154,15 @@ async function init() {
   await pool.query(`ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check`);
   await pool.query(`UPDATE leads SET status='contacted' WHERE status='in_progress'`);
   await pool.query(`ALTER TABLE leads ADD CONSTRAINT leads_status_check CHECK (status IN ('new','contacted','quoted','negotiation','won','lost'))`);
+  // task workflow migrations: creator, status, reminders
+  await pool.query(`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS created_by INT`);
+  await pool.query(`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'open'`);
+  await pool.query(`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS remind_at TIMESTAMPTZ`);
+  await pool.query(`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS reminded BOOLEAN NOT NULL DEFAULT false`);
+  await pool.query(`UPDATE tasks SET status = CASE WHEN done THEN 'done' ELSE 'open' END WHERE status IS NULL OR status=''`);
+  await pool.query(`ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_status_check`);
+  await pool.query(`ALTER TABLE tasks ADD CONSTRAINT tasks_status_check CHECK (status IN ('open','in_progress','follow_up','done'))`);
+  await seedTemplates();
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM users');
   if (rows[0].n === 0) {
     const email = (process.env.SEED_ADMIN_EMAIL || '').toLowerCase().trim();
@@ -166,6 +179,81 @@ async function init() {
     );
     console.log(`Seeded initial admin user ${email} (must change password on first login).`);
   }
+}
+
+// ---- seeded, professionally designed RTL HTML email templates ----
+const LOGO = 'https://led-mls.co.il/assets/images/logo.png';
+const SITE = 'https://led-mls.co.il';
+const ORANGE = '#FF6A1A';
+const shell = (inner) => `<div dir="rtl" style="margin:0;background:#f4f4f6;padding:24px 0;font-family:'Segoe UI',Arial,sans-serif;color:#1d1d1f">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:94%;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06)">
+<tr><td style="background:#0a0603;padding:22px 28px" align="center">
+<img src="${LOGO}" alt="MLS ישראל" width="120" style="display:block;height:auto">
+</td></tr>
+${inner}
+<tr><td style="background:#faf7f4;padding:20px 28px;border-top:1px solid #eee" align="center">
+<p style="margin:0;font-size:13px;color:#8a8a8f">MLS ישראל · מסכי LED מקצועיים · <a href="tel:+972585008500" style="color:${ORANGE};text-decoration:none">058-500-8500</a> · <a href="${SITE}" style="color:${ORANGE};text-decoration:none">led-mls.co.il</a></p>
+</td></tr>
+</table></td></tr></table></div>`;
+
+const TEMPLATES_SEED = [
+  {
+    name: 'הצעת מחיר',
+    subject: 'הצעת מחיר למסך LED — MLS ישראל',
+    body: shell(`<tr><td style="padding:32px 28px 8px">
+<p style="margin:0 0 6px;font-size:15px">שלום {{first_name}},</p>
+<h1 style="margin:0 0 8px;font-size:26px;font-weight:800;letter-spacing:-.5px">הצעת מחיר</h1>
+<p style="margin:0 0 20px;font-size:15px;color:#555;line-height:1.6">תודה על פנייתך. להלן הצעת מחיר מותאמת לצרכים שסיכמנו:</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:12px;overflow:hidden;font-size:14px">
+<tr style="background:#faf7f4"><td style="padding:12px 14px;font-weight:700">פריט</td><td style="padding:12px 14px;font-weight:700;width:90px">כמות</td><td style="padding:12px 14px;font-weight:700;width:120px">מחיר</td></tr>
+<tr><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[תיאור המסך — לדוגמה: מסך חוץ P4, 3×2 מ׳]</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">1</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[₪ ___]</td></tr>
+<tr><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[התקנה ואספקה]</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">1</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[₪ ___]</td></tr>
+<tr style="background:#fff6f0"><td style="padding:14px;font-weight:800" colspan="2">סה״כ לתשלום (לפני מע״מ)</td><td style="padding:14px;font-weight:800;color:${ORANGE}">[₪ ___]</td></tr>
+</table>
+<p style="margin:18px 0 0;font-size:13px;color:#777;line-height:1.6">ההצעה בתוקף ל-14 יום. אחריות יצרן מלאה, כולל התקנה מקצועית וכיול צבע באתר.</p>
+<p style="margin:22px 0 0;font-size:15px">בברכה,<br><b>צוות MLS ישראל</b></p>
+</td></tr>`),
+  },
+  {
+    name: 'קידום מכירות / מבצע',
+    subject: '🔥 מבצע מיוחד על מסכי LED — MLS ישראל',
+    body: shell(`<tr><td style="padding:0">
+<div style="background:linear-gradient(135deg,${ORANGE},#ff9243);padding:38px 28px;text-align:center">
+<p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;color:#fff8f2;text-transform:uppercase">מבצע לזמן מוגבל</p>
+<h1 style="margin:0;font-size:30px;font-weight:800;color:#fff;letter-spacing:-.5px">מסך LED לעסק שלך</h1>
+<p style="margin:10px 0 0;font-size:16px;color:#fff">במחיר שלא תראו בשוק</p>
+</div>
+<div style="padding:30px 28px">
+<p style="margin:0 0 16px;font-size:15px;line-height:1.7">שלום {{first_name}}, זו ההזדמנות לשדרג את החזות של העסק עם מסך LED מקצועי — בהיר, חד, ועמיד. מלאי זמין להתקנה מהירה.</p>
+<ul style="margin:0 0 22px;padding-inline-start:20px;font-size:14px;color:#444;line-height:1.9">
+<li>מסכי חוץ ופנים בכל גודל</li>
+<li>ליווי מלא מהתכנון ועד ההפעלה</li>
+<li>אחריות ושירות מקומי בישראל</li>
+</ul>
+<div align="center"><a href="${SITE}/contact.html" style="display:inline-block;background:${ORANGE};color:#fff;font-size:16px;font-weight:700;text-decoration:none;padding:14px 34px;border-radius:980px">קבלו הצעת מחיר ←</a></div>
+</div>
+</td></tr>`),
+  },
+  {
+    name: 'מעקב לקוח',
+    subject: 'רצינו לחזור אליך — MLS ישראל',
+    body: shell(`<tr><td style="padding:32px 28px">
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7">שלום {{first_name}},</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7">רצינו לוודא שקיבלת את כל המידע שחיפשת לגבי מסכי ה-LED שלנו, ולראות אם נוכל לעזור בשלב הבא. נשמח לענות על כל שאלה או להכין הצעה מותאמת.</p>
+<p style="margin:0 0 22px;font-size:15px;line-height:1.7">אפשר פשוט להשיב למייל הזה, או לחייג אלינו: <a href="tel:+972585008500" style="color:${ORANGE};font-weight:700;text-decoration:none">058-500-8500</a>.</p>
+<p style="margin:0;font-size:15px">בברכה,<br><b>צוות MLS ישראל</b></p>
+</td></tr>`),
+  },
+];
+
+async function seedTemplates() {
+  const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM email_templates');
+  if (rows[0].n > 0) return;
+  for (const t of TEMPLATES_SEED) {
+    await pool.query('INSERT INTO email_templates (name, subject, body) VALUES ($1,$2,$3)', [t.name, t.subject, t.body]);
+  }
+  console.log(`Seeded ${TEMPLATES_SEED.length} email templates.`);
 }
 
 async function log(userId, action, detail = '', leadId = null) {
