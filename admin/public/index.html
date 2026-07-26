@@ -598,7 +598,7 @@ async function openLead(id){
   $('#drawer').innerHTML=`
     <button class="close" onclick="closeDrawer()">✕</button>
     <h3>${esc(l.name)} <span class="muted">#${l.id}</span></h3>
-    <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
+    <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${l.city?' · 📍 '+esc(l.city):''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
     <div class="tabs">
       <button class="active" onclick="leadTab(event,'d-details')">פרטים</button>
       <button onclick="leadTab(event,'d-timeline')">ציר זמן</button>
@@ -615,7 +615,10 @@ async function openLead(id){
         <div class="field"><label>שווי עסקה (₪)</label><input id="f-value" type="number" min="0" value="${l.value||0}"></div>
         <div class="field"><label>צפי סגירה</label><input id="f-close" type="date" value="${l.expected_close?l.expected_close.slice(0,10):''}"></div>
       </div>
-      <div class="field"><label>תגיות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
+      <div class="row">
+        <div class="field"><label>עיר</label><input id="f-city" value="${esc(l.city||'')}" placeholder="עיר"></div>
+        <div class="field"><label>תגיות / התעניינות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
+      </div>
       <div class="row"><button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button><button class="btn-ghost" onclick="editQuote(null,${l.id})">🧾 צור הצעת מחיר</button></div>
     </div>
     <div id="d-timeline" class="tab-pane hidden">
@@ -653,7 +656,7 @@ async function saveLead(id){
   try{
     await api('/api/leads/'+id,{method:'PATCH',body:JSON.stringify({
       status:$('#f-status').value,assigned_to:$('#f-assigned').value||null,
-      value:$('#f-value').value,expected_close:$('#f-close').value||null,tags:$('#f-tags').value})});
+      value:$('#f-value').value,expected_close:$('#f-close').value||null,tags:$('#f-tags').value,city:$('#f-city').value})});
     toast('נשמר ✓');closeDrawer();
     const cur=document.querySelector('aside .nav.active').dataset.page;showPage(cur);
   }catch(e){toast(e.message);}

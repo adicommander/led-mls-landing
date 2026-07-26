@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS leads (
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','contacted','quoted','negotiation','won','lost')),
   value NUMERIC NOT NULL DEFAULT 0,
   expected_close DATE,
+  city TEXT NOT NULL DEFAULT '',
   tags TEXT NOT NULL DEFAULT '',
   assigned_to INT REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -194,6 +195,7 @@ async function init() {
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS value NUMERIC NOT NULL DEFAULT 0`);
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS expected_close DATE`);
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS tags TEXT NOT NULL DEFAULT ''`);
+  await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS city TEXT NOT NULL DEFAULT ''`);
   await pool.query(`ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS lead_id INT`);
   // expand the pipeline stages: map legacy 'in_progress' -> 'contacted', then widen the CHECK
   await pool.query(`ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check`);

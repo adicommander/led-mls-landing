@@ -224,17 +224,21 @@ app.post('/api/leads', leadLimiter, async (req, res) => {
   const email = String(req.body.email || '').trim().slice(0, 160);
   const message = String(req.body.message || '').trim().slice(0, 4000);
   const page = String(req.body.page || '').trim().slice(0, 200);
+  const city = String(req.body.city || '').trim().slice(0, 120);
+  const interests = Array.isArray(req.body.interests)
+    ? req.body.interests.map(x => String(x).trim().slice(0, 40)).filter(Boolean).slice(0, 10) : [];
+  const tags = interests.join(', ');
   if (!name || (!phone && !email)) return res.status(400).json({ error: 'missing fields' });
   const { rows } = await pool.query(
-    'INSERT INTO leads (name, phone, email, message, page) VALUES ($1,$2,$3,$4,$5) RETURNING id',
-    [name, phone, email, message, page]);
+    'INSERT INTO leads (name, phone, email, message, page, city, tags) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+    [name, phone, email, message, page, city, tags]);
   await log(null, 'lead.created', 'התקבל ליד חדש מהאתר', rows[0].id);
   const notify = process.env.LEADS_NOTIFY_EMAIL;
   if (notify) {
     await mail.send({
       to: notify,
       subject: `ליד חדש מהאתר: ${name}`,
-      text: `שם: ${name}\nטלפון: ${phone}\nמייל: ${email}\nעמוד: ${page}\n\n${message}\n\nלניהול: https://led-mls.co.il/admin`,
+      text: `שם: ${name}\nטלפון: ${phone}\nמייל: ${email}\nעיר: ${city}\nמעוניין ב: ${tags}\nעמוד: ${page}\n\n${message}\n\nלניהול: https://led-mls.co.il/admin`,
     });
   }
   res.json({ ok: true, id: rows[0].id });
@@ -267,9 +271,9 @@ app.get('/api/leads/export.csv', auth, async (req, res) => {
   const params = [];
   const whereSql = leadFilters(req, params);
   const { rows } = await pool.query(
-    `SELECT l.id, l.name, l.phone, l.email, l.status, l.value, l.expected_close, l.tags, l.page, l.created_at, u.name AS assigned_name, l.message
+    `SELECT l.id, l.name, l.phone, l.email, l.city, l.status, l.value, l.expected_close, l.tags, l.page, l.created_at, u.name AS assigned_name, l.message
      FROM leads l LEFT JOIN users u ON u.id=l.assigned_to ${whereSql} ORDER BY l.created_at DESC`, params);
-  const cols = ['id', 'name', 'phone', 'email', 'status', 'value', 'expected_close', 'tags', 'assigned_name', 'page', 'created_at', 'message'];
+  const cols = ['id', 'name', 'phone', 'email', 'city', 'status', 'value', 'expected_close', 'tags', 'assigned_name', 'page', 'created_at', 'message'];
   const esc = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const csv = '﻿' + [cols.join(',')].concat(rows.map(r => cols.map(c => esc(r[c])).join(','))).join('\n');
   res.set('Content-Type', 'text/csv; charset=utf-8');
@@ -297,9 +301,10 @@ app.patch('/api/leads/:id', auth, async (req, res) => {
   const value = req.body.value !== undefined ? Math.max(0, Number(req.body.value) || 0) : lead.value;
   const expected = req.body.expected_close !== undefined ? (req.body.expected_close || null) : lead.expected_close;
   const tags = req.body.tags !== undefined ? String(req.body.tags).trim().slice(0, 300) : lead.tags;
+  const city = req.body.city !== undefined ? String(req.body.city).trim().slice(0, 120) : lead.city;
   const { rows } = await pool.query(
-    'UPDATE leads SET status=$1, assigned_to=$2, value=$3, expected_close=$4, tags=$5 WHERE id=$6 RETURNING *',
-    [status, assigned, value, expected, tags, id]);
+    'UPDATE leads SET status=$1, assigned_to=$2, value=$3, expected_close=$4, tags=$5, city=$6 WHERE id=$7 RETURNING *',
+    [status, assigned, value, expected, tags, city, id]);
   if (status !== lead.status) await log(req.user.id, 'lead.stage', `שלב שונה ל: ${status}`, id);
   else await log(req.user.id, 'lead.updated', 'פרטי ליד עודכנו', id);
   res.json({ lead: rows[0] });

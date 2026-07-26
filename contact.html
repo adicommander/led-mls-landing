@@ -529,13 +529,34 @@ body::after{ content:''; position:fixed; inset:0; z-index:1; pointer-events:none
             <input id="email" type="email" inputmode="email" dir="ltr" placeholder="you@example.com">
           </div>
 
+          <div style="margin-bottom:18px;">
+            <label for="city">עיר</label>
+            <input id="city" type="text" placeholder="באיזו עיר?">
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label>איזה מסך מעניין אתכם? <span style="font-weight:400;color:var(--slate-mid)">(אפשר לבחור כמה)</span></label>
+            <div class="screen-picks">
+              <label class="screen-pick"><input type="checkbox" name="screen" value="מסך חוץ"><span>מסך חוץ</span></label>
+              <label class="screen-pick"><input type="checkbox" name="screen" value="מסך פנים"><span>מסך פנים</span></label>
+              <label class="screen-pick"><input type="checkbox" name="screen" value="מסך וילון לחלונות"><span>מסך וילון לחלונות</span></label>
+            </div>
+          </div>
+
           <div style="margin-bottom:24px;">
-            <label for="msg">איזה מסך אתם מחפשים? *</label>
-            <textarea id="msg" rows="4" placeholder="לדוגמה: מסך חוץ לחזית חנות, בערך 3x2 מטר..." required></textarea>
+            <label for="msg">הערות ובקשות נוספות</label>
+            <textarea id="msg" rows="4" placeholder="לדוגמה: מידות משוערות, מיקום ההתקנה, לוח זמנים, כל דבר נוסף..."></textarea>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width:100%;">שליחת פנייה</button>
         </form>
+        <style>
+          .screen-picks{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+          .screen-pick{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid #D9D9E0;background:#fff;border-radius:980px;padding:9px 16px;font-size:.95rem;font-weight:600;transition:all .15s;user-select:none}
+          .screen-pick input{width:16px;height:16px;accent-color:var(--signal-blue);margin:0}
+          .screen-pick:hover{border-color:var(--signal-blue)}
+          .screen-pick:has(input:checked){background:rgba(255,106,26,.1);border-color:var(--signal-blue);color:var(--signal-blue)}
+        </style>
 
         <div class="call-cta">
           <p>מעדיפים לחייג?</p>
@@ -658,10 +679,14 @@ document.querySelectorAll('form[data-demo-form]').forEach(form=>{
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     const original = btn.textContent;
+    const interests = Array.from(form.querySelectorAll('input[name="screen"]:checked')).map(c=>c.value);
+    const cityEl = document.getElementById('city');
     const payload = {
       name: document.getElementById('name').value.trim(),
       phone: document.getElementById('phone').value.trim(),
       email: document.getElementById('email').value.trim(),
+      city: cityEl ? cityEl.value.trim() : '',
+      interests: interests,
       message: document.getElementById('msg').value.trim(),
       page: location.pathname
     };
@@ -677,10 +702,14 @@ document.querySelectorAll('form[data-demo-form]').forEach(form=>{
       btn.textContent = 'הפנייה נשלחה ✓';
       setTimeout(()=>{ btn.textContent = original; btn.disabled = false; form.reset(); }, 2500);
     } catch (err) {
-      // fallback: open WhatsApp with the message so the lead is never lost
+      // fallback: open WhatsApp with the details so the lead is never lost
       btn.textContent = original;
       btn.disabled = false;
-      const txt = encodeURIComponent('היי, אני ' + payload.name + ' (' + payload.phone + '): ' + payload.message);
+      const parts = ['היי, אני ' + payload.name + ' (' + payload.phone + ')'];
+      if (payload.city) parts.push('עיר: ' + payload.city);
+      if (interests.length) parts.push('מעוניין ב: ' + interests.join(', '));
+      if (payload.message) parts.push(payload.message);
+      const txt = encodeURIComponent(parts.join('. '));
       window.open('https://wa.me/972549494948?text=' + txt, '_blank');
     }
   });
