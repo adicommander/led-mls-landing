@@ -786,19 +786,22 @@ async function loadQuotes(){
 function setQuoteFilter(s){quoteFilter.status=s;loadQuotes();}
 function qItemsHead(){
   return `<div class="row" style="gap:.4rem;margin-bottom:.3rem;font-size:.72rem;color:var(--dim);font-weight:600">
-    <div style="flex:3;min-width:130px">תיאור הפריט</div>
-    <div style="flex:0;min-width:58px;text-align:center">כמות</div>
-    <div style="flex:0;min-width:88px;text-align:center">מחיר יח׳<br>(לפני מע״מ)</div>
-    <div style="flex:0;min-width:60px;text-align:center">הנחה %</div>
+    <div style="flex:3;min-width:120px">תיאור הפריט</div>
+    <div style="flex:0;min-width:54px;text-align:center">כמות</div>
+    <div style="flex:0;min-width:82px;text-align:center">מחיר יח׳<br>(לפני מע״מ)</div>
+    <div style="flex:0;min-width:56px;text-align:center">הנחה %</div>
+    <div style="flex:0;min-width:82px;text-align:center">סה״כ שורה</div>
     <div style="flex:0;width:34px"></div>
   </div>`;
 }
+function lineNet(it){return (+it.qty||0)*(+it.price||0)*(1-Math.min(100,Math.max(0,+it.disc||0))/100);}
 function qItemsHtml(){
-  return quoteItems.map((it,i)=>`<div class="row" style="gap:.4rem;margin-bottom:.4rem">
-    <input style="flex:3;min-width:130px" placeholder="תיאור הפריט" value="${esc(it.desc)}" oninput="quoteItems[${i}].desc=this.value" title="תיאור הפריט">
-    <input style="flex:0;min-width:58px" type="number" min="0" placeholder="כמות" value="${it.qty}" oninput="quoteItems[${i}].qty=+this.value;recalcQuote()" title="כמות">
-    <input style="flex:0;min-width:88px" type="number" min="0" placeholder="מחיר" value="${it.price}" oninput="quoteItems[${i}].price=+this.value;recalcQuote()" title="מחיר ליחידה (לפני מע״מ)">
-    <input style="flex:0;min-width:60px" type="number" min="0" max="100" placeholder="%" value="${it.disc||0}" oninput="quoteItems[${i}].disc=+this.value;recalcQuote()" title="הנחה לשורה באחוזים">
+  return quoteItems.map((it,i)=>`<div class="row" style="gap:.4rem;margin-bottom:.4rem;align-items:center">
+    <input style="flex:3;min-width:120px" placeholder="תיאור הפריט" value="${esc(it.desc)}" oninput="quoteItems[${i}].desc=this.value" title="תיאור הפריט">
+    <input style="flex:0;min-width:54px" type="number" min="0" placeholder="כמות" value="${it.qty}" oninput="quoteItems[${i}].qty=+this.value;recalcQuote()" title="כמות">
+    <input style="flex:0;min-width:82px" type="number" min="0" placeholder="מחיר" value="${it.price}" oninput="quoteItems[${i}].price=+this.value;recalcQuote()" title="מחיר ליחידה (לפני מע״מ)">
+    <input style="flex:0;min-width:56px" type="number" min="0" max="100" placeholder="%" value="${it.disc||0}" oninput="quoteItems[${i}].disc=+this.value;recalcQuote()" title="הנחה לשורה באחוזים">
+    <div style="flex:0;min-width:82px;text-align:center;font-weight:700;color:var(--led2)" id="q-line-${i}">${money(lineNet(it))}</div>
     <button class="chip" style="flex:0;color:#C43333;border-color:rgba(217,58,58,.4)" onclick="quoteItems.splice(${i},1);renderQuoteItems()" title="מחק שורה">🗑</button>
   </div>`).join('');
 }
@@ -807,6 +810,7 @@ function addQuoteRow(){quoteItems.push({desc:'',qty:1,price:0,cost:0});renderQuo
 function insertCatItem(id){if(!id)return;const it=CATALOG.find(x=>x.id===+id);if(!it)return;quoteItems.push({desc:it.name,qty:1,price:+it.sale_price||0,cost:+it.cost_price||0});renderQuoteItems();}
 function recalcQuote(){
   const el=$('#q-totals');if(!el)return;
+  quoteItems.forEach((it,i)=>{const c=document.getElementById('q-line-'+i);if(c)c.textContent=money(lineNet(it));});
   const sub=quoteItems.reduce((s,it)=>{const line=(+it.qty||0)*(+it.price||0);const d=Math.min(100,Math.max(0,+it.disc||0));return s+line*(1-d/100);},0);
   const dtype=(document.getElementById('q-disc-type')||{}).value||'amount';
   const dval=+((document.getElementById('q-disc-val')||{}).value||0);
