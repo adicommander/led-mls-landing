@@ -547,60 +547,53 @@ function quoteDocHtml(q, forPrint) {
   const docTitle = isOrder ? `הזמנת עבודה מס׳ ${q.order_number}` : `הצעת מחיר מס׳ ${q.number}`;
   const items = Array.isArray(q.items) ? q.items : [];
   const anyDisc = items.some(it => (Number(it.disc) || 0) > 0);
+  const dt = (d) => d ? new Date(d).toLocaleDateString('he-IL') : '';
+  const esc = (s) => String(s == null ? '' : s).replace(/</g, '&lt;');
+  const cel = 'padding:12px 14px;border-top:1px solid #eee;font-size:14px;text-align:right;';
+  const hcel = 'background:#faf7f4;padding:12px 14px;font-size:12px;color:#666;';
   const rows = items.map(it => {
     const line = (Number(it.qty) || 0) * (Number(it.price) || 0);
     const disc = Number(it.disc) || 0;
     const net = line * (1 - disc / 100);
     return `<tr>
-      <td style="padding:12px 14px;border-top:1px solid #eee">${(it.desc || '').replace(/</g, '&lt;')}</td>
-      <td style="padding:12px 14px;border-top:1px solid #eee;text-align:center">${it.qty || 0}</td>
-      <td style="padding:12px 14px;border-top:1px solid #eee">${nis(it.price)}</td>
-      ${anyDisc ? `<td style="padding:12px 14px;border-top:1px solid #eee;text-align:center">${disc > 0 ? disc + '%' : '—'}</td>` : ''}
-      <td style="padding:12px 14px;border-top:1px solid #eee;font-weight:600">${nis(net)}</td></tr>`;
+      <td style="${cel}">${esc(it.desc)}</td>
+      <td style="${cel}text-align:center;">${it.qty || 0}</td>
+      <td style="${cel}">${nis(it.price)}</td>
+      ${anyDisc ? `<td style="${cel}text-align:center;">${disc > 0 ? disc + '%' : '—'}</td>` : ''}
+      <td style="${cel}font-weight:700;">${nis(net)}</td></tr>`;
   }).join('');
-  const dt = (d) => d ? new Date(d).toLocaleDateString('he-IL') : '';
-  return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${docTitle} — MLS ישראל</title>
-<style>
-  body{margin:0;background:#f4f4f6;font-family:'Segoe UI',Arial,sans-serif;color:#1d1d1f}
-  .doc{max-width:720px;margin:24px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06)}
-  .doc-head{background:#0a0603;padding:24px 30px;display:flex;align-items:center;justify-content:space-between}
-  .doc-head img{height:46px}
-  .doc-head .num{color:#fff;text-align:end}
-  .doc-head .num b{color:#FF6A1A;font-size:1.1rem;display:block}
-  .doc-body{padding:30px}
-  h1{font-size:1.6rem;margin:0 0 4px}
-  .meta{color:#666;font-size:.9rem;margin-bottom:22px}
-  .party{background:#faf7f4;border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:.92rem}
-  table{width:100%;border-collapse:collapse;font-size:.92rem;border:1px solid #eee;border-radius:12px;overflow:hidden}
-  th{background:#faf7f4;padding:12px 14px;text-align:start;font-size:.8rem;color:#666}
-  .totals{margin-top:18px;margin-inline-start:auto;width:280px;font-size:.95rem}
-  .totals div{display:flex;justify-content:space-between;padding:6px 0}
-  .totals .grand{border-top:2px solid #FF6A1A;margin-top:6px;padding-top:10px;font-weight:800;font-size:1.15rem;color:#FF6A1A}
-  .notes{margin-top:22px;font-size:.88rem;color:#555;line-height:1.6;white-space:pre-wrap}
-  .doc-foot{background:#faf7f4;padding:18px 30px;text-align:center;color:#8a8a8f;font-size:.82rem;border-top:1px solid #eee}
-  .printbtn{display:block;width:max-content;margin:16px auto;background:#FF6A1A;color:#fff;border:none;border-radius:980px;padding:10px 26px;font-size:.95rem;cursor:pointer;text-decoration:none}
-  @media print{body{background:#fff}.doc{box-shadow:none;margin:0;max-width:100%}.printbtn{display:none}}
-</style></head><body>
-<div class="doc">
-  <div class="doc-head"><img src="https://led-mls.co.il/assets/images/logo.png" alt="MLS ישראל"><div class="num"><span>${isOrder ? 'הזמנת עבודה' : 'הצעת מחיר'}</span><b>מס׳ ${isOrder ? q.order_number : q.number}</b></div></div>
-  <div class="doc-body">
-    <h1>${(q.title || docTitle).replace(/</g, '&lt;')}</h1>
-    <div class="meta">תאריך: ${dt(q.created_at)}${q.valid_until && !isOrder ? ` · בתוקף עד: ${dt(q.valid_until)}` : ''}${isOrder ? ` · אושרה: ${dt(q.ordered_at)} · הצעה מקורית מס׳ ${q.number}` : ''}</div>
-    <div class="party"><b>לכבוד:</b> ${(q.lead_name || '').replace(/</g, '&lt;')}${q.lead_phone ? ' · ' + q.lead_phone : ''}${q.lead_email ? ' · ' + q.lead_email : ''}</div>
-    <table><thead><tr><th>פריט</th><th style="text-align:center">כמות</th><th>מחיר יח׳</th>${anyDisc ? '<th style="text-align:center">הנחה</th>' : ''}<th>סה״כ</th></tr></thead>
-    <tbody>${rows || `<tr><td colspan="${anyDisc ? 5 : 4}" style="padding:14px;color:#999">אין פריטים</td></tr>`}</tbody></table>
-    <div class="totals">
-      <div><span>סכום ביניים (לפני מע״מ)</span><span>${nis(q.subtotal)}</span></div>
-      ${Number(q.discount) > 0 ? `<div style="color:#217A3B"><span>הנחה${q.discount_type === 'percent' ? ` (${Number(q.discount_value)}%)` : ''}</span><span>-${nis(q.discount)}</span></div>` : ''}
-      <div><span>מע״מ (${Number(q.vat_rate)}%)</span><span>${nis(q.vat)}</span></div>
-      <div class="grand"><span>סה״כ לתשלום</span><span>${nis(q.total)}</span></div>
-    </div>
-    ${q.notes ? `<div class="notes">${String(q.notes).replace(/</g, '&lt;')}</div>` : ''}
+  const tRow = (label, val, extra = '') =>
+    `<tr><td style="padding:5px 0;text-align:right;font-size:14px;${extra}">${label}</td><td style="padding:5px 0;text-align:left;font-size:14px;${extra}">${val}</td></tr>`;
+  // Email-safe: tables + inline styles + explicit dir="rtl"/align (email clients strip <head> CSS and don't support flex)
+  const doc = `<div dir="rtl" style="direction:rtl;text-align:right;max-width:720px;margin:24px auto;background:#ffffff;border-radius:16px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;color:#1d1d1f;box-shadow:0 6px 24px rgba(0,0,0,.06)">
+  <table role="presentation" dir="rtl" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0603;border-collapse:collapse"><tr>
+    <td style="padding:22px 30px;text-align:right"><img src="https://led-mls.co.il/assets/images/logo.png" alt="MLS ישראל" width="120" style="display:inline-block;height:auto"></td>
+    <td style="padding:22px 30px;text-align:left;color:#fff;font-size:13px">${isOrder ? 'הזמנת עבודה' : 'הצעת מחיר'}<br><b style="color:#FF6A1A;font-size:18px">מס׳ ${isOrder ? q.order_number : q.number}</b></td>
+  </tr></table>
+  <div style="padding:30px;direction:rtl;text-align:right">
+    <h1 style="font-size:24px;margin:0 0 4px;text-align:right">${esc(q.title || docTitle)}</h1>
+    <div style="color:#666;font-size:14px;margin-bottom:22px">תאריך: ${dt(q.created_at)}${q.valid_until && !isOrder ? ` · בתוקף עד: ${dt(q.valid_until)}` : ''}${isOrder ? ` · אושרה: ${dt(q.ordered_at)} · הצעה מקורית מס׳ ${q.number}` : ''}</div>
+    <div style="background:#faf7f4;border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:14px"><b>לכבוד:</b> ${esc(q.lead_name)}${q.lead_phone ? ' · ' + esc(q.lead_phone) : ''}${q.lead_email ? ' · ' + esc(q.lead_email) : ''}</div>
+    <table role="presentation" dir="rtl" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #eee">
+      <tr><th style="${hcel}text-align:right">פריט</th><th style="${hcel}text-align:center">כמות</th><th style="${hcel}text-align:right">מחיר יח׳</th>${anyDisc ? `<th style="${hcel}text-align:center">הנחה</th>` : ''}<th style="${hcel}text-align:right">סה״כ</th></tr>
+      ${rows || `<tr><td colspan="${anyDisc ? 5 : 4}" style="padding:14px;color:#999;text-align:right">אין פריטים</td></tr>`}
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="left">
+      <table role="presentation" dir="rtl" cellpadding="0" cellspacing="0" style="width:300px;border-collapse:collapse">
+        ${tRow('סכום ביניים (לפני מע״מ)', nis(q.subtotal))}
+        ${Number(q.discount) > 0 ? tRow('הנחה' + (q.discount_type === 'percent' ? ` (${Number(q.discount_value)}%)` : ''), '-' + nis(q.discount), 'color:#217A3B;') : ''}
+        ${tRow('מע״מ (' + Number(q.vat_rate) + '%)', nis(q.vat))}
+        ${tRow('סה״כ לתשלום', nis(q.total), 'border-top:2px solid #FF6A1A;font-weight:800;font-size:17px;color:#FF6A1A;padding-top:10px;')}
+      </table>
+    </td></tr></table>
+    ${q.notes ? `<div style="margin-top:22px;font-size:14px;color:#555;line-height:1.6;white-space:pre-wrap;text-align:right">${esc(q.notes)}</div>` : ''}
   </div>
-  <div class="doc-foot">MLS ישראל · מסכי LED מקצועיים · 054-949-4948 · led-mls.co.il</div>
-</div>
-${forPrint ? '<a class="printbtn" href="#" onclick="window.print();return false">🖨️ הדפסה / שמירה כ-PDF</a>' : ''}
+  <div style="background:#faf7f4;padding:18px 30px;text-align:center;color:#8a8a8f;font-size:13px;border-top:1px solid #eee">MLS ישראל · מסכי LED מקצועיים · 054-949-4948 · led-mls.co.il</div>
+</div>`;
+  return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${docTitle} — MLS ישראל</title></head>
+<body dir="rtl" style="margin:0;background:#f4f4f6;direction:rtl;text-align:right">
+${doc}
+${forPrint ? '<div id="pb" style="text-align:center"><a href="#" onclick="window.print();return false" style="display:inline-block;background:#FF6A1A;color:#fff;border-radius:980px;padding:10px 26px;font-size:15px;text-decoration:none;margin:16px auto">🖨️ הדפסה / שמירה כ-PDF</a></div><style>@media print{#pb{display:none!important}body{background:#fff!important}}</style>' : ''}
 </body></html>`;
 }
 
