@@ -571,7 +571,7 @@ function quoteDocHtml(q, forPrint) {
     </div>
     ${q.notes ? `<div class="notes">${String(q.notes).replace(/</g, '&lt;')}</div>` : ''}
   </div>
-  <div class="doc-foot">MLS ישראל · מסכי LED מקצועיים · 058-500-8500 · led-mls.co.il</div>
+  <div class="doc-foot">MLS ישראל · מסכי LED מקצועיים · 054-949-4948 · led-mls.co.il</div>
 </div>
 ${forPrint ? '<a class="printbtn" href="#" onclick="window.print();return false">🖨️ הדפסה / שמירה כ-PDF</a>' : ''}
 </body></html>`;

@@ -241,7 +241,7 @@ const shell = (inner) => `<div dir="rtl" style="margin:0;background:#f4f4f6;padd
 </td></tr>
 ${inner}
 <tr><td style="background:#faf7f4;padding:20px 28px;border-top:1px solid #eee" align="center">
-<p style="margin:0;font-size:13px;color:#8a8a8f">MLS ישראל · מסכי LED מקצועיים · <a href="tel:+972585008500" style="color:${ORANGE};text-decoration:none">058-500-8500</a> · <a href="${SITE}" style="color:${ORANGE};text-decoration:none">led-mls.co.il</a></p>
+<p style="margin:0;font-size:13px;color:#8a8a8f">MLS ישראל · מסכי LED מקצועיים · <a href="tel:+972549494948" style="color:${ORANGE};text-decoration:none">054-949-4948</a> · <a href="${SITE}" style="color:${ORANGE};text-decoration:none">led-mls.co.il</a></p>
 </td></tr>
 </table></td></tr></table></div>`;
 
@@ -289,7 +289,7 @@ const TEMPLATES_SEED = [
     body: shell(`<tr><td style="padding:32px 28px">
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7">שלום {{first_name}},</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7">רצינו לוודא שקיבלת את כל המידע שחיפשת לגבי מסכי ה-LED שלנו, ולראות אם נוכל לעזור בשלב הבא. נשמח לענות על כל שאלה או להכין הצעה מותאמת.</p>
-<p style="margin:0 0 22px;font-size:15px;line-height:1.7">אפשר פשוט להשיב למייל הזה, או לחייג אלינו: <a href="tel:+972585008500" style="color:${ORANGE};font-weight:700;text-decoration:none">058-500-8500</a>.</p>
+<p style="margin:0 0 22px;font-size:15px;line-height:1.7">אפשר פשוט להשיב למייל הזה, או לחייג אלינו: <a href="tel:+972549494948" style="color:${ORANGE};font-weight:700;text-decoration:none">054-949-4948</a>.</p>
 <p style="margin:0;font-size:15px">בברכה,<br><b>צוות MLS ישראל</b></p>
 </td></tr>`),
   },
