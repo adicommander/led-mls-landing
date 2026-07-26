@@ -623,7 +623,15 @@ async function openLead(id){
       <button onclick="leadTab(event,'d-email')">מייל</button>
     </div>
     <div id="d-details" class="tab-pane">
-      <div class="msgbox">${esc(l.message)||'(ללא הודעת פנייה)'}</div>
+      <div class="row">
+        <div class="field"><label>שם</label><input id="f-name" value="${esc(l.name||'')}"></div>
+        <div class="field"><label>טלפון</label><input id="f-phone" dir="ltr" value="${esc(l.phone||'')}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>אימייל</label><input id="f-email" type="email" dir="ltr" value="${esc(l.email||'')}" placeholder="you@example.com"></div>
+        <div class="field"><label>עיר</label><input id="f-city" value="${esc(l.city||'')}" placeholder="עיר"></div>
+      </div>
+      <div class="field"><label>הודעת הפנייה</label><textarea id="f-message" rows="3">${esc(l.message||'')}</textarea></div>
       <div class="row">
         <div class="field"><label>שלב</label><select id="f-status">${STAGES.map(s=>`<option value="${s}"${s===l.status?' selected':''}>${STAGE_HE[s]}</option>`).join('')}</select></div>
         <div class="field"><label>מטפל</label><select id="f-assigned"><option value="">— לא משויך —</option>${USERS.map(u=>`<option value="${u.id}"${u.id===l.assigned_to?' selected':''}>${esc(u.name||u.email)}</option>`).join('')}</select></div>
@@ -632,10 +640,7 @@ async function openLead(id){
         <div class="field"><label>שווי עסקה (₪)</label><input id="f-value" type="number" min="0" value="${l.value||0}"></div>
         <div class="field"><label>צפי סגירה</label><input id="f-close" type="date" value="${l.expected_close?l.expected_close.slice(0,10):''}"></div>
       </div>
-      <div class="row">
-        <div class="field"><label>עיר</label><input id="f-city" value="${esc(l.city||'')}" placeholder="עיר"></div>
-        <div class="field"><label>תגיות / התעניינות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
-      </div>
+      <div class="field"><label>תגיות / התעניינות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
       <div class="row"><button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button><button class="btn-ghost" onclick="editQuote(null,${l.id})">🧾 צור הצעת מחיר</button></div>
       <div style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.8rem"><button class="chip" style="color:#C43333;border-color:rgba(217,58,58,.4)" onclick="delLead(${l.id})">🗑 מחק ליד לצמיתות</button></div>
     </div>
@@ -673,6 +678,7 @@ function closeDrawer(){$('#drawer-wrap').classList.add('hidden');}
 async function saveLead(id){
   try{
     await api('/api/leads/'+id,{method:'PATCH',body:JSON.stringify({
+      name:$('#f-name').value,phone:$('#f-phone').value,email:$('#f-email').value,message:$('#f-message').value,
       status:$('#f-status').value,assigned_to:$('#f-assigned').value||null,
       value:$('#f-value').value,expected_close:$('#f-close').value||null,tags:$('#f-tags').value,city:$('#f-city').value})});
     toast('נשמר ✓');closeDrawer();

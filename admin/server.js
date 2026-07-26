@@ -303,9 +303,13 @@ app.patch('/api/leads/:id', auth, async (req, res) => {
   const expected = req.body.expected_close !== undefined ? (req.body.expected_close || null) : lead.expected_close;
   const tags = req.body.tags !== undefined ? String(req.body.tags).trim().slice(0, 300) : lead.tags;
   const city = req.body.city !== undefined ? String(req.body.city).trim().slice(0, 120) : lead.city;
+  const name = req.body.name !== undefined ? (String(req.body.name).trim().slice(0, 120) || lead.name) : lead.name;
+  const phone = req.body.phone !== undefined ? String(req.body.phone).trim().slice(0, 40) : lead.phone;
+  const email = req.body.email !== undefined ? String(req.body.email).trim().slice(0, 160) : lead.email;
+  const message = req.body.message !== undefined ? String(req.body.message).trim().slice(0, 4000) : lead.message;
   const { rows } = await pool.query(
-    'UPDATE leads SET status=$1, assigned_to=$2, value=$3, expected_close=$4, tags=$5, city=$6 WHERE id=$7 RETURNING *',
-    [status, assigned, value, expected, tags, city, id]);
+    'UPDATE leads SET status=$1, assigned_to=$2, value=$3, expected_close=$4, tags=$5, city=$6, name=$7, phone=$8, email=$9, message=$10 WHERE id=$11 RETURNING *',
+    [status, assigned, value, expected, tags, city, name, phone, email, message, id]);
   if (status !== lead.status) await log(req.user.id, 'lead.stage', `שלב שונה ל: ${status}`, id);
   else await log(req.user.id, 'lead.updated', 'פרטי ליד עודכנו', id);
   res.json({ lead: rows[0] });
