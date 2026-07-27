@@ -88,6 +88,16 @@ CREATE TABLE IF NOT EXISTS lead_notes (
   body TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS lead_inquiries (
+  id SERIAL PRIMARY KEY,
+  lead_id INT NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+  message TEXT NOT NULL DEFAULT '',
+  city TEXT NOT NULL DEFAULT '',
+  tags TEXT NOT NULL DEFAULT '',
+  page TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_inq_lead ON lead_inquiries(lead_id);
 CREATE TABLE IF NOT EXISTS lead_messages (
   id SERIAL PRIMARY KEY,
   lead_id INT NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
@@ -198,6 +208,10 @@ async function init() {
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS tags TEXT NOT NULL DEFAULT ''`);
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS city TEXT NOT NULL DEFAULT ''`);
   await pool.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS inquiries INT NOT NULL DEFAULT 1`);
+  // backfill one inquiry row per existing lead (from its own submission) so the tree always shows the original
+  await pool.query(`INSERT INTO lead_inquiries (lead_id, message, city, tags, page, created_at)
+    SELECT id, message, city, tags, page, created_at FROM leads l
+    WHERE NOT EXISTS (SELECT 1 FROM lead_inquiries i WHERE i.lead_id = l.id)`);
   await pool.query(`ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS lead_id INT`);
   // expand the pipeline stages: map legacy 'in_progress' -> 'contacted', then widen the CHECK
   await pool.query(`ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check`);

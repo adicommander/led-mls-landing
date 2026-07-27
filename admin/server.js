@@ -255,8 +255,7 @@ app.post('/api/leads', leadLimiter, async (req, res) => {
     `SELECT * FROM leads WHERE ($1 <> '' AND phone = $1) OR ($2 <> '' AND lower(email) = lower($2)) ORDER BY created_at ASC LIMIT 1`,
     [phone, email])).rows[0] : null;
   if (existing) {
-    const noteBody = [`📩 פנייה חוזרת מהאתר${city ? ` · עיר: ${city}` : ''}${tags ? ` · מעוניין ב: ${tags}` : ''}${page ? ` · עמוד: ${page}` : ''}`, message].filter(Boolean).join('\n');
-    await pool.query('INSERT INTO lead_notes (lead_id, user_id, body) VALUES ($1, NULL, $2)', [existing.id, noteBody]);
+    await pool.query('INSERT INTO lead_inquiries (lead_id, message, city, tags, page) VALUES ($1,$2,$3,$4,$5)', [existing.id, message, city, tags, page]);
     const mergedTags = Array.from(new Set(
       String(existing.tags || '').split(',').map(s => s.trim()).filter(Boolean).concat(interests))).join(', ');
     await pool.query(
@@ -276,6 +275,7 @@ app.post('/api/leads', leadLimiter, async (req, res) => {
   const { rows } = await pool.query(
     'INSERT INTO leads (name, phone, email, message, page, city, tags) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id',
     [name, phone, email, message, page, city, tags]);
+  await pool.query('INSERT INTO lead_inquiries (lead_id, message, city, tags, page) VALUES ($1,$2,$3,$4,$5)', [rows[0].id, message, city, tags, page]);
   await log(null, 'lead.created', 'התקבל ליד חדש מהאתר', rows[0].id);
   const notify = process.env.LEADS_NOTIFY_EMAIL;
   if (notify) {
@@ -334,7 +334,9 @@ app.get('/api/leads/:id', auth, async (req, res) => {
   const messages = (await pool.query('SELECT m.*, u.name AS user_name FROM lead_messages m LEFT JOIN users u ON u.id=m.user_id WHERE m.lead_id=$1 ORDER BY m.id', [id])).rows;
   const activity = (await pool.query('SELECT a.*, u.name AS user_name FROM activity_log a LEFT JOIN users u ON u.id=a.user_id WHERE a.lead_id=$1 ORDER BY a.id DESC LIMIT 100', [id])).rows;
   const tasks = (await pool.query('SELECT t.*, u.name AS user_name FROM tasks t LEFT JOIN users u ON u.id=t.user_id WHERE t.lead_id=$1 ORDER BY t.done, t.due_date NULLS LAST', [id])).rows;
-  res.json({ lead, notes, messages, activity, tasks });
+  const inqRows = (await pool.query('SELECT * FROM lead_inquiries WHERE lead_id=$1 ORDER BY created_at DESC, id DESC', [id])).rows;
+  const inquiryList = inqRows.length ? inqRows : [{ message: lead.message, city: lead.city, tags: lead.tags, page: lead.page, created_at: lead.created_at }];
+  res.json({ lead, notes, messages, activity, tasks, inquiryList });
 });
 
 app.patch('/api/leads/:id', auth, async (req, res) => {

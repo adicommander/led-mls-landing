@@ -211,6 +211,14 @@ aside button.nav.active,aside button.nav:hover{background:rgba(255,106,26,.1);co
 .checkbox{accent-color:var(--led)}
 code{background:#F0F0F3;color:#C4551A;padding:.05rem .35rem;border-radius:6px;font-size:.85em}
 
+/* nested inquiries tree */
+.inq-root{font-weight:700;font-size:1rem;margin:.2rem 0 .8rem}
+.inq-tree{border-inline-start:2px solid var(--line);margin-inline-start:10px;padding-inline-start:16px}
+.inq-node{position:relative;margin-bottom:1rem;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7rem .8rem}
+.inq-node::before{content:'';position:absolute;inset-inline-start:-25px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--led);border:2px solid #fff;box-shadow:0 0 0 1px var(--led)}
+.inq-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.inq-head b{color:var(--led2)}
+
 /* WYSIWYG template editor */
 .wysi-toolbar{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem}
 .wysi-toolbar button{background:#fff;border:1px solid #D9D9E0;border-radius:8px;padding:.35rem .6rem;font-size:.85rem;color:var(--text);min-width:34px}
@@ -707,6 +715,7 @@ async function openLead(id){
     <div class="muted" style="margin-top:.2rem">${esc(l.phone)} ${l.email?' · '+esc(l.email):''} ${l.city?' · 📍 '+esc(l.city):''}${l.inquiries>1?` · 🔁 ${l.inquiries} פניות`:''} ${wa?`· <a class="wa" style="padding:.15rem .6rem" href="${wa}" target="_blank" rel="noopener">וואטסאפ</a>`:''}</div>
     <div class="tabs">
       <button class="active" onclick="leadTab(event,'d-details')">פרטים</button>
+      <button onclick="leadTab(event,'d-inquiries')">פניות (${d.inquiryList.length})</button>
       <button onclick="leadTab(event,'d-timeline')">ציר זמן</button>
       <button onclick="leadTab(event,'d-tasks')">משימות</button>
       <button onclick="leadTab(event,'d-email')">מייל</button>
@@ -732,6 +741,17 @@ async function openLead(id){
       <div class="field"><label>תגיות / התעניינות (מופרדות בפסיק)</label><input id="f-tags" value="${esc(l.tags||'')}" placeholder="לדוגמה: מסך חוץ, דחוף"></div>
       <div class="row"><button class="btn" onclick="saveLead(${l.id})">שמור פרטים</button><button class="btn-ghost" onclick="editQuote(null,${l.id})">🧾 צור הצעת מחיר</button></div>
       <div style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.8rem"><button class="chip" style="color:#C43333;border-color:rgba(217,58,58,.4)" onclick="delLead(${l.id})">🗑 מחק ליד לצמיתות</button></div>
+    </div>
+    <div id="d-inquiries" class="tab-pane hidden">
+      <div class="inq-root">🧑 ${esc(l.name)} <span class="muted">· ${d.inquiryList.length} ${d.inquiryList.length===1?'פנייה':'פניות'}</span></div>
+      <div class="inq-tree">
+        ${d.inquiryList.map((q,i)=>{const num=d.inquiryList.length-i;return `
+          <div class="inq-node">
+            <div class="inq-head"><b>פנייה #${num}</b><span class="muted">${fmtDT(q.created_at)}</span></div>
+            ${(q.city||q.tags)?`<div style="margin:.35rem 0">${q.city?`<span class="tag">📍 ${esc(q.city)}</span>`:''}${(q.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')}</div>`:''}
+            <div class="msgbox" style="margin:.2rem 0 0">${esc(q.message)||'(ללא הודעה)'}</div>
+          </div>`;}).join('')}
+      </div>
     </div>
     <div id="d-timeline" class="tab-pane hidden">
       <div class="row" style="margin-bottom:.6rem"><input id="d-note" placeholder="הוסף הערה..."><button class="btn btn-sm" style="flex:0" onclick="addNote(${l.id})">שמור</button></div>
