@@ -12,7 +12,7 @@ const ssl = rawUrl.includes('localhost')
     : { rejectUnauthorized: false };
 
 // PG 15+ blocks CREATE in schema public for non-owner users, and DO dev
-// databases restrict CREATE SCHEMA too — so at boot we probe for a schema the
+// databases restrict CREATE SCHEMA too - so at boot we probe for a schema the
 // app user can actually write to, and route every connection there.
 let appSchema = 'public';
 const pool = new Pool({ connectionString, ssl });
@@ -234,7 +234,7 @@ async function init() {
     const email = (process.env.SEED_ADMIN_EMAIL || '').toLowerCase().trim();
     const password = process.env.SEED_ADMIN_PASSWORD || '';
     if (!email || !password) {
-      console.warn('No users exist and SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD are not set — admin cannot log in.');
+      console.warn('No users exist and SEED_ADMIN_EMAIL/SEED_ADMIN_PASSWORD are not set - admin cannot log in.');
       return;
     }
     const hash = await bcrypt.hash(password, 12);
@@ -266,14 +266,14 @@ ${inner}
 const TEMPLATES_SEED = [
   {
     name: 'הצעת מחיר',
-    subject: 'הצעת מחיר למסך LED — MLS ישראל',
+    subject: 'הצעת מחיר למסך LED - MLS ישראל',
     body: shell(`<tr><td style="padding:32px 28px 8px">
 <p style="margin:0 0 6px;font-size:15px">שלום {{first_name}},</p>
 <h1 style="margin:0 0 8px;font-size:26px;font-weight:800;letter-spacing:-.5px">הצעת מחיר</h1>
 <p style="margin:0 0 20px;font-size:15px;color:#555;line-height:1.6">תודה על פנייתך. להלן הצעת מחיר מותאמת לצרכים שסיכמנו:</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:12px;overflow:hidden;font-size:14px">
 <tr style="background:#faf7f4"><td style="padding:12px 14px;font-weight:700">פריט</td><td style="padding:12px 14px;font-weight:700;width:90px">כמות</td><td style="padding:12px 14px;font-weight:700;width:120px">מחיר</td></tr>
-<tr><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[תיאור המסך — לדוגמה: מסך חוץ P4, 3×2 מ׳]</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">1</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[₪ ___]</td></tr>
+<tr><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[תיאור המסך - לדוגמה: מסך חוץ P4, 3×2 מ׳]</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">1</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[₪ ___]</td></tr>
 <tr><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[התקנה ואספקה]</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">1</td><td style="padding:12px 14px;border-top:1px solid #f0f0f0">[₪ ___]</td></tr>
 <tr style="background:#fff6f0"><td style="padding:14px;font-weight:800" colspan="2">סה״כ לתשלום (לפני מע״מ)</td><td style="padding:14px;font-weight:800;color:${ORANGE}">[₪ ___]</td></tr>
 </table>
@@ -283,7 +283,7 @@ const TEMPLATES_SEED = [
   },
   {
     name: 'קידום מכירות / מבצע',
-    subject: '🔥 מבצע מיוחד על מסכי LED — MLS ישראל',
+    subject: '🔥 מבצע מיוחד על מסכי LED - MLS ישראל',
     body: shell(`<tr><td style="padding:0">
 <div style="background:linear-gradient(135deg,${ORANGE},#ff9243);padding:38px 28px;text-align:center">
 <p style="margin:0 0 6px;font-size:13px;letter-spacing:2px;color:#fff8f2;text-transform:uppercase">מבצע לזמן מוגבל</p>
@@ -291,7 +291,7 @@ const TEMPLATES_SEED = [
 <p style="margin:10px 0 0;font-size:16px;color:#fff">במחיר שלא תראו בשוק</p>
 </div>
 <div style="padding:30px 28px">
-<p style="margin:0 0 16px;font-size:15px;line-height:1.7">שלום {{first_name}}, זו ההזדמנות לשדרג את החזות של העסק עם מסך LED מקצועי — בהיר, חד, ועמיד. מלאי זמין להתקנה מהירה.</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.7">שלום {{first_name}}, זו ההזדמנות לשדרג את החזות של העסק עם מסך LED מקצועי - בהיר, חד, ועמיד. מלאי זמין להתקנה מהירה.</p>
 <ul style="margin:0 0 22px;padding-inline-start:20px;font-size:14px;color:#444;line-height:1.9">
 <li>מסכי חוץ ופנים בכל גודל</li>
 <li>ליווי מלא מהתכנון ועד ההפעלה</li>
@@ -303,7 +303,7 @@ const TEMPLATES_SEED = [
   },
   {
     name: 'מעקב לקוח',
-    subject: 'רצינו לחזור אליך — MLS ישראל',
+    subject: 'רצינו לחזור אליך - MLS ישראל',
     body: shell(`<tr><td style="padding:32px 28px">
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7">שלום {{first_name}},</p>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7">רצינו לוודא שקיבלת את כל המידע שחיפשת לגבי מסכי ה-LED שלנו, ולראות אם נוכל לעזור בשלב הבא. נשמח לענות על כל שאלה או להכין הצעה מותאמת.</p>

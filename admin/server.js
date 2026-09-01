@@ -99,7 +99,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   const tpl = mail.codeEmail(code);
   const result = await mail.send({ to: user.email, ...tpl });
   const pre = jwt.sign({ uid: user.id, typ: 'pre2fa' }, JWT_SECRET, { expiresIn: '10m' });
-  await log(user.id, 'login.password_ok', mail.configured ? '' : 'smtp not configured — code in logs');
+  await log(user.id, 'login.password_ok', mail.configured ? '' : 'smtp not configured - code in logs');
   res.json({ pending2fa: true, pre, emailSent: result.sent });
 });
 
@@ -208,7 +208,7 @@ app.patch('/api/users/:id', auth, adminOnly, async (req, res) => {
     const temp = crypto.randomBytes(9).toString('base64url');
     const hash = await bcrypt.hash(temp, 12);
     await pool.query('UPDATE users SET password_hash=$1, must_change_password=true WHERE id=$2', [hash, id]);
-    await mail.send({ to: email, subject: 'איפוס סיסמה — מערכת הניהול MLS ישראל', text: `סיסמה זמנית חדשה: ${temp}` });
+    await mail.send({ to: email, subject: 'איפוס סיסמה - מערכת הניהול MLS ישראל', text: `סיסמה זמנית חדשה: ${temp}` });
     resetInfo = { tempPassword: temp };
   }
   try {
@@ -399,7 +399,7 @@ app.post('/api/leads/:id/email', auth, async (req, res) => {
   const filled = fillTemplate(body, lead);
   const html = isHtml(filled) ? filled : undefined;
   const result = await mail.send({ to: lead.email, from: mail.FROM_SALES, subject, text: html ? filled.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : filled, html });
-  if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal/SMTP מוגדר' });
+  if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה - ודא שמפתח OneSignal/SMTP מוגדר' });
   await pool.query(
     'INSERT INTO lead_messages (lead_id, user_id, direction, channel, subject, body, delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)',
     [id, req.user.id, subject, body]);
@@ -470,7 +470,7 @@ app.delete('/api/tasks/:id', auth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// reminder poller — every minute, email the assignee for any task whose remind_at has passed
+// reminder poller - every minute, email the assignee for any task whose remind_at has passed
 async function processReminders() {
   try {
     const { rows } = await pool.query(
@@ -494,7 +494,7 @@ async function processReminders() {
 
 const isHtml = (s) => /<[a-z][\s\S]*>/i.test(String(s || ''));
 
-// {{name}} {{first_name}} — filled from a lead record
+// {{name}} {{first_name}} - filled from a lead record
 function fillTemplate(text, lead) {
   const first = (lead.name || '').split(' ')[0];
   return String(text || '')
@@ -581,13 +581,13 @@ function quoteTotals(items, vatRate, discType, discVal) {
   return { subtotal, discount, vat, total: afterDisc + vat };
 }
 function cleanItems(items) {
-  // `cost` is kept for internal margin analysis only — quoteDocHtml never renders it to the client
+  // `cost` is kept for internal margin analysis only - quoteDocHtml never renders it to the client
   return (Array.isArray(items) ? items : []).slice(0, 50)
     .map(it => ({ desc: String(it.desc || '').slice(0, 300), qty: Number(it.qty) || 0, price: Number(it.price) || 0, cost: Number(it.cost) || 0, disc: clampPct(it.disc) }))
     .filter(it => it.desc || it.qty || it.price);
 }
 
-// full RTL HTML document — used both for the printable page and the emailed quote
+// full RTL HTML document - used both for the printable page and the emailed quote
 function quoteDocHtml(q, forPrint) {
   const isOrder = q.status === 'ordered' && q.order_number;
   const docTitle = isOrder ? `הזמנת עבודה מס׳ ${q.order_number}` : `הצעת מחיר מס׳ ${q.number}`;
@@ -605,7 +605,7 @@ function quoteDocHtml(q, forPrint) {
       <td style="${cel}">${esc(it.desc)}</td>
       <td style="${cel}text-align:center;">${it.qty || 0}</td>
       <td style="${cel}">${nis(it.price)}</td>
-      ${anyDisc ? `<td style="${cel}text-align:center;">${disc > 0 ? disc + '%' : '—'}</td>` : ''}
+      ${anyDisc ? `<td style="${cel}text-align:center;">${disc > 0 ? disc + '%' : '-'}</td>` : ''}
       <td style="${cel}font-weight:700;">${nis(net)}</td></tr>`;
   }).join('');
   const tRow = (label, val, extra = '') =>
@@ -636,7 +636,7 @@ function quoteDocHtml(q, forPrint) {
   </div>
   <div style="background:#faf7f4;padding:18px 30px;text-align:center;color:#8a8a8f;font-size:13px;border-top:1px solid #eee">MLS ישראל · מסכי LED מקצועיים · 054-949-4948 · led-mls.co.il</div>
 </div>`;
-  return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${docTitle} — MLS ישראל</title></head>
+  return `<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${docTitle} - MLS ישראל</title></head>
 <body dir="rtl" style="margin:0;background:#f4f4f6;direction:rtl;text-align:right">
 ${doc}
 ${forPrint ? '<div id="pb" style="text-align:center"><a href="#" onclick="window.print();return false" style="display:inline-block;background:#FF6A1A;color:#fff;border-radius:980px;padding:10px 26px;font-size:15px;text-decoration:none;margin:16px auto">🖨️ הדפסה / שמירה כ-PDF</a></div><style>@media print{#pb{display:none!important}body{background:#fff!important}}</style>' : ''}
@@ -706,8 +706,8 @@ app.post('/api/quotes/:id/send', auth, async (req, res) => {
   const q = (await pool.query('SELECT q.*, l.name AS lead_name, l.email AS lead_email, l.phone AS lead_phone FROM quotes q LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1', [id])).rows[0];
   if (!q) return res.status(404).json({ error: 'not found' });
   if (!q.lead_email) return res.status(400).json({ error: 'ללקוח אין כתובת מייל' });
-  const result = await mail.send({ to: q.lead_email, from: mail.FROM_SALES, subject: `הצעת מחיר מס׳ ${q.number} — MLS ישראל`, text: `הצעת מחיר מס׳ ${q.number}. סה״כ לתשלום: ${nis(q.total)}.`, html: quoteDocHtml(q, false) });
-  if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה — ודא שמפתח OneSignal מוגדר' });
+  const result = await mail.send({ to: q.lead_email, from: mail.FROM_SALES, subject: `הצעת מחיר מס׳ ${q.number} - MLS ישראל`, text: `הצעת מחיר מס׳ ${q.number}. סה״כ לתשלום: ${nis(q.total)}.`, html: quoteDocHtml(q, false) });
+  if (!result.sent) return res.status(502).json({ error: 'שליחת המייל נכשלה - ודא שמפתח OneSignal מוגדר' });
   await pool.query(`UPDATE quotes SET status=CASE WHEN status='draft' THEN 'sent' ELSE status END, sent_at=now() WHERE id=$1`, [id]);
   if (q.lead_id) {
     await pool.query('INSERT INTO lead_messages (lead_id,user_id,direction,channel,subject,body,delivered) VALUES ($1,$2,\'out\',\'email\',$3,$4,true)', [q.lead_id, req.user.id, `הצעת מחיר ${q.number}`, `הצעת מחיר על סך ${nis(q.total)} נשלחה`]);

@@ -16,7 +16,7 @@ const transporter = smtpConfigured
 // Two sender identities: system mail (2FA, invites, reminders) from info@,
 // sales mail (quotes, customer emails, lead alerts) from sales@.
 const FROM_SYSTEM = process.env.EMAIL_FROM_SYSTEM || process.env.SMTP_FROM || 'MLS ישראל <info@led-mls.co.il>';
-const FROM_SALES = process.env.EMAIL_FROM_SALES || 'MLS ישראל — מכירות <sales@led-mls.co.il>';
+const FROM_SALES = process.env.EMAIL_FROM_SALES || 'MLS ישראל - מכירות <sales@led-mls.co.il>';
 const OS_FROM_NAME = process.env.EMAIL_FROM_NAME || 'MLS ישראל';
 const OS_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@mail.led-mls.co.il';
 
@@ -68,13 +68,13 @@ async function send({ to, subject, text, html, from }) {
 
 function codeEmail(code) {
   return {
-    subject: `${code} — קוד הכניסה שלך למערכת הניהול MLS ישראל`,
-    text: `קוד האימות שלך: ${code}\nהקוד תקף ל-10 דקות. אם לא ניסית להתחבר — התעלם מהודעה זו.`,
+    subject: `${code} - קוד הכניסה שלך למערכת הניהול MLS ישראל`,
+    text: `קוד האימות שלך: ${code}\nהקוד תקף ל-10 דקות. אם לא ניסית להתחבר - התעלם מהודעה זו.`,
     html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:420px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
-      <h2 style="color:#ff6600;margin:0 0 12px">MLS ישראל — מערכת ניהול</h2>
+      <h2 style="color:#ff6600;margin:0 0 12px">MLS ישראל - מערכת ניהול</h2>
       <p>קוד האימות שלך:</p>
       <div style="font-size:32px;letter-spacing:8px;font-weight:bold;background:#fff7f0;border:1px solid #ffd9b3;border-radius:8px;padding:12px;text-align:center">${code}</div>
-      <p style="color:#888;font-size:13px">הקוד תקף ל-10 דקות. אם לא ניסית להתחבר — התעלם מהודעה זו.</p>
+      <p style="color:#888;font-size:13px">הקוד תקף ל-10 דקות. אם לא ניסית להתחבר - התעלם מהודעה זו.</p>
     </div>`,
   };
 }
